@@ -113,7 +113,13 @@ var GameSeed = (function(){
     /* v2.6: 引擎系统 tick */
     try{
       /* 事件冷却递减 */
-      if(typeof EventDirector !== 'undefined') EventDirector.tickCooldowns(S);
+      if(typeof EventDirector !== 'undefined'){
+        EventDirector.tickCooldowns(S);
+        /* v2.6: 世界动态联动玩家影响力 */
+        if(S.turn > 0 && S.turn % 3 === 0){
+          EventDirector.injectInfluenceNews(S);
+        }
+      }
       /* 伤病恢复 */
       if(typeof CharacterEngine !== 'undefined'){
         CharacterEngine.tickInjuries(S);
@@ -741,6 +747,35 @@ var GameSeed = (function(){
         }
       }
     }catch(_){}
+
+    // v2.6: 开档即完整 —— 立即填充初始世界动态与已发生事件，不等第一次世界演化
+    try{
+      if(typeof EventDirector !== 'undefined' && EventDirector.generateInitialWorld){
+        EventDirector.generateInitialWorld(S);
+      } else {
+        // 兜底：给世界动态各维度填一句开局描述
+        var _era = (S.setup && S.setup.era) ? String(S.setup.era) : '';
+        var _yr = parseInt(String(S.setup && S.setup.sdate || '').slice(0,4)) || 1943;
+        var _openers = {
+          '政府': _yr+' 年，政局按正典时间线运行。',
+          '英雄界': '超级英雄世界暗流涌动，传奇即将书写。',
+          '反派与地下': '地下势力各有盘算，暗处的眼睛在观察。',
+          '科技与经济': '科技与经济按时代背景正常运转。',
+          '宇宙': '宇宙深处，古老的力量正在沉睡。',
+          '多元宇宙': '神圣时间线稳固，分支尚未出现。',
+          '你所在地区': '你所在的地区一切如常，生活继续。'
+        };
+        if(S.world){
+          for(var _wk in _openers){ if(S.world[_wk]==='—' || !S.world[_wk]) S.world[_wk] = _openers[_wk]; }
+        }
+      }
+      // 注入 1-2 条开局已发生事件
+      if(S.events && Array.isArray(S.events['已发生'])){
+        var _birth = (S.setup && S.setup.birth) ? String(S.setup.birth) : '普通人';
+        S.events['已发生'].push({time:String(_yr)+'年', text:'你出生于一个'+_birth+'家庭，故事从此刻开始。'});
+      }
+    }catch(e){ console.warn('init world failed', e); }
+
     renderNode();
   }
 

@@ -48,7 +48,28 @@
         {id:'c_promote',  text:'有晋升的可能', weight:2, req:{careerLevel:2}},
         {id:'c_project',  text:'接到一个重要项目', weight:3, occupation:['scientist','engineer','reporter']},
         {id:'c_special',  text:'上级找你谈特殊任务', weight:1, req:{military:true}},
-        {id:'c_investigate', text:'有件事值得深入调查', weight:2, occupation:['reporter','police']}
+        {id:'c_investigate', text:'有件事值得深入调查', weight:2, occupation:['reporter','police']},
+        /* v2.6: 医生线事件 */
+        {id:'c_doc_emergency', text:'急诊室送来了一个重伤病人', weight:5, occupation:['doctor'], effects:{stress:+5, 声望:+1}},
+        {id:'c_doc_surgery', text:'一台高难度手术安排给了你', weight:3, occupation:['doctor'], req:{careerLevel:2}, effects:{stress:+8, 声望:+3}},
+        {id:'c_doc_research', text:'有个医学研究项目邀请你参与', weight:2, occupation:['doctor'], effects:{声望:+2}},
+        {id:'c_doc_patient', text:'一位病人的家属专程来感谢你', weight:4, occupation:['doctor'], effects:{stress:-2, 声望:+2}},
+        {id:'c_doc_burnout', text:'连续加班让你感到疲惫', weight:3, occupation:['doctor'], effects:{stress:+6, 健康:-2}},
+        {id:'c_doc_breakthrough', text:'你的治疗方案取得了突破', weight:1, occupation:['doctor'], req:{careerLevel:3}, effects:{声望:+5}},
+        /* v2.6: 工程师线事件 */
+        {id:'c_eng_design', text:'你负责的设计方案进入评审', weight:4, occupation:['engineer'], effects:{stress:+3}},
+        {id:'c_eng_patent', text:'你的一个发明可以申请专利', weight:2, occupation:['engineer'], req:{careerLevel:2}, effects:{声望:+3, money:+2000}},
+        {id:'c_eng_overtime', text:'项目赶工，又要加班了', weight:4, occupation:['engineer'], effects:{stress:+5, money:+300}},
+        {id:'c_eng_recruit', text:'有公司想挖你过去', weight:1, occupation:['engineer'], req:{careerLevel:3}, effects:{}},
+        {id:'c_eng_break', text:'设备出了故障，需要你抢修', weight:3, occupation:['engineer'], effects:{stress:+4}},
+        {id:'c_eng_publish', text:'你的技术论文被期刊收录', weight:1, occupation:['engineer'], req:{careerLevel:3}, effects:{声望:+4}},
+        /* v2.6: 记者线事件 */
+        {id:'c_rep_scoop', text:'你挖到了一条独家新闻', weight:3, occupation:['reporter'], effects:{声望:+3, 声望:+0}},
+        {id:'c_rep_interview', text:'你获得了一次重要采访机会', weight:4, occupation:['reporter'], effects:{声望:+2}},
+        {id:'c_rep_danger', text:'你追查的线索牵扯到危险人物', weight:2, occupation:['reporter'], req:{careerLevel:2}, effects:{stress:+6}},
+        {id:'c_rep_award', text:'你的报道获得了新闻奖提名', weight:1, occupation:['reporter'], req:{careerLevel:3}, effects:{声望:+5}},
+        {id:'c_rep_source', text:'一个线人主动联系了你', weight:3, occupation:['reporter'], effects:{}},
+        {id:'c_rep_block', text:'你的报道被上级压了下来', weight:2, occupation:['reporter'], effects:{stress:+4}}
       ],
       /* 世界新闻 (Level NEWS) */
       world: [
@@ -257,6 +278,65 @@
   function WL_hasFlag(S, key){
     return WorldlineEngine && WorldlineEngine.hasFlag(S, key);
   }
+
+  /* v2.6: 开档即完整 —— 生成初始世界动态，不等第一次世界演化 */
+  ED.generateInitialWorld = function(S){
+    var era = (S.setup && S.setup.era) ? String(S.setup.era) : '';
+    var yr = parseInt(String((S.setup && S.setup.sdate) || '').slice(0,4)) || 1943;
+    var birth = (S.setup && S.setup.birth) ? String(S.setup.birth) : '普通人';
+    var openers = {
+      '政府': yr+' 年，政局按正典时间线运行，一切如常。',
+      '英雄界': '超级英雄世界暗流涌动，传奇即将书写。',
+      '反派与地下': '地下势力各有盘算，暗处的眼睛在观察。',
+      '科技与经济': '科技与经济按时代背景正常运转。',
+      '宇宙': '宇宙深处，古老的力量正在沉睡。',
+      '多元宇宙': '神圣时间线稳固，分支尚未出现。',
+      '你所在地区': '你所在的地区一切如常，生活继续。'
+    };
+    if(S.world){
+      for(var k in openers){
+        if(!S.world[k] || S.world[k]==='—' || S.world[k]==='待首次世界演化'){
+          S.world[k] = openers[k];
+        }
+      }
+    }
+    /* 注入开局已发生事件 */
+    if(S.events && Array.isArray(S.events['已发生'])){
+      S.events['已发生'].unshift({time:String(yr)+'年', text:'你出生于一个'+birth+'家庭，故事从此刻开始。'});
+    }
+  };
+
+  /* v2.6: 世界动态联动玩家影响力 —— 影响力高时，新闻里出现和玩家相关的内容 */
+  ED.injectInfluenceNews = function(S){
+    try{
+      var wl = S.worldline || {};
+      var infl = wl.playerInfluence || 0;
+      if(infl < 20) return;
+      var name = (S.setup && S.setup.name) || '你';
+      var occ = (S.player && S.player.职业) || '';
+      var newsPool = [];
+      if(infl >= 80){
+        newsPool = [
+          name+'近期的举动引发了广泛关注，媒体争相报道。',
+          '有人说'+name+'正在改变这个世界的走向。',
+          name+'的名字开始出现在多个情报机构的名单上。'
+        ];
+      } else if(infl >= 50){
+        newsPool = [
+          occ ? '作为'+occ+'，'+name+'在业内小有名气。' : name+'在圈子里渐渐有了名声。',
+          '有人开始议论'+name+'的所作所为。'
+        ];
+      } else if(infl >= 20){
+        newsPool = [
+          name+'最近做的事被一些人注意到了。'
+        ];
+      }
+      if(newsPool.length && S.world && S.world['你所在地区']){
+        var txt = RNG.pick(newsPool);
+        S.world['你所在地区'] = txt;
+      }
+    }catch(_){}
+  };
 
   window.EventDirector = ED;
 })();

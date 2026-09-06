@@ -528,7 +528,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   -webkit-transform:translateZ(0);transform:translateZ(0);
 }
-#engstat{font-size:12px;color:#7f8da0;flex:1;min-width:160px;word-break:break-all}
 .topbtns{display:flex;flex-wrap:wrap;gap:6px}
 
 /* ===================== 时间大卡片（电影信息卡风格）===================== */
@@ -944,7 +943,6 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
  .screen{padding:8px}
  .big-title{letter-spacing:1px}
  .topbar{padding:8px 10px;gap:7px}
- #engstat{flex:1 1 100%;min-width:0;font-size:11.5px}
  .topbtns{flex:1 1 100%;gap:5px}
  .topbtns button{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px}
  .panel h3{padding:9px 10px;font-size:13px;min-height:44px}
@@ -1067,7 +1065,6 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] button.primary:hover{box-shadow:0 0 18px rgba(179,49,58,.5)}
 :root[data-theme='light'] .topbar{
   background:linear-gradient(90deg,var(--bg-2),var(--bg-1));border-color:var(--line-2)}
-:root[data-theme='light'] #engstat{color:var(--fg-2)}
 :root[data-theme='light'] .timecard{
   background:linear-gradient(180deg,var(--bg-2),var(--bg-1));
   border-color:color-mix(in srgb,var(--accent) 35%,var(--line-2));
@@ -1627,7 +1624,7 @@ html,body,div,span,p,button,input,textarea{
 .reg-card .m{font-size:11px;color:var(--fg-2);margin-top:3px;line-height:1.5}
 .reg-card .s{font-size:11px;color:var(--magic);margin-top:4px;font-weight:600;letter-spacing:.3px}
 
-/* 引擎档位小标签（顶部状态栏 engstat） */
+/* 引擎档位小标签 */
 .eng-lv{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px;letter-spacing:.3px}
 .eng-lv.lv-rec{background:rgba(143,224,160,.12);color:var(--hero)}
 .eng-lv.lv-adv{background:rgba(157,124,255,.14);color:var(--magic)}
@@ -2620,19 +2617,15 @@ body.mode-easy #opts.busy .opt{
     </div>
     <div class="dim" style="text-align:center;margin-top:10px">你的故事，将从这条神圣时间线上一个普通的名字开始。</div>
     <div style="max-width:860px;margin:14px auto 0;padding:11px 14px;border:1px dashed rgba(232,198,106,.45);border-radius:10px;background:linear-gradient(180deg,rgba(232,198,106,.08),rgba(232,198,106,.02));font-size:12.5px;line-height:1.8;color:var(--fg-1)">
-      🛟 点「进入世界」前，请先阅读：<br>
-      · 🛡 <b>免责声明</b>：本作是<b>非官方同人作品</b>，漫威 / 钢铁侠 / 美队 / 雷神 / 复仇者联盟 等<b>相关 IP、角色、商标 归属 华特迪士尼公司 / 漫威娱乐（Marvel Entertainment, LLC）</b>，原作一切解释权归官方所有；<b>本作不以任何方式用于商业用途，不代表官方立场</b>。本作剧情由大语言模型实时生成，可能出现<b>与正典冲突 / 违背科学常识 / 不符合现实法律</b>的内容，<b>仅供娱乐与同人二创参考，请勿当真</b>；涉及军事、医学、法律、金融、职业等描述<b>一律不能作为现实决策依据</b>。作者对因违反本声明、滥用本作品或<b>未成年人未在监护人指导下使用</b>造成的任何直接/间接损失不承担法律责任。完整条款请点右上 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「ℹ 关于作者 · 版权」</u>。<br>
-      · 🎂 <b style="color:#e8c66a">年龄建议：本作建议 16 周岁以上用户游玩</b>。16 周岁以下未成年人请<b>务必在家长 / 监护人知情并指导</b>下使用，并<b>合理控制每日游玩时长（建议 ≤ 1 小时 / 天）</b>，避免沉迷游戏影响学业与身心健康。<br>
-      · 🧭 云端 AI 会自动合规审核，如遇拦截提示→不是网页坏了→换委婉措辞 / 一键切<b>离线推演</b>即可继续游戏。
+      🛡 <b>非官方同人作品</b>，漫威 IP 归属迪士尼/漫威，AI 生成剧情仅供娱乐。<br>
+      🎂 <b style="color:#e8c66a">建议 16+ 游玩</b>，未成年人请在监护人指导下使用。完整条款见 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u>。
     </div>
     <div style="text-align:center;margin-top:14px;display:flex;gap:7px;justify-content:center;flex-wrap:wrap">
       <button id="btnBackToGame" onclick="backToGame()" style="display:none" class="primary">↩ 返回当前人生</button>
       <button onclick="openLoad()">📂 读取存档</button>
-      <button onclick="location.href='#load'" id="btnDirectLoad">⤓ 直接进入存档</button>
-      <button onclick="openSettings()">⚙ 引擎设置</button>
       <button onclick="openThemePanel()">🎨 外观主题</button>
       <button onclick="openAbout()">ℹ 关于作者</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">🧋 请学生开发者喝杯奶茶</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">☕ 支持一下</button>
       <button onclick="openTutorial()" style="background:color-mix(in srgb,var(--magic) 15%,var(--bg-2));border-color:color-mix(in srgb,var(--magic) 45%,var(--line-2))">❔ 新手帮助</button>
     </div>
     <div id="load" style="max-width:860px;margin:14px auto 0;display:none" class="setup-card">
@@ -2660,15 +2653,13 @@ body.mode-easy #opts.busy .opt{
 <div class="screen" id="gameScreen" style="display:none">
 
   <div class="topbar">
-    <div id="engstat">引擎未配置</div>
     <div class="topbtns">
       <button onclick="openThemePanel()">🎨 外观</button>
-      <button onclick="openSettings()">⚙ 引擎</button>
-      <button onclick="forceCheck()">🔍 自检</button>
       <button onclick="openSave()">💾 存档</button>
       <button onclick="openLoad()">📂 读档</button>
+      <button onclick="openLifeReview()">📜 人生回顾</button>
       <button onclick="openAbout()">ℹ 关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="高三课佘写代码辛苦，买杯奶茶支持一下～">🧋 请喝奶茶</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者">☕ 支持</button>
     </div>
   </div>
 
@@ -2680,7 +2671,7 @@ body.mode-easy #opts.busy .opt{
         <span class="ovr-num" id="ovrNum">0</span>
         <span class="ovr-meta"><span class="ovr-tier" id="ovrTier">凡人</span><span class="ovr-lab">OVR 综评</span></span>
       </span>
-      <span id="modeBadge" class="mode-badge expert" style="margin-right:8px" title="点击可切换模式（简易/专家）" onclick="try{toggleModeMenu&&toggleModeMenu(event)}catch(_){}">专家模式</span>🕐 世界时间 · 地球-616
+      🕐 世界时间 · 地球-616
     </div>
     <div class="big" id="bigTime">—</div>
     <div class="sub" id="subTime">—</div>
@@ -2740,10 +2731,10 @@ body.mode-easy #opts.busy .opt{
         </div>
       </div>
       <div class="actrow">
-        <button class="primary" style="font-size:15px;padding:10px 22px" id="btnGo" onclick="doTurn('normal')">▶ 推进</button>
-        <button onclick="doTurn('world')" title="1~3 小时，世界自行前进一段时间，NPC 各忙各的">⏭ 世界自行推进</button>
+        <button class="primary" style="font-size:15px;padding:10px 22px" id="btnGo" onclick="var pi=$('playerInput');var inp=(pi?pi.value:'').trim();if(inp){doTurn('normal')}else{doTurn('world')}" title="填了行动就执行；没填就让世界自己运转，事件会找上门">▶ 推进</button>
+        <button onclick="doTurn('world')" title="不做选择，让时间先往前走，世界和身边人都会自己动起来">🌙 先过几天</button>
         <button onclick="openSkipMenu()" title="跳到 1 周 / 1 月 / 1 季，附带世界总结与身边人动态">🗓 时间快进</button>
-        <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳过到大事件</button>
+        <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳到有事情发生</button>
       </div>
     </div></div>
   </div>
@@ -2759,15 +2750,11 @@ body.mode-easy #opts.busy .opt{
     </div>
   </div>
 
-  <div class="foot">作者：<span class="cx-sign" title="高三学生开发者 CX · 课余独立作品 · 漫威模拟器">© CX（高三学生开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
+  <div class="foot">作者：<span class="cx-sign" title="独立开发者 · 课余作品 · 漫威模拟器">© CX（独立开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
     <div class="foot-beta" style="margin-top:8px;font-size:12px;line-height:1.9;color:var(--fg-2);padding:0 6px">
-      🔬 本作 <b>仍在 Beta 公测阶段</b>（当前版本 Beta v2.3 · 抖音首发版），剧情、人设文笔、AI 正典同步会持续打磨升级。<br>
-        🐞 游玩中遇到 Bug、白屏、剧情 OOC，或想提出脑洞设定？<b>随时 @我发抖音私信 / 评论区留言</b>：<br>
-        🎵 <b>抖音同名</b>：<span class="cx-sign" title="搜索抖音号 cxh20080910 关注发私信即可">CX</span>（<b>抖音号：cxh20080910</b> · 私信、评论、合拍我都能看到）<br>
-      💖 感谢每一位耐心游玩、愿意陪这个高中生模拟器慢慢长大的朋友——<b>你们的每一条评论我晚自习下课后都会看</b>。<br>
-      ⚠️ <b>温馨提示</b>：手机浏览器（尤其微信 / 抖音内置 WebView）的 localStorage 可能被系统自动清理，<b>玩到重要节点务必点「💾 存档 → ⬇ 导出 TXT 文件」存一份到自己相册 / 云盘</b>，进度归零真的会哭。<br>
-      🛡 <b>免责声明（摘要）</b>：本作是<b>非官方同人作品</b>，漫威相关 IP / 角色 / 商标 归属<b>华特迪士尼公司 / 漫威娱乐</b>；AI 生成剧情<b>仅供娱乐参考，请勿当真</b>；完整条款点 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u> 查看。<br>
-      🎂 <b style="color:#e8c66a">年龄建议：本作建议 16 周岁以上用户游玩</b>；16 周岁以下未成年人请在家长 / 监护人知情并指导下使用，合理安排时间，避免沉迷。
+      💾 <b>存档提醒</b>：手机浏览器的 localStorage 可能被清理，重要节点请点「💾 存档 → ⬇ 导出 TXT」备份到本地。<br>
+      🛡 <b>免责</b>：非官方同人作品，漫威 IP 归属迪士尼/漫威；AI 生成剧情仅供娱乐，请勿当真。<br>
+      🎂 <b style="color:#e8c66a">建议 16+ 游玩</b>，未成年人请在监护人指导下使用，合理控制时长。
     </div>
   </div>
 </div>
@@ -3201,6 +3188,17 @@ document.addEventListener('keydown',function(e){
   </div>
 </div>
 
+<!-- ================= 人生回顾（v2.6 手动入口） ================= -->
+<div class="modal about-modal" id="lifeReviewModal" onclick="if(event.target===this)closeLifeReview()" style="z-index:120">
+  <div class="box" style="max-width:620px">
+    <h3>📜 人生回顾</h3>
+    <div id="lifeReviewBody" style="margin-top:10px;max-height:65vh;overflow-y:auto"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="primary" onclick="closeLifeReview()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================= 关于作者 & 版权声明 ================= -->
 <div class="modal about-modal" id="aboutModal" onclick="if(event.target===this)closeAbout()">
   <div class="box">
@@ -3237,35 +3235,28 @@ document.addEventListener('keydown',function(e){
 <!-- ================= 赞助打赏（Beta v2.3 · 高三学生·课余独立开发·AI算力全自费） ================= -->
 <div class="modal about-modal" id="donateModal" onclick="if(event.target===this)closeDonate()" style="z-index:122">
   <div class="box" style="max-width:540px">
-    <h3>🧋 请高三开发者喝杯奶茶 ☕</h3>
+    <h3>☕ 支持一下作者</h3>
     <div class="author-hero" style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(242,197,77,.10),rgba(157,124,255,.08));border:1px dashed rgba(242,197,77,.45)">
-      <div class="cx-name" style="color:#f2c54d">高三自习课偷摸写代码 · 自费跑 AI 中 💦</div>
+      <div class="cx-name" style="color:#f2c54d">独立开发者 · 课余作品</div>
       <div class="role" style="line-height:1.85;margin-top:6px">
-        本作 <b>永久免费</b> 开放给所有同学玩。<b>你每点一次「推进」，消耗的都是我自己生活费里挤出来买的 AI Token。</b><br>
-        玩得开心、想让我在高考前还能多修几个 bug、多加几条正典大事件？<b>一杯珍珠奶茶、一根老冰棍都是爱。</b><br>
-        不打赏也完全 OK —— <b>你点进来玩、愿意发一条抖音 @朋友来看，就是我最大的成就感 🛡</b>
+        本作永久免费。如果你玩得开心，想鼓励我继续更新剧情和正典大事件，<b>一杯咖啡、一瓶汽水都是心意</b>。<br>
+        不支持也完全没关系——<b>你愿意点开玩，就是最大的支持</b>。🛡
       </div>
     </div>
     <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <!-- 微信收款码：把 CX_DONATE_WX 设置为图片 URL / data:base64，就会自动显示；默认占位图 -->
-      <div class="qr-card" onclick="try{_dlQrPlaceholder('wechat')}catch(_){}" title="扫码给作者加一个鸡腿">
-        <div class="qr-title">💚 微信赞赏码 / 收款码</div>
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('wechat')}catch(_){}" title="扫码支持作者">
+        <div class="qr-title">💚 微信</div>
         <div class="qr-box" id="qrWX"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
         <div class="qr-foot">长按 / 点击 → 识别二维码</div>
       </div>
-      <!-- 支付宝收款码 -->
-      <div class="qr-card" onclick="try{_dlQrPlaceholder('alipay')}catch(_){}" title="扫码给作者加一个鸡腿">
-        <div class="qr-title">💙 支付宝收款码</div>
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('alipay')}catch(_){}" title="扫码支持作者">
+        <div class="qr-title">💙 支付宝</div>
         <div class="qr-box" id="qrAli"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
         <div class="qr-foot">长按 / 点击 → 识别二维码</div>
       </div>
     </div>
-    <div class="dim" style="margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--bg-1);border:1px dashed var(--line-2);line-height:1.9">
-      🛡️ 收款码由<b style="color:#9d7cff">高三学生开发者 CX</b> 直接嵌入源码，<b>只读展示·无法被篡改·所有玩家打开即见。</b><br>
-      扫码时请注意核对头像与昵称：<b>微信收款显示「S0mb1t(**杭)」；支付宝收款显示「**杭」。</b> 如发现二维码被调换，请第一时间通过抖音私信 @我。
-    </div>
     <div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button class="primary" onclick="closeDonate()">收到啦～谢谢你陪我高考前的自习时间 🥰</button>
+      <button class="primary" onclick="closeDonate()">谢谢你 ♥</button>
     </div>
   </div>
 </div>
@@ -3995,6 +3986,61 @@ function openAbout(){
 }
 function closeAbout(){
   var m=$('aboutModal');if(m)m.style.display='none';
+  _lockBodyScroll(false);
+}
+/* v2.6: 人生回顾手动入口 */
+function openLifeReview(){
+  try{
+    var m=$('lifeReviewModal');if(!m)return;
+    m.style.display='flex';_lockBodyScroll(true);
+    var h=[];
+    /* 基本信息 */
+    h.push('<h4 style="margin:6px 0 8px">👤 基本信息</h4>');
+    var name = (S.setup && S.setup.name) || '无名者';
+    var era = (S.setup && S.setup.era) || '—';
+    var birth = (S.setup && S.setup.birth) || '—';
+    h.push(dkv('姓名', name));
+    h.push(dkv('时代', era));
+    h.push(dkv('出身', birth));
+    h.push(dkv('当前年龄', (S.player&&S.player.年龄)||'—'));
+    h.push(dkv('职业', (S.player&&S.player.职业)||'—'));
+    h.push(dkv('已活回合', (S.turn||0)+' 轮'));
+    try{ if(S.seedKey) h.push(dkv('🧬 世界种子', '<span style="color:var(--gold,#f2c54d);font-family:monospace">'+esc(String(S.seedKey))+'</span>')) }catch(_){}
+    /* 成就 */
+    h.push('<h4 style="margin:14px 0 8px">🏆 已解锁成就</h4>');
+    var achs = (S.goals && S.goals.unlockedAchievements) || [];
+    if(!achs.length){ h.push('<div class="dim">还没有解锁成就，继续你的人生吧～</div>'); }
+    else {
+      achs.forEach(function(a){
+        h.push('<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line-2)">');
+        h.push('<span style="font-size:20px">'+esc(a.ic||'🏆')+'</span>');
+        h.push('<div><div style="font-weight:600">'+esc(a.name||'')+' <span style="color:var(--gold,#f2c54d);font-size:11px">['+esc(a.tier||'')+']</span></div>');
+        h.push('<div style="color:var(--fg-2);font-size:12px">'+esc(a.desc||'')+'</div></div></div>');
+      });
+    }
+    /* 里程碑 */
+    h.push('<h4 style="margin:14px 0 8px">🎯 人生里程碑</h4>');
+    var ms = (S.goals && S.goals.milestones) || [];
+    if(!ms.length){ h.push('<div class="dim">尚未记录重要节点。</div>'); }
+    else {
+      ms.slice(0,15).forEach(function(m){
+        h.push('<div style="padding:4px 0;font-size:13px"><span style="color:var(--fg-2)">第 '+(m.turn||0)+' 轮 · '+esc(m.at||'')+'</span> '+esc(m.name||'')+'</div>');
+      });
+    }
+    /* 已发生大事 */
+    h.push('<h4 style="margin:14px 0 8px">📰 人生大事</h4>');
+    var evs = (S.events && S.events['已发生']) || [];
+    if(!evs.length){ h.push('<div class="dim">人生才刚刚开始。</div>'); }
+    else {
+      evs.slice(-12).forEach(function(e){
+        h.push('<div style="padding:4px 0;font-size:13px"><span style="color:var(--gold,#f2c54d)">'+esc(e.time||'')+'</span> '+esc(e.text||'')+'</div>');
+      });
+    }
+    $('lifeReviewBody').innerHTML = h.join('');
+  }catch(e){console.warn('openLifeReview',e)}
+}
+function closeLifeReview(){
+  var m=$('lifeReviewModal');if(m)m.style.display='none';
   _lockBodyScroll(false);
 }
 
@@ -5615,18 +5661,8 @@ function _renderOffDemo(){
 }
 /* 首次进入游戏时，只在页面顶部出现一次"升级AI文笔"引导小条（可关），不阻塞 */
 function engineBannerOnce(){
-  try{
-    if(localStorage.getItem('mcu_eng_banner_closed_v2'))return;
-    var r=resolveEngine();
-    var bn=$('checkBanner');if(!bn)return;
-    /* 已有 AI 能力（作者共享池 / 代理 / 用户自填 Key）→ 显示绿色欢迎条 */
-    if(r.route==='rec_proxy'||r.route==='rec_userkey'||r.route==='rec_shared_key'||r.route==='adv'){
-      bn.innerHTML='<div class="banner" style="background:linear-gradient(90deg,rgba(143,224,160,.14),rgba(157,124,255,.10));border-color:#8fe0a0" onclick="localStorage.setItem(\'mcu_eng_banner_closed_v2\',\'1\');this.remove()" title="点此关闭">✅ 已接入 '+esc(r.label.replace(/🚀 推荐档 · AI/,'AI文笔').replace('（','｜').replace('）',''))+'，零配置直接开玩。本模拟器的 NPC、剧情、世界观均由 '+esc(CX_SHARED_MODEL)+' 实时生成。（点我关闭）</div>';
-      return;
-    }
-    /* 作者还没填 Key → 黄色提示条，不让用户以为"这游戏就这样" */
-    bn.innerHTML='<div class="banner" style="background:linear-gradient(90deg,rgba(232,198,106,.16),rgba(255,154,162,.12));border-color:#e8c66a" onclick="localStorage.setItem(\'mcu_eng_banner_closed_v2\',\'1\');this.remove()" title="点此关闭">⚠ 作者共享 AI 池尚未激活，当前用离线兜底。请联系 CX 把智谱 Key 填进代码（1.4.html L1252），立刻升级完整版 AI 文笔。（点我关闭）</div>';
-  }catch(_){}
+  /* v2.6: 已移除推荐档引导条，引擎状态不再展示给玩家 */
+  return;
 }
 function updEng(){
   var r=resolveEngine();
@@ -6349,19 +6385,19 @@ function _doStartGame(){
  if(isNaN(d.getTime())){d=new Date(eraObj.d+'T07:30:00')}
  S={
   setup:setup, date:d.toISOString(), turn:0, log:[], rel:[], npcs:[], rumors:[], events_log:[],
-  player:{年龄:setup.age||'22',所在地:setup.loc||'未设定',身份:setup.birth||'',职业:'待引擎设定',
-   财富:'待引擎设定',家庭:'待引擎设定',社会地位:'待引擎设定',身体与能力:'待引擎设定',
-   战斗能力:'待引擎设定',科技与工程:'待引擎设定',技能:'待引擎设定',声望:'—',
-   所属势力:setup.fac||'',当前目标:setup.goal||'待引擎设定',身体状态:'健康',情绪:'平静',当前任务:'—'},
+  player:{年龄:setup.age||'22',所在地:setup.loc||'未设定',身份:setup.birth||'',职业:'待业',
+   财富:'普通',家庭:'未知',社会地位:'平民',身体与能力:'健康',
+   战斗能力:'普通人',科技与工程:'—',技能:'—',声望:0,
+   所属势力:setup.fac||'无',当前目标:setup.goal||'活下去',身体状态:'健康',情绪:'平静',当前任务:'—'},
   ability:null,
   world:{}, events:{'进行中':[],'已发生':[],'隐藏':[]}, org:null,
   fold:{}, _needCheck:false, _lastBigEventTurn:-9999,
   /* v1.8：目标系统（🎯 人生目标 / 成就 / 里程碑） */
   goals:null,
   /* CX 原创水印：存档级溯源（盗发者保存/转发时原样保留作者信息）*/
-  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:'漫威模拟器 2.2',_createdAt:Date.now(),_mode:null
+  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:'漫威模拟器 2.6',_createdAt:Date.now(),_mode:null
  };
- WORLD_KEYS.forEach(function(k){S.world[k]='待首次世界演化'});
+ WORLD_KEYS.forEach(function(k){S.world[k]='—'});
  CUR_HINTS=[];updInputPH();
  // v1.6：用户点击「进入世界」就当"已过新手"，下次关掉浏览器再进来不再自动弹教程。
  // 新手还是想回看的话，首页有「❔ 新手帮助」按钮可以手动开。
@@ -7367,9 +7403,37 @@ function unlockAchievement(id,extra){
     var rec={id:id,tier:a.tier,ic:a.ic,name:a.name,desc:a.desc,at:fmtShort(curDate()),turn:S.turn||0,extra:extra||''};
     S.goals.unlockedAchievements.unshift(rec);
     S.goals.milestones.push({type:'ach',id:id,name:a.name,turn:rec.turn,at:rec.at});
-    try{toast('🏆 解锁成就 · '+a.tier+' · '+a.ic+' '+a.name+' — '+a.desc)}catch(_){}
+    try{toast('🏆 解锁成就 · '+a.tier+' · '+a.ic+' '+a.name)}catch(_){}
+    showAchievementPopup(a);
     return true;
   }catch(e){console.warn('unlockAchievement',e);return false}
+}
+/* v2.6: 成就解锁居中弹窗（动画 + 自动消失）*/
+function showAchievementPopup(a){
+  try{
+    var el=document.getElementById('achievementPopup');
+    if(!el){
+      el=document.createElement('div');
+      el.id='achievementPopup';
+      el.style.cssText='position:fixed;top:22%;left:50%;transform:translateX(-50%) scale(.8);z-index:9999;opacity:0;transition:all .4s cubic-bezier(.2,1.4,.4,1);pointer-events:none';
+      document.body.appendChild(el);
+    }
+    var tierColor = {铜:'#cd7f52',银:'#b8c4d0',金:'#f2c54d',铂:'#9d7cff',钻石:'#4dd2e8'}[a.tier] || '#8fa3b8';
+    el.innerHTML='<div style="background:linear-gradient(135deg,rgba(20,28,40,.97),rgba(15,22,34,.97));border:1.5px solid '+tierColor+';border-radius:16px;padding:22px 30px;min-width:280px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,.6),0 0 30px '+tierColor+'44;backdrop-filter:blur(10px)">'+
+      '<div style="font-size:11px;letter-spacing:2px;color:'+tierColor+';margin-bottom:6px">🏆 成就解锁</div>'+
+      '<div style="font-size:38px;margin:4px 0">'+a.ic+'</div>'+
+      '<div style="font-size:17px;font-weight:700;color:#fff;margin:4px 0 6px">'+esc(a.name)+'</div>'+
+      '<div style="font-size:12px;color:#8fa3b8;line-height:1.6">'+esc(a.desc||'')+'</div>'+
+      '<div style="display:inline-block;margin-top:10px;padding:2px 12px;border-radius:999px;background:'+tierColor+'22;border:1px solid '+tierColor+'66;color:'+tierColor+';font-size:11px;font-weight:600">'+a.tier+'</div>'+
+    '</div>';
+    requestAnimationFrame(function(){
+      el.style.opacity='1'; el.style.transform='translateX(-50%) scale(1)';
+    });
+    clearTimeout(el._t);
+    el._t=setTimeout(function(){
+      el.style.opacity='0'; el.style.transform='translateX(-50%) scale(.9)';
+    },2800);
+  }catch(_){}
 }
 
 /* ===================== 渲染 ===================== */
@@ -7725,9 +7789,16 @@ function _renderDetailBody(k){
   if(k==='setup'){
     /* v1.9 去重：去掉与其它卡重复的字段（年龄/所在地→人生状态，初始技能/能力资质/装备→能力，
        阵营倾向→所属组织，初始目标→人生目标）。出身卡只保留开局固有设定。*/
-    var o=S.setup||{};['时代','血统/出身','出生身份','姓名','性别','家庭状况','性格关键词','模拟风格','起始时间'].forEach(function(kk){
-      if(kk==='起始时间'){if(S.date)h.push(dkv('开局时刻',fmtShort(curDate())))}else{h.push(dkv(kk,o[kk.toLowerCase()]||o[kk]||'—'))}
+    var o=S.setup||{};['时代','血统/出身','出生身份','姓名','性别','家庭状况','性格关键词','模拟风格'].forEach(function(kk){
+      h.push(dkv(kk,o[kk.toLowerCase()]||o[kk]||'—'))
     });
+    if(S.date)h.push(dkv('开局时刻',fmtShort(curDate())));
+    /* v2.6: 世界种子显示在出身卡 */
+    try{
+      var seedLabel = (S.seedKey && String(S.seedKey).length>0) ? String(S.seedKey) : '随机种子';
+      var seedIcon = '🧬';
+      h.push(dkv(seedIcon+' 世界种子', '<span style="color:var(--gold,#f2c54d);font-family:monospace;font-size:12px">'+esc(seedLabel)+'</span>'));
+    }catch(_){}
     return h.join('');
   }
   if(k==='player'){
@@ -8553,7 +8624,6 @@ async function doTurn(mode){
               '<div style="margin-top:4px;font-size:12.5px;color:var(--fg-2)">'+info.html+'</div>' +
               '<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:7px">' +
                 '<button class="primary" style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{var c=getCfg();c.engine=\'offline\';setCfg(c);updEng();document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();toast(\'已切换：离线推演 ✓\')}catch(_){}">🟢 一键切离线推演</button>' +
-                '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();openSettings()}catch(_){}">⚙ 打开引擎设置</button>' +
                 '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="this.closest(\'#_apiErrTip\')&&this.closest(\'#_apiErrTip\').remove()">知道了 ×</button>' +
               '</div>' +
             '</div>' +
@@ -9151,14 +9221,47 @@ function normalizeSave(o){
  o.fold=o.fold||{};o._needCheck=!!o._needCheck;
  if(o._mode!=='easy'&&o._mode!=='expert')o._mode=null;   /* v1.8：双模式兜底，非法值清空让 getMode() 走 localStorage */
  if(!o.world)o.world={};
- WORLD_KEYS.forEach(function(k){if(o.world[k]==null||o.world[k]==='')o.world[k]='—'});
+ WORLD_KEYS.forEach(function(k){if(o.world[k]==null||o.world[k]===''||o.world[k]==='待首次世界演化')o.world[k]='—'});
  /* v1.4：旧存档导入时补齐 S.news 结构（新闻 + 信息来源），后续面板版本直接读 */
  if(!o.news||typeof o.news!=='object')o.news={items:[],sources:[]};
  if(!Array.isArray(o.news.items))o.news.items=[];
  if(!Array.isArray(o.news.sources))o.news.sources=[];
+ /* v2.6: 老存档兼容迁移 —— 补齐 v2.6 新增字段，避免读档后缺字段报错 */
+ try{
+   /* 出身结构化数据：老存档只有文本身份，补一个默认 origin 对象 */
+   if(!o.origin || typeof o.origin !== 'object'){
+     o.origin = {
+       出身: (o.setup && o.setup.birth) || '普通人',
+       血统: '凡人',
+       经济层: 3,
+       职业倾向: '待业',
+       初始技能: [],
+       初始装备: []
+     };
+   }
+   /* 目标/成就系统 */
+   if(!o.goals || typeof o.goals !== 'object'){
+     o.goals = { currentGoal:(o.player&&o.player['当前目标'])||'活下去', goals:[], unlockedAchievements:[], milestones:[] };
+   }
+   if(!Array.isArray(o.goals.unlockedAchievements))o.goals.unlockedAchievements=[];
+   if(!Array.isArray(o.goals.milestones))o.goals.milestones=[];
+   /* 家庭系统 */
+   if(!o.family || typeof o.family !== 'object'){
+     o.family = { members:[], intent:null, married:false, children:0 };
+   }
+   /* 玩家属性兜底：老存档可能缺字段 */
+   if(o.player){
+     var pDefaults = {'职业':'待业','财富':'普通','家庭':'未知','社会地位':'平民','身体与能力':'健康','战斗能力':'普通人','科技与工程':'—','技能':'—','声望':'0','所属势力':'无','当前目标':'活下去','身体状态':'健康','情绪':'平静','当前任务':'—'};
+     for(var pk in pDefaults){ if(o.player[pk]==null||o.player[pk]==='')o.player[pk]=pDefaults[pk]; }
+   }
+   /* 世界线引擎数据 */
+   if(!o.worldline || typeof o.worldline !== 'object'){
+     o.worldline = { seed:(o.seedKey||'rand'), divergenceLevel:0, canonIntegrity:100, majorFlags:{}, alteredEvents:[] };
+   }
+ }catch(_){}
  /* 导入存档时补全作者字段，即使存档被人手动抠掉也会自动回填 CX */
  try{
-   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app='漫威模拟器 2.0';
+   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app='漫威模拟器 2.6';
    o._lastImportedAt=Date.now();
  }catch(_){}
  return o;
@@ -9302,8 +9405,6 @@ function enterGame(){
  /* v1.8：恢复简易/专家模式（存档优先 → localStorage → 默认专家）*/
  try{restoreModeFromSaved()}catch(_){}
  applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
- /* 进入游戏后再弹一次升级 AI 引导（首屏创角时 banner 可能被用户忽略）*/
- try{engineBannerOnce()}catch(_){}
  window.scrollTo(0,0);
 }
 function backToHome(){
@@ -9951,8 +10052,6 @@ function _boot(){
       if(!localStorage.getItem(CKEY))safeLS(CKEY,JSON.stringify(DEFAULT_CFG));
     }catch(e){}
     updEng();updHomeBtns();
-    /* 首屏提示：没配置 AI 时才出现，用户点 1 次就永久关闭（localStorage） */
-    try{engineBannerOnce()}catch(_){}
     /* 绑定 iOS/鸿蒙 键盘聚焦自动滚动到视野 */
     try{if(typeof window._FixKB==='function')window._FixKB()}catch(_){}
     /* 恢复上次人生（v1.4：主 KEY 损坏时自动从 3 份滚动备份 / sessionStorage 按"最新保存时间"挑一份）*/

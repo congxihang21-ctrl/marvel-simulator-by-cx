@@ -148,14 +148,16 @@
           }
         });
       }
-      /* v2.6: 恋爱结婚（22岁后，未婚，有概率结识伴侣） */
-      if(age >= 22 && !f.配偶 && RNG.chance(0.04)){
+      /* v2.6: 恋爱结婚（22岁后，未婚，有概率结识伴侣）—— 尊重玩家"不婚"选择 */
+      var intentSingle = (f.intent === 'single');
+      if(age >= 22 && !f.配偶 && !intentSingle && RNG.chance(0.04)){
         var names = ['张伟','李娜','王芳','刘洋','陈静','赵磊','孙丽','周强'];
         f.配偶 = {姓名: RNG.pick(names), 状态:'婚姻中', 结婚年龄: age};
         if(S.worldline) WorldlineEngine.addMemory(S, new Date(S.date).getFullYear(), '你和'+f.配偶.姓名+'结婚了。');
       }
-      /* v2.6: 生育（已婚，25-45岁，有概率生子） */
-      if(f.配偶 && age >= 25 && age <= 45 && (f.子女||[]).length < 3 && RNG.chance(0.03)){
+      /* v2.6: 生育（已婚，25-45岁，有概率生子）—— 尊重玩家"丁克"选择 */
+      var intentChildfree = (f.intent === 'childfree');
+      if(f.配偶 && !intentChildfree && age >= 25 && age <= 45 && (f.子女||[]).length < 3 && RNG.chance(0.03)){
         if(!f.子女) f.子女 = [];
         var childNames = ['小宇','小雨','小轩','小涵','小辰','小诺'];
         f.子女.push({姓名: RNG.pick(childNames), 年龄: 0, 性别: RNG.chance(0.5)?'男':'女'});
