@@ -1,0 +1,262 @@
+/* ===== v2.6: 事件导演系统 (Event Director) =====
+   负责评估玩家状态、筛选可达事件、计算权重、选择下一事件 */
+(function(){
+  var ED = {
+    /* 事件库 —— 按类型分层（日常/人生/关系/职业/英雄/世界） */
+    eventPool: {
+      /* 日常事件 (Level 1) —— 权重最高，填充人生 */
+      daily: [
+        {id:'d_work',     text:'今天的工作安排', weight:15, stage:['young','early','adult','middle'], effects:{stress:+2, money:+50}},
+        {id:'d_neighbor', text:'邻居敲门打招呼', weight:8,  effects:{}},
+        {id:'d_study',    text:'要不要学点新东西？', weight:6, effects:{stress:+1}},
+        {id:'d_exercise', text:'去锻炼一下身体', weight:6, effects:{stress:-3, 体能:+1}},
+        {id:'d_friend',   text:'朋友邀请你出门', weight:7, effects:{stress:-2}},
+        {id:'d_save',     text:'要不要存点钱？', weight:5, effects:{}},
+        {id:'d_shop',     text:'看到一件想买的东西', weight:5, effects:{money:-30, stress:-1}},
+        {id:'d_rest',     text:'今天想在家休息', weight:8, effects:{stress:-5, money:-10}},
+        {id:'d_ill',      text:'感觉身体不太舒服', weight:3, effects:{健康:-5, stress:+3}},
+        {id:'d_news',     text:'新闻里提到了一些事', weight:6, effects:{}},
+        /* v2.6: 出身差异化日常事件 */
+        {id:'d_poor_bill',text:'账单到期了，钱不够付', weight:4, req:{tierMax:2}, effects:{stress:+8, 债务:+200}},
+        {id:'d_poor_food',text:'今天只能吃便宜的快餐', weight:5, req:{tierMax:2}, effects:{stress:+2, 健康:-2}},
+        {id:'d_rich_inv', text:'理财顾问来电推荐产品', weight:4, req:{tierMin:5}, effects:{}},
+        {id:'d_rich_party',text:'有人邀请参加高端聚会', weight:3, req:{tierMin:5}, effects:{stress:-3, 声望:+2}},
+        {id:'d_mid_gym',  text:'要不要办张健身卡？', weight:4, req:{tierMin:3, tierMax:4}, effects:{money:-100, 体能:+1}}
+      ],
+      /* 人生选择 (Level 2) */
+      life: [
+        {id:'l_career',   text:'是否考虑换一份工作？', weight:4, stage:['young','early','adult']},
+        {id:'l_move',     text:'要不要搬家？', weight:2},
+        {id:'l_marry',    text:'有人向你提起结婚的事', weight:3, stage:['early','adult','middle'], req:{ageMin:22}},
+        {id:'l_child',    text:'考虑要个孩子？', weight:2, stage:['early','adult'], req:{ageMin:25}},
+        {id:'l_joinOrg',  text:'一个组织向你抛出橄榄枝', weight:2},
+        {id:'l_invest',   text:'有个投资机会', weight:2},
+        {id:'l_education',text:'是否继续深造？', weight:3, stage:['teen','young']}
+      ],
+      /* 人物关系 (Level 3) */
+      relation: [
+        {id:'r_trust',    text:'一个朋友向你倾诉秘密', weight:3, req:{minFriend:3}},
+        {id:'r_help',     text:'朋友遇到困难需要帮助', weight:3},
+        {id:'r_conflict', text:'和某人发生了争执', weight:2},
+        {id:'r_love',     text:'有人对你表示好感', weight:2, stage:['teen','young','early']},
+        {id:'r_secret',   text:'你发现了某人的秘密', weight:1},
+        {id:'r_family',   text:'家人之间产生了矛盾', weight:3}
+      ],
+      /* 职业成长 (Level 4) —— 按职业分 */
+      career: [
+        {id:'c_train',    text:'获得了一次培训机会', weight:4, occupation:['soldier','worker']},
+        {id:'c_promote',  text:'有晋升的可能', weight:2, req:{careerLevel:2}},
+        {id:'c_project',  text:'接到一个重要项目', weight:3, occupation:['scientist','engineer','reporter']},
+        {id:'c_special',  text:'上级找你谈特殊任务', weight:1, req:{military:true}},
+        {id:'c_investigate', text:'有件事值得深入调查', weight:2, occupation:['reporter','police']}
+      ],
+      /* 世界新闻 (Level NEWS) */
+      world: [
+        {id:'w_news_normal', text:'收音机/电视里传来新闻', weight:5, level:'NEWS'},
+        {id:'w_news_super',  text:'新闻提到了异常事件', weight:2, level:'NEWS', req:{awarenessMin:10}},
+        {id:'w_indirect',    text:'你感觉到周围有些不寻常', weight:1, level:'INDIRECT'}
+      ],
+      /* 英雄/超自然事件 (Level 5) —— 必须满足条件才出现 */
+      hero: [
+        {id:'h_ssr_recruit', text:'SSR 的人找到了你', weight:1, level:'DIRECT',
+         req:{ageMin:18, military:true, reputation:20}, divergence:+5},
+        {id:'h_meet_hero',   text:'你偶然见到了一位超级英雄', weight:1, level:'INDIRECT',
+         req:{locationCity:true}},
+        {id:'h_strange',     text:'你目睹了无法解释的现象', weight:1, req:{awarenessMin:30}},
+        {id:'h_recruit',     text:'有人邀请你加入一个秘密组织', weight:1, req:{influence:30}}
+      ]
+    },
+
+    /* 检查事件是否满足硬条件 */
+    checkRequirements: function(S, evt){
+      if(!evt.req) return true;
+      var req = evt.req;
+      var p = S.player || {};
+      var age = parseInt(p.年龄) || 0;
+      var wl = S.worldline || {};
+
+      if(req.ageMin && age < req.ageMin) return false;
+      if(req.ageMax && age > req.ageMax) return false;
+      if(req.stage){
+        var st = CharacterEngine.getLifeStage(age).id;
+        if(req.stage.indexOf(st) === -1) return false;
+      }
+      if(req.military && !WL_hasFlag(S,'military')) return false;
+      if(req.reputation && (p.声望||0) < req.reputation) return false;
+      if(req.influence && (wl.playerInfluence||0) < req.influence) return false;
+      if(req.awarenessMin && (wl.publicAwareness||0) < req.awarenessMin) return false;
+      if(req.careerLevel && (p.职业路径&&p.职业路径.等级||0) < req.careerLevel) return false;
+      if(req.minFriend){
+        var friendCount = (S.rel||[]).filter(function(r){return (r.信任==='高'||r.信任==='中等偏高')}).length;
+        if(friendCount < req.minFriend) return false;
+      }
+      if(req.occupation){
+        var occ = (p.职业路径&&p.职业路径.当前职业) || p.职业 || '';
+        var ok = false;
+        for(var i=0;i<req.occupation.length;i++){
+          if(occ.indexOf(req.occupation[i]) !== -1){ok=true;break;}
+        }
+        if(!ok) return false;
+      }
+      /* v2.6: 出身阶层要求（经济等级 1-6） */
+      if(req.tierMax || req.tierMin){
+        var tier = 3;
+        var eco = p.经济;
+        if(eco){
+          var wealth = (eco.储蓄||0)+(eco.现金||0)-(eco.债务||0);
+          if(wealth < 0) tier = 2;
+          else if(wealth < 2000) tier = 2;
+          else if(wealth < 10000) tier = 3;
+          else if(wealth < 50000) tier = 4;
+          else if(wealth < 300000) tier = 5;
+          else tier = 6;
+        }
+        if(req.tierMax && tier > req.tierMax) return false;
+        if(req.tierMin && tier < req.tierMin) return false;
+      }
+      return true;
+    },
+
+    /* 软条件修正权重 */
+    applySoftModifiers: function(S, evt, baseWeight){
+      var w = baseWeight;
+      if(!evt.req) return w;
+      var req = evt.req;
+      var p = S.player || {};
+      var wl = S.worldline || {};
+      /* 软条件：未满足时降权但不排除 */
+      if(req.softMilitary && !WL_hasFlag(S,'military')) w *= 0.2;
+      if(req.softRich && CharacterEngine.getEconomyLabel(S) === '贫困') w *= 0.3;
+      if(req.softEducated && (p.属性&&p.属性.智力||50) < 60) w *= 0.5;
+      return w;
+    },
+
+    /* 事件冷却检查 */
+    checkCooldown: function(S, evtId){
+      if(!S.cooldowns) S.cooldowns = {};
+      var cd = S.cooldowns[evtId] || 0;
+      return cd <= 0;
+    },
+
+    /* 设置事件冷却 */
+    setCooldown: function(S, evtId, turns){
+      if(!S.cooldowns) S.cooldowns = {};
+      S.cooldowns[evtId] = turns;
+    },
+
+    /* 每回合递减冷却 */
+    tickCooldowns: function(S){
+      if(!S.cooldowns) return;
+      for(var k in S.cooldowns){
+        if(S.cooldowns[k] > 0) S.cooldowns[k]--;
+      }
+    },
+
+    /* 核心：根据玩家状态选择下一事件 */
+    selectNextEvent: function(S){
+      if(!S.worldline) WorldlineEngine.init(S);
+      var p = S.player || {};
+      var age = parseInt(p.年龄) || 20;
+      var stage = CharacterEngine.getLifeStage(age);
+      var occ = (p.职业路径 && p.职业路径.当前职业) || p.职业 || '普通';
+      var wl = S.worldline;
+
+      /* 根据身份决定事件类型权重（项13） */
+      var typeWeights = this.getTypeWeights(S, occ);
+
+      /* 收集候选事件 */
+      var candidates = [];
+      var self = this;
+      Object.keys(this.eventPool).forEach(function(type){
+        var pool = self.eventPool[type];
+        pool.forEach(function(evt){
+          /* 人生阶段过滤 */
+          if(evt.stage && evt.stage.indexOf(stage.id) === -1) return;
+          /* 硬条件 */
+          if(!self.checkRequirements(S, evt)) return;
+          /* 冷却 */
+          if(!self.checkCooldown(S, evt.id)) return;
+          /* 事件历史去重（非日常事件不重复） */
+          if(type !== 'daily' && type !== 'world'){
+            if((S.eventHistory||[]).some(function(h){return h.id === evt.id})) return;
+          }
+          /* 计算权重 */
+          var w = (evt.weight || 5) * (typeWeights[type] || 0.1);
+          w = self.applySoftModifiers(S, evt, w);
+          if(w > 0) candidates.push({evt: evt, weight: w, type: type});
+        });
+      });
+
+      if(candidates.length === 0){
+        /* 兜底：返回一个日常事件 */
+        return {evt: this.eventPool.daily[0], type:'daily'};
+      }
+
+      /* 按权重随机选择 */
+      var chosen = RNG.weighted(candidates.map(function(c){return {item:c, weight:c.weight}}));
+      return chosen;
+    },
+
+    /* 根据身份获取事件类型权重（项13） */
+    getTypeWeights: function(S, occ){
+      var wl = S.worldline || {};
+      var div = wl.divergenceLevel || 0;
+      /* 基础权重 */
+      var base = {daily:0.60, life:0.15, relation:0.10, career:0.10, world:0.04, hero:0.01};
+
+      /* SSR/军人身份 */
+      if(occ.indexOf('soldier') !== -1 || occ.indexOf('SSR') !== -1 || occ.indexOf('military') !== -1){
+        base = {daily:0.25, life:0.05, relation:0.10, career:0.35, world:0.15, hero:0.10};
+      }
+      /* 复仇者成员 */
+      if(WL_hasFlag(S,'avenger')){
+        base = {daily:0.10, life:0.05, relation:0.10, career:0.20, world:0.15, hero:0.40};
+      }
+      /* 科学家/工程师 */
+      if(occ.indexOf('scientist') !== -1 || occ.indexOf('engineer') !== -1){
+        base = {daily:0.40, life:0.10, relation:0.08, career:0.25, world:0.10, hero:0.07};
+      }
+      /* 偏离度越高，英雄事件概率越高 */
+      if(div > 30) base.hero = Math.min(0.4, base.hero + (div-30)*0.005);
+      if(div > 50) base.world += 0.05;
+
+      return base;
+    },
+
+    /* 执行事件效果 */
+    applyEventEffects: function(S, evt){
+      if(!evt.effects) return;
+      var e = evt.effects;
+      if(e.stress) CharacterEngine.addStress(S, e.stress);
+      if(e.money) CharacterEngine.addMoney(S, e.money);
+      if(e.健康) CharacterEngine.addHealth(S, e.健康);
+      if(e.声望) CharacterEngine.addReputation(S, e.声望);
+      if(e.体能) CharacterEngine.addStat(S, '体能', e.体能);
+      if(e.智力) CharacterEngine.addStat(S, '智力', e.智力);
+      if(e.divergence && S.worldline) WorldlineEngine.addDivergence(S, e.divergence);
+      if(e.influence && S.worldline) WorldlineEngine.addInfluence(S, e.influence);
+      if(e.flag && S.worldline) WorldlineEngine.setFlag(S, e.flag, true);
+    },
+
+    /* 记录事件历史 */
+    recordEvent: function(S, evt, choice){
+      if(!S.eventHistory) S.eventHistory = [];
+      S.eventHistory.push({
+        id: evt.id, turn: S.turn, date: S.date,
+        choice: choice, timestamp: Date.now()
+      });
+      /* 设置冷却 */
+      var cd = evt.id.indexOf('d_') === 0 ? RNG.int(3,7) :
+               evt.id.indexOf('r_') === 0 ? RNG.int(10,20) :
+               evt.id.indexOf('h_') === 0 ? RNG.int(40,80) : RNG.int(5,10);
+      this.setCooldown(S, evt.id, cd);
+    }
+  };
+
+  /* 辅助函数：检查 Flag */
+  function WL_hasFlag(S, key){
+    return WorldlineEngine && WorldlineEngine.hasFlag(S, key);
+  }
+
+  window.EventDirector = ED;
+})();
