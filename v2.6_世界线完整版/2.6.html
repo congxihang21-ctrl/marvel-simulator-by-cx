@@ -5872,13 +5872,12 @@ function friendlyApiError(rawMsg){
 async function callApi(messages,maxTok){
   var eng=resolveEngine();
   var base=(eng&&eng.base)||'',key=(eng&&eng.key)||'',model=(eng&&eng.model)||'';
-  /* Beta v2.0 · 省 token 策略：默认温度 0.7（角色扮演够用，采样更快更稳）
-     max_tokens 按场景自适应：开局首刷 1200 / 日常回合 800 / 自定义取 eng.max
-     生成短一点 = 推理快、烧的 token 少，剧情模拟器写 600 字绰绰有余 */
+  /* v2.6：不降质提速 —— max_tokens 保持充裕不截断剧情，提速靠 SSE 流式/关思考链/精简输入
+     开局首刷 1500 / 日常回合 1200 → 写得完、不截断、不降智 */
   var temp=eng&&eng.temp!=null?eng.temp:0.7;
   var isOpening=false; try{isOpening=!!(messages&&messages[1]&&typeof messages[1].content==='string'&&messages[1].content.indexOf('开局初始化请求')>=0)}catch(_){}
   var easy=false; try{easy=(typeof getMode==='function'&&getMode()==='easy')}catch(_){}
-  var defMax=isOpening?1200:(easy?600:800);
+  var defMax=isOpening?1500:(easy?900:1200);
   var max=eng&&eng.max?eng.max:defMax;
   if(!base||!model)throw new Error('引擎路由未就绪（无 Base URL/模型），请切到离线模式或检查配置。');
   var url=base+'/chat/completions';
