@@ -529,6 +529,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   -webkit-transform:translateZ(0);transform:translateZ(0);
 }
 .topbtns{display:flex;flex-wrap:wrap;gap:6px}
+.topbtns button{padding:7px 12px;font-size:12.5px;min-height:36px;font-weight:600;border-radius:10px;background:color-mix(in srgb,var(--bg-2) 85%,transparent);border:1px solid var(--line-2);color:var(--fg-1);letter-spacing:.2px}
+.topbtns button:hover{color:var(--fg-0);border-color:color-mix(in srgb,var(--accent) 45%,var(--line-2));background:color-mix(in srgb,var(--accent) 10%,var(--bg-2))}
 
 /* ===================== 时间大卡片（电影信息卡风格）===================== */
 .timecard{
@@ -1678,9 +1680,10 @@ body.mode-easy .subh:has(+ #playerInput)::before{content:"🔍 "}
 body.mode-easy .subh:has(+ #playerInput)::after{content:"（给想自己写剧情的朋友～不写也完全可以玩）";font-weight:400;margin-left:4px}
 
 /* 简易模式：巨大的「继续推进⏭️」按钮条（行动区最上方） — 用户一眼就能看到 */
-.easy-go-bar{display:none;align-items:stretch;justify-content:space-between;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
+.easy-go-bar{display:flex;align-items:stretch;justify-content:space-between;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
 body.mode-easy .easy-go-bar{display:flex}
-.easy-go-main{flex:1;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-weight:800;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 75%,#fff 5%),color-mix(in srgb,var(--magic) 55%,#fff 5%));color:#fff;letter-spacing:.6px;box-shadow:0 6px 22px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08);border:none;cursor:pointer;transition:transform .12s ease, box-shadow .18s ease}
+.easy-go-main{flex:1;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-weight:800;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 75%,#fff 5%),color-mix(in srgb,var(--magic) 55%,#fff 5%));color:#fff;letter-spacing:.6px;box-shadow:0 6px 22px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08);border:none;cursor:pointer;transition:transform .12s ease, box-shadow .18s ease, filter .18s ease}
+.easy-go-main:hover{filter:brightness(1.06);box-shadow:0 8px 28px rgba(232,198,106,.32),inset 0 -2px 0 rgba(0,0,0,.08)}
 .easy-go-main:active{transform:translateY(1px) scale3d(.992,.992,1);box-shadow:0 3px 12px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08)}
 .easy-go-main .ic{font-size:28px}
 .easy-go-main .sub{font-size:12px;font-weight:500;opacity:.9;letter-spacing:.2px;display:block;line-height:1.4}
@@ -1875,10 +1878,11 @@ body.mode-easy #body_story{max-height:min(580px,72vh) !important}
    好处：① 一屏看完所有人生信息 ② 不用每个都点三角展开 ③ 视觉更紧凑。*/
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:8px 0 12px}
 @media (max-width:720px){.grid{grid-template-columns:1fr;gap:10px}}
-.mc{position:relative;border:1px solid var(--line-2);border-radius:14px;padding:12px 13px 11px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 90%,transparent),color-mix(in srgb,var(--bg-2) 70%,transparent));transition:transform .12s, box-shadow .18s, border-color .18s;contain:style paint}
-.mc:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line-2));box-shadow:0 4px 14px rgba(0,0,0,.14);transform:translateY(-1px)}
+.mc{position:relative;border:1px solid var(--line-2);border-radius:14px;padding:12px 13px 11px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 92%,transparent),color-mix(in srgb,var(--bg-2) 72%,transparent));transition:transform .14s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;contain:style paint;overflow:hidden}
+.mc::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);pointer-events:none}
+.mc:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line-2));box-shadow:0 6px 20px rgba(0,0,0,.18),0 0 0 1px color-mix(in srgb,var(--accent) 10%,transparent) inset;transform:translateY(-2px)}
 .mc .hd{display:flex;align-items:center;gap:9px;margin-bottom:8px;cursor:pointer;user-select:none}
-.mc .ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,color-mix(in srgb,var(--magic) 22%,transparent),color-mix(in srgb,var(--accent) 20%,transparent));flex-shrink:0}
+.mc .ic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,color-mix(in srgb,var(--magic) 26%,transparent),color-mix(in srgb,var(--accent) 22%,transparent));flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1)}
 .mc .tl{font-weight:800;font-size:14.5px;color:var(--fg-0);flex:1;line-height:1.3}
 .mc .more{font-size:11.5px;font-weight:700;color:var(--accent);padding:4px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);white-space:nowrap;cursor:pointer;transition:all .15s}
 .mc .more:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
@@ -5869,19 +5873,20 @@ async function callApi(messages,maxTok){
   var eng=resolveEngine();
   var base=(eng&&eng.base)||'',key=(eng&&eng.key)||'',model=(eng&&eng.model)||'';
   /* Beta v2.0 · 省 token 策略：默认温度 0.7（角色扮演够用，采样更快更稳）
-     max_tokens 按模式自适应：简易 720 / 专家 1200 / 用户自定义取 eng.max / 开局首刷 1500
-     生成短一点 = 推理快、烧的 token 少，剧情模拟器写 500 字绰绰有余 */
+     max_tokens 按场景自适应：开局首刷 1200 / 日常回合 800 / 自定义取 eng.max
+     生成短一点 = 推理快、烧的 token 少，剧情模拟器写 600 字绰绰有余 */
   var temp=eng&&eng.temp!=null?eng.temp:0.7;
   var isOpening=false; try{isOpening=!!(messages&&messages[1]&&typeof messages[1].content==='string'&&messages[1].content.indexOf('开局初始化请求')>=0)}catch(_){}
   var easy=false; try{easy=(typeof getMode==='function'&&getMode()==='easy')}catch(_){}
-  var defMax=isOpening?1500:(easy?720:1200);
+  var defMax=isOpening?1200:(easy?600:800);
   var max=eng&&eng.max?eng.max:defMax;
   if(!base||!model)throw new Error('引擎路由未就绪（无 Base URL/模型），请切到离线模式或检查配置。');
   var url=base+'/chat/completions';
-  /* 超时：移动端（含微信/抖音 WebView）90s；桌面 180s；自检请求 30s */
+  /* v2.6 提速：超时大幅缩短 → AI 不响应时快速回退离线引擎，不让玩家干等
+     移动端 45s / 桌面 60s / 自检 20s */
   var isShort=false;try{isShort=ENV&&(ENV.isMobile||ENV.isWechat||ENV.isDouyin)}catch(_){}
-  var tmo=isShort?90000:180000;
-  if(maxTok&&maxTok<64)tmo=30000;   /* ping / 测试连接 30s */
+  var tmo=isShort?45000:60000;
+  if(maxTok&&maxTok<64)tmo=20000;   /* ping / 测试连接 20s */
   var ctrl=null;
   try{ctrl=new AbortController()}catch(_){ctrl=null}   /* IE11 / 老内核 无 AbortController */
   var to=null;
