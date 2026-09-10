@@ -629,8 +629,8 @@ var GameSeed = (function(){
       var next = NODES[S.currentNode].choices[0].next;
       if(next && next.indexOf('ending_') !== 0) nextSeed = next;
     }
-    /* v2.6: 第3回合后，50%概率走 EventDirector 动态事件，增加人生多样性 */
-    if(typeof EventDirector !== 'undefined' && (S.turn||0) > 2 && Math.random() < 0.5){
+    /* v2.6: 第3回合后，70%概率走 EventDirector 动态事件（AI 驱动人生） */
+    if(typeof EventDirector !== 'undefined' && (S.turn||0) > 2 && Math.random() < 0.7){
       try{
         var picked = EventDirector.selectNextEvent(S);
         if(picked && picked.evt){

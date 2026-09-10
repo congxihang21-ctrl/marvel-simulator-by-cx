@@ -31,7 +31,24 @@
     {id:'multiverse_anomaly', name:'多元宇宙异常体', weight:1,
      check: function(S){ return (S.worldline.divergenceLevel||0) > 90; }},
     {id:'retirement', name:'功成身退', weight:3,
-     check: function(S){ return (S.player.声望||0) > 40 && !WL_hasFlag(S,'hasAbility'); }}
+     check: function(S){ return (S.player.声望||0) > 40 && !WL_hasFlag(S,'hasAbility'); }},
+    /* v2.6 扩充结局 */
+    {id:'wealthy_tycoon', name:'富甲一方', weight:3,
+     check: function(S){ var p=S.player||{}; var eco=p.经济||{}; return (eco.现金||0)+(eco.储蓄||0) > 5000000; }},
+    {id:'sage', name:'智者传世', weight:3,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.智力||0) > 85 && (st.科技||0) > 60 && (S.worldline.divergenceLevel||0) < 40; }},
+    {id:'romantic', name:'浪漫一生', weight:4,
+     check: function(S){ var p=S.player||{}; var f=p.家庭||{}; return f.配偶 && (p.声望||0) < 40 && (S.worldline.divergenceLevel||0) < 30; }},
+    {id:'adventurer', name:'传奇冒险家', weight:3,
+     check: function(S){ return (S.worldline.divergenceLevel||0) > 40 && (S.worldline.divergenceLevel||0) < 70 && (S.player.声望||0) > 20; }},
+    {id:'mediator', name:'和平调停者', weight:2,
+     check: function(S){ var st=(S.player&&S.player.属性)||{}; return (st.魅力||0) > 75 && (S.worldline.divergenceLevel||0) > 30 && (S.player.声望||0) > 30; }},
+    {id:'mentor', name:'人生导师', weight:3,
+     check: function(S){ var st=(S.player&&S.player.属性)||{}; return (st.智力||0) > 70 && (st.意志||0) > 70 && (S.rel||[]).length >= 5; }},
+    {id:'survivor', name:'大难不死', weight:2,
+     check: function(S){ return (S.player.健康||100) > 0 && (S.player.健康||100) < 30 && (S.turn||0) > 80; }},
+    {id:'redeemed', name:'浪子回头', weight:2,
+     check: function(S){ return WL_hasFlag(S,'criminal') && (S.player.声望||0) > 0; }}
   ];
 
   var EE = {

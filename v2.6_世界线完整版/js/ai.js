@@ -21,10 +21,10 @@ var AIService = (function(){
         key:  (c.key||CX_KEY).trim(),
         model:(c.model||CX_MODEL).trim(),
         temp: typeof c.temp==='number'?c.temp:0.82,
-        max:  c.max||4096
+        max:  c.max||2048
       };
     }catch(e){
-      return {base:CX_BASE,key:CX_KEY,model:CX_MODEL,temp:0.82,max:4096};
+      return {base:CX_BASE,key:CX_KEY,model:CX_MODEL,temp:0.82,max:2048};
     }
   }
 
@@ -55,7 +55,7 @@ var AIService = (function(){
     for(var attempt=0; attempt<2; attempt++){
       try{
         var ctrl = new AbortController();
-        var to = setTimeout(function(){ try{ctrl.abort();}catch(e){} }, 45000);
+        var to = setTimeout(function(){ try{ctrl.abort();}catch(e){} }, 30000);
         var r = await fetch(url, {
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},
@@ -106,132 +106,82 @@ var AIService = (function(){
     return null;
   }
 
-  // 构建游戏上下文（给 AI 的世界状态摘要）
+  // 构建游戏上下文（给 AI 的世界状态摘要）—— v2.6 精简版，减少 token
   function buildContext(state){
     if(!state) return '';
     var s = state;
     var d = s.date ? new Date(s.date) : new Date();
     var st = s.stats || {};
-    var timeStr = d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日';
-    var attrStr = '体能' + Math.round(st.str||0) + ' 格斗' + Math.round(st.cbt||0) + ' 敏捷' + Math.round(st.agi||0) +
-                  ' 智力' + Math.round(st.int||0) + ' 科技' + Math.round(st.tec||0) + ' 超能' + Math.round(st.pwr||0) +
-                  ' 魅力' + Math.round(st.cha||0) + ' 意志' + Math.round(st.wil||0);
+    var yr = d.getFullYear();
     var parts = [];
-    parts.push('【当前时间】' + timeStr);
-    parts.push('【时代】' + (s.eraName||''));
-    parts.push('【地点】' + (s.location||(s.player&&s.player['所在地'])||''));
-    parts.push('【身份】' + (s.originName||(s.player&&s.player['身份'])||'') + ' / ' + (s.faction||(s.player&&s.player['所属势力'])||''));
-    parts.push('【属性】' + attrStr);
-    parts.push('【状态】压力' + (s.stress||0) + '/100  金钱' + (s.money||0));
+    parts.push(yr+'年'+(d.getMonth()+1)+'月 · '+(s.eraName||'')+' · '+(s.location||''));
+    parts.push('身份:'+(s.originName||'')+'/'+(s.faction||'无')+' · 年龄:'+(s.age||'?'));
+    parts.push('属性:体'+Math.round(st.str||0)+'智'+Math.round(st.int||0)+'魅'+Math.round(st.cha||0)+'意'+Math.round(st.wil||0)+'格'+Math.round(st.cbt||0)+'科'+Math.round(st.tec||0));
+    parts.push('状态:压力'+(s.stress||0)+' 钱'+(s.money||0)+' 声望'+(s.player&&s.player['声望']||0));
+    /* 经济等级约束 */
+    var tier = (s.origin && s.origin.经济层) || (s.player && s.player['财富']) || 3;
+    var tierName = ['赤贫','贫困','工薪','中产','富裕','精英'][Math.max(0,Math.min(5,(typeof tier==='number'?tier:3)-1))] || '中产';
+    parts.push('经济:'+tierName);
     if(s.relations && Object.keys(s.relations).length){
       var rlist = [];
+      var cn = 0;
       for(var rn in s.relations){
+        if(cn++>=4) break;
         var rv = s.relations[rn];
-        rlist.push(rn + '(好感' + (rv.favor||0) + '/信任' + (rv.trust||0) + ')');
+        rlist.push(rn+'(好'+(rv.favor||0)+')');
       }
-      if(rlist.length) parts.push('【人际关系】' + rlist.join('、'));
+      if(rlist.length) parts.push('关系:'+rlist.join(' '));
     }
-    if(s.flags){
-      var fl = [];
-      if(s.flags.injuredCount) fl.push('受伤' + s.flags.injuredCount + '次');
-      if(s.flags.battleCount) fl.push('战斗' + s.flags.battleCount + '次');
-      for(var fk in s.flags){
-        if(s.flags[fk] === true && fk !== 'eventCount' && fk !== 'dailyCount') fl.push(fk);
-      }
-      if(fl.length) parts.push('【世界线标记】' + fl.join('、'));
-    }
-    /* v2.6: 信息边界 —— 普通人不知道秘密组织/宇宙魔方等 */
-    parts.push('【知识边界】' + getKnowledgeBoundary(s));
-    return parts.join('\n');
+    parts.push('知界:'+getKnowledgeBoundary(s));
+    return parts.join(' | ');
   }
 
-  /* v2.6: 根据身份/阵营/flag 决定玩家知道什么 */
+  /* v2.6: 根据身份/阵营决定玩家知道什么 —— 精简版 */
   function getKnowledgeBoundary(s){
-    var knows = [];
-    var faction = (s.faction || (s.player && s.player['所属势力']) || '').toLowerCase();
-    var origin = (s.originName || (s.player && s.player['身份']) || '').toLowerCase();
-    var flags = s.flags || {};
-    var isSHIELD = /shield|神盾|s.h.i.e.l.d/i.test(faction);
-    var isHydra = /hydra|九头蛇/i.test(faction);
-    var isAvenger = /复仇者|avenger/i.test(faction);
-    var isStark = /斯塔克|stark/i.test(faction+origin);
-    var isMilitary = /军|soldier|military|兵/i.test(origin+faction);
+    var faction = (s.faction || '').toLowerCase();
+    var origin = (s.originName || '').toLowerCase();
+    var isSHIELD = /shield|神盾|hydra|九头蛇|avenger|复仇者/i.test(faction);
     var isScientist = /科学家|scientist|研究员|博士/i.test(origin+faction);
-    var age = s.age || 0;
-    var year = (s.date ? new Date(s.date) : new Date()).getFullYear();
-
-    knows.push('公开新闻：纽约之战、奥创事件、内战、灭霸入侵等已公开事件');
-    if(isSHIELD || isHydra || isAvenger){
-      knows.push('知道神盾局/Hydra 的存在与秘密行动');
-      if(year >= 2011) knows.push('知道宇宙魔方/无限宝石的存在');
-    } else if(isScientist && year >= 2010){
-      knows.push('听说过一些前沿科研传闻，但不知全貌');
-    } else if(isMilitary){
-      knows.push('知道一些军方机密，但不涉及超自然');
-    } else {
-      knows.push('不知道神盾局、Hydra、无限宝石等秘密');
-    }
-    if(isStark){
-      knows.push('熟悉斯塔克工业内部动向');
-    }
-    if(age < 18){
-      knows.push('未成年，社会接触面有限');
-    }
-    return knows.join('；') + '。AI 叙事时必须遵守此边界，不要让玩家知道不该知道的事。';
+    if(isSHIELD) return '知情(神盾/九头蛇/宝石)';
+    if(isScientist) return '略知科研传闻';
+    return '平民(不知秘密组织)';
   }
 
   // ========== 1. 事件叙事润色 ==========
   async function generateNarrative(event, state, isDaily){
     if(!event) return event.text||'';
     var ctx = buildContext(state);
-    var depth = isDaily ? '日常' : '重要';
 
-    var system = '你是漫威电影宇宙人生模拟器的首席叙事编剧。你的职责是把游戏策划写的"事件骨架"润色成有电影感的叙事段落。\n\n核心原则：\n1. 【画面优先】每段必须有可被摄影机拍到的画面：光线、声音、气味、温度、人物动作。不要写"你感到紧张"，要写"你的掌心渗出冷汗，M1加兰德的枪托硌着锁骨"。\n2. 【第二人称】始终用"你"。不要用"主角"。\n3. 【克制】不滥用形容词。不用"令人震撼地""无比悲壮地"。让画面自己说话。\n4. 【对话】有人物在场时，写一两句符合身份的对话，不要长篇大论。\n5. 【不越界】绝不写选项内容、绝不写行动结果、绝不修改事件的走向。你只负责"场景 + 发生了什么 + 你现在的处境"。\n6. 【MCU 正典】钢铁侠、美国队长、雷神等角色的言行必须符合 MCU 电影中的人设。不要让 OOC。\n7. 【不剧透】不要暗示未来会发生什么。';
+    var system = '你是MCU人生模拟器叙事编剧。规则：\n1.第二人称"你"。\n2.画面优先：写光线/声音/动作，不写"你感到紧张"。\n3.克制，少形容词。\n4.有人物就写一两句符合身份的对话。\n5.不写选项、不写结果、不改走向。\n6.MCU角色符合电影人设，不OOC。\n7.不剧透未来。';
 
-    var examples = '【示范·好】\n1944年3月17日，意大利前线。\n雨已经下了三个小时。你靠在半塌的石墙边，帆布斗篷渗进了冷水，M1加兰德的枪托硌着锁骨。\n无线电突然刺啦响了一声。"第三小队失去联系。"\n传令的中尉转过头，雨水顺着他钢盔的檐滴下来。"你是这里离他们最近的人。"\n远处传来第二声爆炸——这一次，比刚才近得多。\n\n【示范·坏·不要这样写】\n这是一个非常紧张刺激的夜晚，你感到无比害怕，但你知道自己必须勇敢地面对即将到来的挑战，因为这是你的命运。';
+    var prompt = ctx + '\n\n事件:' + (event.title||event.text||'') +
+                 '\n请润色为' + (isDaily ? '80-150字生活化叙事' : '150-300字电影化叙事') +
+                 '。直接输出正文，无前缀。';
 
-    var prompt = ctx + '\n\n【事件标题】' + event.title + '\n【事件等级】' + (event.level||depth) + '\n【策划原始事件】\n' + (event.text||'') +
-                 '\n\n请把上面的事件骨架润色为' + (isDaily ? '100-180字' : '200-350字') + '的电影化叙事。' +
-                 (isDaily ? '日常事件要生活化、有烟火气，不要太戏剧化。' : '重要事件要有张力、有画面、有人物。') +
-                 '\n直接输出正文，不要加标题、不要加引号、不要写"润色后："之类的前缀。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: isDaily ? 0.7 : 0.85, max: isDaily ? 600 : 1200});
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: isDaily ? 0.7 : 0.85, max: isDaily ? 500 : 1000});
     return result && result.trim() ? result.trim() : (event.text||'');
   }
 
   // ========== 2. NPC 对话（带记忆） ==========
   async function generateNPCDialogue(npc, playerInput, state, history){
     var ctx = buildContext(state);
-    var npcInfo = npc ? ('【NPC】' + npc.name + '\n身份：' + (npc.role||'未知') + '\n性格：' + (npc.personality||'沉稳') +
-                         '\n与玩家关系：' + (npc.relation||'陌生') + '\n好感度：' + (npc.favor||50) + '/100\n信任度：' + (npc.trust||30) + '/100') : '';
+    var npcInfo = npc ? (npc.name+'('+(npc.role||'')+',好感'+(npc.favor||50)+',信任'+(npc.trust||30)+')') : '';
     var historyStr = '';
     if(history && history.length){
-      historyStr = '\n【近期对话记录】\n' + history.map(function(h){
-        return (h.role==='player'?'玩家：':'对方：') + h.text;
-      }).join('\n');
+      historyStr = '\n近期:\n' + history.slice(-3).map(function(h){return (h.role==='player'?'你':'Ta')+':'+h.text;}).join('\n');
     }
-
-    var system = '你是漫威电影宇宙中的一个角色。你正在和玩家对话。\n\n规则：\n1. 用第一人称，以该NPC的口吻说话。\n2. 回复必须符合NPC的身份、性格、与玩家的关系和信任度。好感低→冷淡；信任低→有所保留；挚友→真诚。\n3. 参考近期对话记录，保持话题连贯，不要重复已经说过的话。\n4. 不要说不属于这个角色会说的话。不要剧透未来剧情。\n5. 回复要短，50-150字，像真实对话一样有停顿、有情绪。\n6. 如果NPC是MCU正典角色（如美队、钢铁侠），言行必须符合电影人设。\n7. 直接输出对话内容，不要加引号、不要加"NPC说："。';
-
-    var prompt = ctx + '\n' + npcInfo + historyStr + '\n\n【玩家说】' + playerInput +
-                 '\n\n请以该NPC的身份回复玩家。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.9});
-    return result && result.trim() ? result.trim() : '（' + (npc.name||'对方') + '沉默了一会儿，似乎在斟酌措辞。）';
+    var system = '你是MCU中的角色，正和玩家对话。第一人称，符合身份性格和关系。好感低冷淡，信任低保留。50-120字，像真实对话。直接输出内容。';
+    var prompt = ctx + '\n' + npcInfo + historyStr + '\n你说:'+playerInput+'\nTa回复:';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.9, max: 300});
+    return result && result.trim() ? result.trim() : '（'+(npc?npc.name:'对方')+'沉默了一会儿。）';
   }
 
   // ========== 3. 自定义行动解析 ==========
   async function generateCustomChoice(playerInput, state){
     var ctx = buildContext(state);
-    var system = '你是漫威人生模拟器的行动判定引擎。玩家输入了一个自定义行动，你需要把它解析成结构化数据供游戏引擎使用。\n\n你必须严格返回JSON，不要加任何其他文字。';
-    var prompt = ctx + '\n【玩家行动】' + playerInput + '\n\n返回JSON格式：\n' +
-                 '{"action":"行动类型","risk":1-100,"requiredStats":["属性名"],"successText":"成功时的简短描述(30-60字，有画面感)","failText":"失败时的简短描述(30-60字，有画面感)","worldFlag":"可选，触发的世界线标记名(英文)"}' +
-                 '\n\n行动类型：investigate(调查)/fight(战斗)/talk(交涉)/sneak(潜行)/flee(逃跑)/study(研究)/help(帮助)/betray(背叛)/other(其他)\n' +
-                 'risk：1-100，越高越危险\n' +
-                 'requiredStats：从[体能,格斗,敏捷,智力,科技,超能,魅力,意志]中选1-2个\n' +
-                 '只返回JSON，不要任何解释。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.3});
+    var system = '行动判定引擎。只返回JSON。';
+    var prompt = ctx + '\n行动:'+playerInput+'\n返回JSON:{"action":"investigate/fight/talk/sneak/flee/study/help/betray/other","risk":1-100,"requiredStats":["属性1"],"successText":"30字有画面","failText":"30字有画面","worldFlag":null}\n只JSON。';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.3, max: 400});
     var parsed = parseJSON(result);
     if(parsed && parsed.action){
       return {
@@ -249,43 +199,31 @@ var AIService = (function(){
   // ========== 4. 结局叙事扩写 ==========
   async function generateEnding(ending, state){
     var ctx = buildContext(state);
-    var system = '你是漫威人生模拟器的结局编剧。玩家的一生已经结束，你需要为这个结局写一段有仪式感的人生总结。\n\n规则：\n1. 以电影旁白的口吻，第三人称。\n2. 回顾玩家的一生，点出关键转折。\n3. 给出最终评价——克制、有重量感，不要煽情过度。\n4. 风格：MCU 电影片尾旁白、史诗感、留白。\n5. 200-400字。\n6. 不要剧透其他结局，不要虚构时间线之外的重大事件。';
-
-    var prompt = ctx + '\n【结局名称】' + (ending.title||ending.name||'') +
-                 '\n【结局类型】' + (ending.type||'') +
-                 '\n【结局描述】' + (ending.text||'') +
-                 '\n\n请为这个结局写一段人生总结。直接输出正文。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.8});
+    var system = 'MCU结局编剧。第三人称电影旁白口吻，回顾一生，克制有重量感，不煽情不剧透。200-350字。直接输出。';
+    var prompt = ctx + '\n结局:'+(ending.title||ending.name||'')+' ('+(ending.type||'')+')\n'+(ending.text||'')+'\n写人生总结。';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.8, max: 800});
     return result && result.trim() ? result.trim() : (ending.text||'');
   }
 
   // ========== 5. 人生传记 ==========
   async function generateLifeSummary(state, timeline, ending){
     if(!timeline || !timeline.length) return '';
-    var events = timeline.slice(-20).map(function(t){return (t.date||'') + ' ' + (t.text||t.title||'');}).join('\n');
+    var events = timeline.slice(-15).map(function(t){return (t.date||'')+' '+(t.text||t.title||'');}).join('\n');
     var ctx = buildContext(state);
-    var system = '你是漫威宇宙的史官。你正在为一位刚刚走完一生的人物撰写官方传记。\n\n规则：\n1. 第三人称，客观但有温度。\n2. 从人物的起点写到结局，突出关键选择和转折。\n3. 风格：MCU 电影片尾彩蛋的档案感、克制、史诗。\n4. 300-500字。\n5. 严格基于提供的时间线，不要虚构时间线之外的重大事件。';
-
-    var prompt = ctx + '\n【人生时间线】\n' + events +
-                 '\n【最终结局】' + (ending ? (ending.title||ending.name||'') : '') +
-                 '\n\n请为这位人物撰写人生传记。直接输出正文。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.85});
+    var system = 'MCU史官。第三人称，客观有温度，突出关键转折，档案感史诗感。250-400字。基于时间线，不虚构。直接输出。';
+    var prompt = ctx + '\n时间线:\n'+events+'\n结局:'+(ending?(ending.title||ending.name||''):'')+'\n写传记。';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.85, max: 1000});
     return result && result.trim() ? result.trim() : '';
   }
 
   // ========== 6. 世界新闻生成 ==========
   async function generateWorldNews(state){
     var ctx = buildContext(state);
-    var system = '你是漫威宇宙的新闻编辑。根据当前时代、世界状态和玩家身份，生成3-5条新闻。\n\n规则：\n1. 新闻要符合时代背景。\n2. 新闻不一定与玩家直接相关。\n3. 混合：国际大事、社会新闻、科技动态、传闻八卦、MCU正典暗示。\n4. 【身份视角】普通人只看到表面新闻；科学家/记者看到更多科技内幕；军方/神盾局看到机密级信息；富豪看到金融和商业动向。根据玩家身份调整新闻深度。\n5. 必须返回JSON数组，不要加其他文字。';
-
-    var prompt = ctx + '\n\n请根据上述玩家身份与知识边界，生成符合其视角的新闻。返回JSON数组，每条格式：{"title":"新闻标题","content":"1-2句内容","tag":"国际/社会/科技/传闻/神秘/机密"}\n只返回JSON数组。';
-
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.9});
+    var system = 'MCU新闻编辑。按玩家身份视角生成3-4条新闻。返回JSON数组。';
+    var prompt = ctx + '\n生成新闻JSON:[{"title":"标题","content":"1-2句","tag":"国际/社会/科技/传闻/神秘"}]\n只JSON。';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.9, max: 600});
     var parsed = parseJSON(result);
     if(Array.isArray(parsed) && parsed.length) return parsed;
-    // Fallback 静态新闻
     var era = (state && state.eraName) || '';
     if(/二战/.test(era)){
       return [
@@ -304,16 +242,15 @@ var AIService = (function(){
   async function generateOrigin(state){
     var ctx = buildContext(state);
     var era = (state && state.setup && state.setup.era) || '';
-    var system = '你是漫威人生模拟器的出身生成器。请输出一个JSON对象，不要任何其他文字。\n\nJSON字段：\n- 家庭出身：字符串，家庭背景简述\n- 社会阶层：字符串，选填"赤贫/贫困/工薪/中产/富裕/精英"\n- 父母职业：字符串，父母职业方向\n- 成长环境：字符串，成长地点和氛围\n- 性格倾向：字符串，1-2个性格关键词\n- 初始技能：数组，2-3个技能字符串\n- 描述：字符串，50-120字的完整出身描述\n\n规则：必须符合时代，普通真实有生活气息，不要超级英雄背景。';
-    var prompt = ctx + '\n\n请为玩家生成一个出生身份，输出JSON对象。';
-    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.95});
+    var system = '出身生成器。返回JSON:{"家庭出身":"","社会阶层":"赤贫/贫困/工薪/中产/富裕/精英","父母职业":"","成长环境":"","性格倾向":"","初始技能":["",""],"描述":"50-100字"}。符合时代，普通真实，非超英。只JSON。';
+    var prompt = ctx + '\n生成出身JSON。';
+    var result = await callAI([{role:'user',content:prompt}], {system: system, temp: 0.95, max: 500});
     if(result && result.trim()){
-      // 尝试解析 JSON
       var jsonStr = result.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```$/,'').trim();
       try{
         var obj = JSON.parse(jsonStr);
         if(obj && typeof obj === 'object' && obj.描述) return obj;
-      }catch(e){ /* 解析失败，降级为文本 */ }
+      }catch(e){}
       return {描述: result.trim(), 社会阶层: '工薪'};
     }
     // Fallback: 按时代分文案

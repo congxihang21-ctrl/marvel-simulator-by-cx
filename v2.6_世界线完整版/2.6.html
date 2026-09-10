@@ -1630,13 +1630,9 @@ html,body,div,span,p,button,input,textarea{
 .eng-lv.lv-adv{background:rgba(157,124,255,.14);color:var(--magic)}
 .eng-lv.lv-off{background:rgba(232,198,106,.14);color:var(--accent)}
 
-/* =============== v1.8 · 双模式系统（简易模式 / 专家模式）=============== */
-/* 模式徽章（顶栏/引擎设置里用）*/
-.mode-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-weight:800;font-size:11.5px;letter-spacing:.3px;border:1px solid transparent;white-space:nowrap;user-select:none;cursor:default}
-.mode-badge.easy{background:linear-gradient(135deg,color-mix(in srgb,#5ecfff 22%,transparent),color-mix(in srgb,#8fe0a0 22%,transparent));border-color:rgba(143,224,160,.55);color:#d9f7e4;text-shadow:0 1px 0 rgba(0,0,0,.15)}
-.mode-badge.easy::before{content:"🌱"}
-.mode-badge.expert{background:linear-gradient(135deg,color-mix(in srgb,#9d7cff 24%,transparent),color-mix(in srgb,#e8c66a 20%,transparent));border-color:rgba(157,124,255,.55);color:#efe5ff}
-.mode-badge.expert::before{content:"🔬"}
+/* v2.6: 简易/专家模式已移除，相关 CSS 全部删除 */
+
+/* =============== Beta v2.0 · 世界日志滚动修复（双端）===============
 
 /* 模式选择双卡片（新手教程 Step0 / 引擎设置里） */
 .mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 6px}
@@ -2707,7 +2703,6 @@ body.mode-easy #opts.busy .opt{
 
   <div class="panel"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>【我的行动】· 此刻<span class="ptime" id="time_action">—</span></h3>
     <div class="body" id="body_action" style="max-height:none">
-      <div class="easy-tip-strip" id="easyTipStrip"><b>👉 操作超简单：</b>下面给了你 3 个方向，点一个卡片；或直接点最上面的「继续推进⏭️」按钮，让世界往前走就行啦～漫威背景不懂也没关系，AI 会在剧情里慢慢讲给你。</div>
       <div class="easy-go-bar" id="easyGoBar">
         <button class="easy-go-main" onclick="locked('doTurn',function(){try{if(CUR_HINTS&&CUR_HINTS[0]){var pi=$('playerInput');if(pi&&!pi.value.trim())pi.value=CUR_HINTS[0];doTurn('normal')}else{doTurn('world')}}catch(e){console.warn(e)}},900)" title="如果填了行动就执行；没填就自动走世界轮">
           <span class="ic">⏭️</span>
@@ -7586,7 +7581,16 @@ function closeNPCChat(){document.getElementById('npcChatModal').style.display='n
 
 function renderWorld(){
  var w=S.world||{},h=[];
- WORLD_KEYS.forEach(function(k){h.push(kv(k,w[k]))});
+ /* v2.6: 默认显示 3 个核心维度，其余折叠（手机端一屏看完） */
+ var coreKeys=['你所在地区','英雄界','科技与经济'];
+ var restKeys=WORLD_KEYS.filter(function(k){return coreKeys.indexOf(k)===-1});
+ coreKeys.forEach(function(k){h.push(kv(k,w[k]))});
+ if(restKeys.length){
+   h.push('<div class="world-more-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.wm-arrow\').textContent=this.nextElementSibling.style.display===\'none\'?\'▶\':\'▼\'" style="cursor:pointer;font-size:12px;color:var(--fg-2);margin:4px 0;user-select:none"><span class="wm-arrow">▶</span> 展开其余 '+restKeys.length+' 个维度</div>');
+   h.push('<div class="world-more-body" style="display:none">');
+   restKeys.forEach(function(k){h.push(kv(k,w[k]))});
+   h.push('</div>');
+ }
  // v2.6: AI 世界新闻
  h.push('<div class="subh2">🌍 世界新闻</div>');
  var newsItems=(S.news&&S.news.items)||[];
@@ -7990,113 +7994,16 @@ function renderStory(){
    原则：玩法内核 100% 一致，只改「UI呈现方式 / 操作复杂度 / 新手引导密度 / hints口语化标签」
    - 简易模式：给朋友分享、对漫威不熟、第一次玩、"找不到推进按钮" 的人
    - 专家模式：原 1.6 完整界面，老用户 / 漫威迷 / 懂 AI 的人  */
-var MODE_KEY='MCU_mode_by_CX';
-/* 简易模式下，三选项的口语化前缀 + 一句白话小标签（解释给小白这是什么意思） */
-var EASY_OPT_LABELS=[
-  {k:'A', p:'🥇 稳妥一点：', l:'按系统建议走 · 不容易踩坑', cls:'opt-a'},
-  {k:'B', p:'🌟 搞点新意思：', l:'尝试一下不一样的选择',     cls:'opt-b'},
-  {k:'C', p:'🎲 随便走走：', l:'随遇而安 · 看看会遇到什么',   cls:'opt-c'}
-];
-function getMode(){
-  /* v2.6: 取消简易/专家模式区别，统一使用专家模式（展示全部字段） */
-  return 'expert';
-}
-function applyModeBodyClass(m){
-  try{
-    var b=document.body;if(!b)return;
-    b.classList.remove('mode-easy','mode-expert');
-    b.classList.add(m==='easy'?'mode-easy':'mode-expert');
-  }catch(_){}
-}
-function applyModeBadge(m){
-  try{
-    var el=$('modeBadge');if(!el)return;
-    el.classList.remove('easy','expert');
-    el.classList.add(m);
-    el.textContent = m==='easy' ? '简易模式' : '专家模式';
-    el.title = m==='easy'
-      ? '🌱 简易模式 · 点我切换到专家模式'
-      : '🔬 专家模式 · 点我切换到简易模式';
-  }catch(_){}
-}
-function refreshModeCardsUI(m){
-  try{
-    var easyC=$('sMc_easy'),expC=$('sMc_expert');
-    var easyD=$('sMc_easy_dot'),expD=$('sMc_expert_dot');
-    if(easyC){easyC.classList.toggle('active', m==='easy')}
-    if(expC){expC.classList.toggle('active', m==='expert')}
-    if(easyD){easyD.style.display = m==='easy'?'inline':'none'}
-    if(expD){expD.style.display = m==='expert'?'inline':'none'}
-  }catch(_){}
-  /* Beta v1.9：同步开局主界面 home-modes 大卡选中态 */
-  try{
-    var host=$('homeModes');if(!host)return;
-    var cards=host.querySelectorAll('.home-mode');
-    for(var i=0;i<cards.length;i++){
-      var cm=cards[i].getAttribute('data-mode');
-      cards[i].setAttribute('aria-checked', cm===m ? 'true' : 'false');
-    }
-  }catch(_){}
-}
-/* Beta v1.9：开局主界面切换简易/专家模式。与教程/顶部徽章 100% 同步：
-   改 class、改徽章、写 localStorage、写存档 S._mode。
-   开局前没存档 → 只写 localStorage（applyMode 会同步全局 class / badge / home 卡 UI）。*/
-function homeSetMode(m){
-  if(m!=='easy'&&m!=='expert')m='expert';
-  try{
-    /* 直接复用 applyMode：同时处理 body class + badge + localStorage + 存档 + cards UI */
-    if(typeof applyMode==='function'){applyMode(m,{silent:true})}
-    else{
-      try{if(S)S._mode=m}catch(_){}
-      try{localStorage.setItem(MODE_KEY,m)}catch(_){}
-      applyModeBodyClass(m);applyModeBadge(m);refreshModeCardsUI(m);
-    }
-  }catch(e){console.warn('homeSetMode',e)}
-}
-/* 开局前 5 回合给简易模式加引导条，之后自动消失（减少视觉干扰） */
-function refreshEasyTipStrip(){
-  try{
-    var s=$('easyTipStrip');if(!s)return;
-    var turn=(S&&S.turn)?S.turn:0;
-    s.classList.toggle('on', turn<=4);
-  }catch(_){}
-}
-function setMode(m, showToast){
-  if(m!=='easy'&&m!=='expert')m='expert';
-  try{
-    if(S){
-      S._mode=m;
-      try{save()}catch(_){}
-    }
-    try{localStorage.setItem(MODE_KEY,m)}catch(_){}
-    applyModeBodyClass(m);
-    applyModeBadge(m);
-    refreshModeCardsUI(m);
-    refreshEasyTipStrip();
-    if(CUR_HINTS&&CUR_HINTS.length){try{renderOpts()}catch(_){}}
-    if(showToast){
-      try{toast(m==='easy'?'🌱 已切到简易模式 · 按钮更大，操作更简单':'🔬 已切到专家模式 · 完整高级界面回来啦')}catch(_){}
-    }
-  }catch(e){console.warn('setMode fail',e)}
-}
-/* 顶栏模式徽章点击：快速切换，用户不用跳进引擎设置 */
-function toggleModeMenu(){
-  try{
-    var cur=getMode();
-    var nxt=cur==='easy'?'expert':'easy';
-    if(confirm((cur==='easy'?'🌱 当前是【简易模式】，现在切到【专家模式】？\n\n切换后会回到原 1.6 完整操作界面：自定义输入框变回主角，所有高级选项出现。':'🔬 当前是【专家模式】，现在切到【简易模式】？\n\n切换后「继续推进⏭️」大按钮会出现，选项卡片更大、有白话解释，更适合新人。')+'\n\n随时可以再点顶部徽章切回来，进度不会丢。')){
-      setMode(nxt,true);
-    }
-  }catch(_){}
-}
-/* 启动时调用：从存档 / localStorage 恢复模式，并把所有 UI 同步到正确状态 */
-function restoreModeFromSaved(){
-  var m=getMode();
-  applyModeBodyClass(m);
-  applyModeBadge(m);
-  refreshModeCardsUI(m);
-  refreshEasyTipStrip();
-}
+/* v2.6: 已取消简易/专家模式区别，统一展示全部字段。以下为兼容桩函数，避免旧调用点报错。 */
+function getMode(){ return 'expert'; }
+function applyModeBodyClass(){}
+function applyModeBadge(){}
+function refreshModeCardsUI(){}
+function homeSetMode(){}
+function refreshEasyTipStrip(){}
+function setMode(){}
+function toggleModeMenu(){}
+function restoreModeFromSaved(){}
 
 /* v1.4：自定义行动输入框 placeholder 动态化：根据当前 A/B/C/D/E 选项实时拼接 + 建议怎么改 */
 function updInputPH(){
@@ -9258,6 +9165,22 @@ function normalizeSave(o){
    if(!o.worldline || typeof o.worldline !== 'object'){
      o.worldline = { seed:(o.seedKey||'rand'), divergenceLevel:0, canonIntegrity:100, majorFlags:{}, alteredEvents:[] };
    }
+   /* 补齐世界线引擎的完整字段（老存档可能只有部分） */
+   var wlDefaults = {playerInfluence:0, worldChaos:0, publicAwareness:0, heroRelations:{}, factionRelations:{}, deadCharacters:[], completedArcs:[]};
+   for(var wk in wlDefaults){ if(o.worldline[wk]==null)o.worldline[wk]=wlDefaults[wk]; }
+   if(!Array.isArray(o.worldline.alteredEvents))o.worldline.alteredEvents=[];
+   if(!Array.isArray(o.worldline.deadCharacters))o.worldline.deadCharacters=[];
+   if(!Array.isArray(o.worldline.completedArcs))o.worldline.completedArcs=[];
+   /* v2.6 新增运行时字段 */
+   if(!o.memory)o.memory=[];
+   if(!o.chapters)o.chapters=[];
+   if(!o.eventHistory)o.eventHistory=[];
+   if(!o.cooldowns||typeof o.cooldowns!=='object')o.cooldowns={};
+   if(typeof o.stress!=='number')o.stress=0;
+   if(typeof o.money!=='number')o.money=0;
+   if(typeof o.age!=='number')o.age=(o.player&&o.player['年龄'])?parseInt(o.player['年龄'])||18:18;
+   /* 人际关系格式迁移：老存档 rel 是数组，新版同时支持 relations 对象 */
+   if(!o.relations||typeof o.relations!=='object')o.relations={};
  }catch(_){}
  /* 导入存档时补全作者字段，即使存档被人手动抠掉也会自动回填 CX */
  try{
@@ -9402,6 +9325,12 @@ function enterGame(){
  var bar=$('gameBottomBar');if(bar)bar.style.display='block';
  buildPanels(); /* v1.9：buildPanels 内部已经幂等（先清空 colL/colR 再重建），
                     直接调用不会重复。不要用 body_player 这种已废弃的 guard。*/
+ /* v2.6: 加载存档后确保所有引擎字段完整（老存档兼容） */
+ try{
+   if(typeof WorldlineEngine!=='undefined')WorldlineEngine.init(S);
+   if(typeof EventDirector!=='undefined'&&EventDirector.init)EventDirector.init(S);
+   if(typeof RelationshipEngine!=='undefined'&&RelationshipEngine.initAll)RelationshipEngine.initAll(S);
+ }catch(e){console.warn('engine init on load',e)}
  /* v1.8：恢复简易/专家模式（存档优先 → localStorage → 默认专家）*/
  try{restoreModeFromSaved()}catch(_){}
  applyFold();try{ensureWatermark()}catch(_){}renderAll();save();

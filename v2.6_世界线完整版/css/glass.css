@@ -161,3 +161,18 @@
 .glass-shine:hover::after {
   animation: glassShine .8s var(--ease-out);
 }
+
+/* ===== v2.6: 低端机降级 —— 不支持 backdrop-filter 时用纯色背景 ===== */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-container, .glass-module, .glass-control, .glass-badge, .glass-special, .glass-soft, .glass-solid {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass-container { background: rgba(20,24,32,.92); }
+  .glass-module { background: rgba(28,33,44,.88); }
+  .glass-control { background: rgba(35,41,54,.9); }
+  .glass-badge { background: rgba(45,52,68,.95); }
+  .glass-special { background: rgba(40,35,20,.92); }
+  .glass-soft { background: rgba(28,33,44,.88); }
+  .glass-solid { background: rgba(45,52,68,.95); }
+}
