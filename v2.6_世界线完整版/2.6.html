@@ -2534,6 +2534,10 @@ html,body,div,span,p,button,input,textarea{
 })();
 </script>
 <!-- ================= v2.6 融合：引入 v2.4 Liquid Glass 设计令牌与 AI 服务 ================= -->
+<!-- v2.6：引入 Noto Sans SC 中文字体，Windows 端不再 fallback 到微软雅黑 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/design-tokens.css">
 <link rel="stylesheet" href="css/glass.css">
 <link rel="stylesheet" href="css/components.css">
@@ -2610,12 +2614,12 @@ html,body,div,span,p,button,input,textarea{
 
   <div class="topbar">
     <div class="topbtns">
-      <button onclick="openThemePanel()">🎨 外观</button>
-      <button onclick="openSave()">💾 存档</button>
-      <button onclick="openLoad()">📂 读档</button>
-      <button onclick="openLifeReview()">📜 人生回顾</button>
-      <button onclick="openAbout()">ℹ 关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者">☕ 支持</button>
+      <button onclick="openThemePanel()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>外观</button>
+      <button onclick="openSave()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>存档</button>
+      <button onclick="openLoad()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>读档</button>
+      <button onclick="openLifeReview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>人生回顾</button>
+      <button onclick="openAbout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>支持</button>
     </div>
   </div>
 
@@ -5778,8 +5782,7 @@ async function callApi(messages,maxTok){
      开局首刷 1500 / 日常回合 1200 → 写得完、不截断、不降智 */
   var temp=eng&&eng.temp!=null?eng.temp:0.7;
   var isOpening=false; try{isOpening=!!(messages&&messages[1]&&typeof messages[1].content==='string'&&messages[1].content.indexOf('开局初始化请求')>=0)}catch(_){}
-  var easy=false; try{easy=(typeof getMode==='function'&&getMode()==='easy')}catch(_){}
-  var defMax=isOpening?1500:(easy?900:1200);
+  var defMax=isOpening?1500:1200;
   var max=eng&&eng.max?eng.max:defMax;
   if(!base||!model)throw new Error('引擎路由未就绪（无 Base URL/模型），请切到离线模式或检查配置。');
   var url=base+'/chat/completions';
@@ -8138,15 +8141,7 @@ var SYS_PROMPT=[
  '14) hints严格三方向分化：数组第 0 条 = A·稳妥目标（按部就班过日子、朝玩家当前目标推进、风险低、容易出正反馈）；第 1 条 = B·冒险代价（调查异常/挺身而出/碰运气/接触超自然、有奖励有明确代价或失败概率、戏剧张力大）；第 2 条 = C·感情社交（找家人/朋友/恋人/邻居/NPC、聊天约会聚会、修补关系或建立新关系、不一定有战斗但人情羁绊深）。三条必须第一人称口语 "我…" 开头、每条 18~36 字、互无重叠方向；',
  '15) 快进/nextevent必须写 events_log：期间所有日常+大事件清单（每条前加 🟢🟤 日常 或 🔴 大事件）；',
  '16) stats能力值 8维 0-99整数：str体能/cbt格斗/agi敏捷/int智力/tec科技/pwr超能/cha魅力/wil意志。只回传**发生变化的维度，传绝对值，不传增量**。训练→str/agi，参战→cbt/wil，学习科研→int/tec，社交领导→cha。普通回合单项0~2，快进按跨度1~6。纯人类pwr通常0~5，只有觉醒/改造/魔法/宝石才大涨，严禁普通人随便给超能；',
- '17) equipment装备&自制装备（战力防崩坏·必严格执行）：玩家/剧情获得或自制任何装备/武器/战衣/载具/药剂/道具→写入 equipment 数组（仅新增/属性变动/归属变动的；没变化的别重复列）。装备7档 tier，statBoost严格对应（**只能加8维基础能力，不得直接改OVR**，OVR由系统按8维自动重算）：',
- '  ·T7凡人日常（手机/钱包/普通衣物）：statBoost 全0，仅描述；',
- '  ·T6训练/民用专业级（警棍/防刺服/专业护具/训练武器）：单维≤3，合计≤5；',
- '  ·T5军事/特工/量产级（制式手枪/军用防弹衣/神盾外勤标配）：单维≤6，合计≤10；',
- '  ·T4街头英雄级（首套自制战衣/改装非致命武器/黑寡妇双枪/鹰眼弓+箭/冬兵早期臂）：单维≤10，合计≤18；',
- '  ·T3复仇者主力级（马克3~7/队长圆盾/巴基正式臂/经典鹰眼全套/黑豹战服/悬浮斗篷早期）：单维≤18，合计≤30，必须带 req 门槛；',
- '  ·T2传奇英雄级（Mark50/85纳米战衣/暴风战斧/雷神之锤/单颗无限宝石未激活的手套/振金全装备/厄斯金血清完整版）：单维≤26，合计≤45；剧情合理+玩家达标才给，未获得时 owned=false；',
- '  ·T1多元宇宙级（无限手套全宝石/宇宙之心/奥丁之力/天神组武器）：**普通剧情绝对不给**，仅终局+OVR≥65+正典节点命中，单维≤35/合计≤60；用完立即 owned=false 或注明"已损坏/归还/失去"；',
- '  装备平衡禁令：① statBoost 只许出现 8 维字段，严禁 OVR/HP/暴击率/百分比减伤等；② 同一件装备用同一 id 增量改，不许多回合多套同名版本；③ 玩家自制档位严格按 tec+int：<20→T6，<35→T5，<50→T4，<65→T3，<80→T2；纯手工/街头再降1档；④ 装备穿戴使用要写入 narrative，不是隐身加成；⑤ 旧档 setup.gear 首次推进时整理成 1~3 条 T7/T6 入库；⑥ 玩家设定明显离谱（小学生手搓无限手套）时，改成合理的 T6/T7 玩具模型/失败品，并在 narrative 里轻松调侃；',
+ '17) equipment装备防崩坏：statBoost只加8维(禁OVR/HP/暴击)·同id增量改·穿戴写入narrative。7档：T7日常全0/T6民用单≤3合≤5/T5军用单≤6合≤10/T4街英单≤10合≤18/T3复联单≤18合≤30需req/T2传奇单≤26合≤45达标才给/T1多元宇宙普通剧情不给(终局+OVR≥65)。自制档位：tec+int<20→T6,<35→T5,<50→T4,<65→T3,<80→T2；纯手工再降1档。离谱设定→改T6/T7玩具并调侃。',
  '',
  '输出 schema（严格 JSON，中文键名，未用到的字段也要给 null 或 []，不要丢字段）：',
  '```mcu-sim',
@@ -8172,17 +8167,14 @@ var SYS_PROMPT=[
 
 function buildRequest(mode,inp){
  var d=curDate(),hol=holidays(d);
- var easy=(typeof getMode==='function'&&getMode()==='easy');   /* Beta v2.0：简易模式 = 大跨度快节奏 + 省算力 */
  var lines=[];
  lines.push('═══ 当前世界状态账本（精简） ═══');
  lines.push('【时间】'+fmt(d)+' | '+season(d)+' | '+term(d)+' | '+(isWeekend(d)?'周末':'工作日')+(hol.length?' | 节假日：'+hol.join('、'):''));
- lines.push('【回合】第 '+S.turn+' 轮 | 上大事件冷却：'+String((S._lastBigEventTurn||-9999))+(easy?' | 【简易模式：大跨度快节奏】':''));
+ lines.push('【回合】第 '+S.turn+' 轮 | 上大事件冷却：'+String((S._lastBigEventTurn||-9999)));
  lines.push('');
- /* v1.4 提速：JSON 化时用 replacer 把长字段截断，避免每轮请求越来越大（之前 S.npcs 多了就几百上千字）
-    Beta v2.0：简易模式上下文再砍 ~35%（账本更短 → 更省算力 → 玩得更久） */
+ /* v1.4 提速：JSON 化时用 replacer 把长字段截断，避免每轮请求越来越大（之前 S.npcs 多了就几百上千字） */
  function _cut(obj,maxLen,maxArr){
    try{
-     if(easy){maxLen=Math.round(maxLen*0.65);maxArr=Math.max(2,Math.round((maxArr||8)*0.7))}
      var s = JSON.stringify(obj);
      if(s.length<=maxLen)return s;
      /* 若是数组先按长度砍 */
@@ -8204,20 +8196,17 @@ function buildRequest(mode,inp){
  var evDone=(S.events&&S.events['已发生'])?S.events['已发生'].slice(-2):[];   /* 最近 2 条（更少=更短=更快） */
  lines.push('【事件】'+_cut({'进行中':(S.events['进行中']||[]).slice(-3),'已发生':evDone},850,5));
  lines.push('【NPC（最多 4 个关键角色）】'+_cut(Array.isArray(S.npcs)?S.npcs.slice(0,4):S.npcs,1500,4));
- /* Beta v2.0：简易模式砍掉冗余账本（组织/隐藏事件），省约 10~20% 输入 token */
- if(!easy){
-   lines.push('【组织与势力】'+_cut(S.org,320,4));
-   lines.push('【隐藏事件数】'+String(((S.events&&S.events['隐藏'])||[]).length));
- }
+ lines.push('【组织与势力】'+_cut(S.org,320,4));
+ lines.push('【隐藏事件数】'+String(((S.events&&S.events['隐藏'])||[]).length));
  /* Beta v2.0：能力值账本（AI 据此评估成长，stats 字段仅回传变化维度）*/
  try{var _st=ensureStats();if(_st)lines.push('【能力值 OVR='+_st.ovr+'】str体能'+_st.str+' cbt格斗'+_st.cbt+' agi敏捷'+_st.agi+' int智力'+_st.int+' tec科技'+_st.tec+' pwr超能'+_st.pwr+' cha魅力'+_st.cha+' wil意志'+_st.wil)}catch(_){}
- /* Beta v2.0：装备账本（AI 据此评估玩家自制装备的档位上限、识别已有装备） */
+ /* v2.6：装备账本（档位规则已在 SYS_PROMPT，此处只传数据） */
  try{
    var eqList=Array.isArray(S.equipment)?S.equipment.slice(0,30):[];
    if(eqList.length){
-     lines.push('【装备库（T7日常…T1多元宇宙）共 '+eqList.length+' 件；玩家随身 + owned=true 的只算生效加成。自制档位硬上限：玩家 tec+int <20→T6、<35→T5、<50→T4、<65→T3、<80→T2。AI 严格遵守，不可随意突破。】'+_cut(eqList,1200,30));
+     lines.push('【装备库共 '+eqList.length+' 件；owned=true 才算生效加成】'+_cut(eqList,1200,30));
    }else if(S.setup&&S.setup.gear){
-     lines.push('【初始装备（旧档字段 setup.gear，首次推进请入 equipment 数组 1~3 件 T7/T6）】'+String(S.setup.gear||'').slice(0,120));
+     lines.push('【初始装备（首次推进请入 equipment 1~3 件 T7/T6）】'+String(S.setup.gear||'').slice(0,120));
    }
  }catch(_){}
  lines.push('');
@@ -8266,18 +8255,14 @@ function buildRequest(mode,inp){
  }catch(_eCa){}
  var lg=(S.log||[]).slice(-1);   /* 最近 1 条（把上轮玩家输入 + 结果写成上一条，引擎不丢上下文） */
  lines.push('【世界日志（最近1条）】');
- lg.forEach(function(e){lines.push('· '+(e.time||'')+' '+(e.self?'[玩家行动] ':'')+String(e.text||'').slice(0,easy?150:220))});
+ lg.forEach(function(e){lines.push('· '+(e.time||'')+' '+(e.self?'[玩家行动] ':'')+String(e.text||'').slice(0,220))});
  lines.push('');
  if(mode==='check'){
   lines.push('═══ 玩家本轮输入 ═══');
   lines.push('【强制自检】不要续写剧情。只输出 selfcheck（剧情快照 + 人设OOC自检报告），hints 返回空数组，advance.minutes 设为 0。');
  }else if(mode==='world'){
   lines.push('═══ 玩家本轮输入 ═══');
-  if(easy){
-   lines.push('【🌙 简易模式 · 节奏快进】你点的是"过几天再说"：时间直接往前走 3～7 天（按剧情节奏定天数，真实公历推进）。用蒙太奇写：先用 2～3 句概括这几天世界和你的日常，再落到一个具体小场景收尾。narrative 250～400 字就够，干净利落、不写流水账；这期间可有 1 件日常小事，大事件概率仍按冷却约束。');
-  }else{
-   lines.push('（玩家没输入具体行动，请按世界逻辑自然推进他当下生活的 1～3 小时；有 15% 概率触发 1 件日常小事，<2% 概率触发大事件，其余就是普通的上班 / 上学 / 做饭 / 通勤 / 闲聊即可。）');
-  }
+  lines.push('【🌙 世界自转】玩家没输入具体行动，让时间往前走 7～14 天（你按剧情节奏定天数，真实公历推进）。用蒙太奇写：先用 2～3 句概括这几天世界和他的日常，再落到一个具体小场景收尾。narrative 250～400 字，干净利落、不写流水账；这期间可有 1 件日常小事，大事件概率仍按冷却约束。');
  }else if(mode==='nextevent'){
   lines.push('═══ 玩家本轮输入 ═══');
   lines.push('【⚡ 跳过到大事件】玩家选择"快进到下一个对他有影响的事件"。时间直接推进 3~14 天（你决定一个合理的跨度），期间世界照常运转；推进结束时必须触发至少一件事——优先日常小事（65%），若玩家已经玩了 30 回合以上则有 35% 概率直接落到一次"人生大事件"。narrative 按「世界整体变化 → 身边人动态 → 自己经历 → 最后落到事件触发当天场景」分四段写，并在 events_log 里把期间所有小事/大事全部列出来。');
@@ -8292,26 +8277,12 @@ function buildRequest(mode,inp){
   lines.push('═══ 玩家本轮输入 ═══');
   lines.push(inp);
   lines.push('');
-  if(easy){
-   /* Beta v2.0：简易模式 = 一次决定一段岁月；一张卡片就是一两周，节奏干脆、省算力。 */
-   lines.push('【⏩ 简易模式 · 长跨度推进（请务必遵守）】玩家按下的不是"这一小时要干嘛"，而是"接下来一段时间的方向"——本回合 advance.minutes 必须对应 7～20 天（约半个月，具体天数你根据剧情节奏自己定，但必须按真实公历推进，星期、季节都要正确）。用蒙太奇写法：先用 3～5 句概括这半个月里玩家围绕「'+String(inp||'').slice(0,30)+'」这个方向的日常（上班 / 上学 / 训练 / 社交 / 调查，有进展也有琐碎），再落到这段时间里最有戏的 1 个场景或转折收尾。narrative 控制在 350～500 字，信息密度高、不写流水账；期间自然带过 1 件日常小事就够了，大事件仍按冷却约束发生。hints 照常给 3 条第一人称念头（每条 ≤24 字）。');
-  }else{
-   lines.push('（这是普通玩家行动回合。除了响应玩家行动，也有 ~15% 概率额外塞一件「日常小事」作为剧情小插曲或结果的一部分；大事件本回合基本不会发生。）');
-  }
+  lines.push('【⏩ 玩家行动回合】时间推进 2～5 天（你按剧情节奏定天数，真实公历推进）。围绕「'+String(inp||'').slice(0,30)+'」展开：可先用 2～3 句概括日常进展，再落到最有戏的场景收尾。narrative 300～450 字，不写流水账；除响应行动外有 ~15% 概率加一件日常小事，大事件按冷却约束。');
  }
- /* =============== v1.8 · 简易模式专属「小白友好」附加提示 =============== */
+ /* =============== v2.6 · 叙事优化指令（去重后保留核心：专有名词解释/文风/省算力）=============== */
  try{
-   if(typeof getMode==='function' && getMode()==='easy'){
-     lines.push('');
-     lines.push('【🌱 简易模式 · 漫威小白友好指令（本段只影响文笔，不改变玩法内核）】');
-     lines.push('1) 叙事遇到漫威专有名词 / 超级英雄真名 / 组织缩写时，第一次出现加括号给一句小白解释，例：「托尼·斯塔克（就是大家常说的钢铁侠，斯塔克工业的天才富二代、花花公子、慈善家）」「神盾局（S.H.I.E.L.D.，专门处理超自然威胁的政府秘密情报组织）」。');
-     lines.push('2) hints 三条写得更口语化：用第一人称"我"开头，像是玩家脑子里面蹦出来的三个念头（比如"我先正常上班摸鱼一天""我去那个传言的仓库看看热闹""我约上周认识的姑娘喝一杯"），不要出现任何命令式语气，也不要有任何选项编号（A/B/C）。');
-     lines.push('2.5) hints 必须严格按三方向分化：第0条=A·稳妥目标（日常/学业/事业朝玩家目标推进，零风险、易出正反馈）；第1条=B·冒险代价（去调查/挺身而出/碰运气/接触超自然，有奖励有明确代价/失败风险）；第2条=C·感情社交（约人/聊天/家人朋友恋人邻居/修补关系/谈感情线，人情羁绊深）。三条方向必须一眼能分清，不要三条都写"我去逛街"这种模糊选项。');
-     lines.push('3) 叙事文风偏轻松一点，像一个会讲故事的朋友在给玩家讲人生，不要写成维基百科或资料集；如果玩家是普通人、还没接触超级世界，就以普通人生活为主线，把"超级"的部分写成新闻/街谈巷议的背景。');
-     lines.push('4) 3 条 hints 方向差距拉得越大越好（比如一条：按部就班过日子；一条：冒个险；一条：搞点社交/感情线），这样玩家"点哪张卡片都不会觉得和上一张差不多"。');
-     lines.push('5) 【简·省算力·重要】narrative 不超过 500 字；player/world/relationships/npcs/events 只回传发生变化的字段（没变化的就别写了，返回 null 或省略都行）；events_log 每条 ≤40 字；hints 每条 ≤24 字。这能为内测服务器减轻不少压力、让更多人能同时玩。');
-     lines.push('6) 【能力值成长】每回合根据剧情在 stats 里回传发生变化的维度（绝对值 0-99，不是增量）：训练/健身→str/agi，打斗/参战→cbt/wil，学习/科研/黑客→int/tec，社交/领导/谈判→cha；大跨度回合单项可 +1~4，普通回合 0~2；纯人类 pwr（超能）不轻易涨，只有觉醒/改造/魔法/宝石等契机才动。');
-   }
+   lines.push('');
+   lines.push('【🌱 叙事优化指令】① 漫威专有名词首次出现加括号小白解释（如「托尼·斯塔克（钢铁侠）」）；② 文风像会讲故事的朋友，普通人视角为主，超级部分当新闻背景；③ 省算力：narrative≤500字，只回传变化字段，events_log每条≤40字。');
  }catch(_){}
  /* =============== v1.8 · 🎯 人生目标系统上下文（每回合都要注入，AI 必须返回 goals_update）=============== */
  try{
@@ -8518,17 +8489,16 @@ async function doTurn(mode){
 function offlineTurn(mode,inp){
  if(!S)return;
  var d=curDate();
- /* Beta v2.0：简易模式大跨度——normal=7~20天（约半个月），world=3~7天，一个决定过一段时间，节奏快、省算力 */
- var easyMode=(typeof getMode==='function'&&getMode()==='easy');
- /* v1.4：根据 mode 计算分钟跨度，nextevent 随机 3~14 天 */
+ /* v2.6 统一节奏：normal=2~5天（一个行动几天内有结果），world=7~14天（世界自转一两周）
+    MCU横跨70+年，一回合约1-2周，几百回合可玩完完整时间线 */
  var addMin=60, spanDays=0;
  if(mode==='world'){
-   if(easyMode){spanDays=3+Math.floor(Math.random()*5);addMin=spanDays*24*60}
-   else addMin=120;
+   spanDays=7+Math.floor(Math.random()*8); /* 7~14天 */
+   addMin=spanDays*24*60;
  }
  else if(mode==='normal'){
-   if(easyMode){spanDays=7+Math.floor(Math.random()*14);addMin=spanDays*24*60}
-   else addMin=60;
+   spanDays=2+Math.floor(Math.random()*4); /* 2~5天 */
+   addMin=spanDays*24*60;
  }
  else if(mode==='skip_week'){addMin=7*24*60;spanDays=7}
  else if(mode==='skip_month'){addMin=30*24*60;spanDays=30}
@@ -8542,13 +8512,8 @@ function offlineTurn(mode,inp){
  d.setMinutes(d.getMinutes()+addMin);setDate(d);
 
  /* v1.4：离线随机事件抽取（skip_* / nextevent 必然抽一个）
-    Beta v2.0：简易模式大跨度回合按跨度抽日常事件（走 skip 同款密度逻辑）*/
- var evPack;
- if(easyMode && (mode==='normal'||mode==='world') && spanDays>=2){
-   evPack=pickOfflineEvent('skip_month', spanDays);
- }else{
-   evPack=pickOfflineEvent(mode, spanDays);
- }
+    v2.6：normal/world 现在都有跨度，统一按跨度抽事件 */
+ var evPack = pickOfflineEvent(mode, spanDays);
  var evText=evPack&&evPack.ev?evPack.ev.text:'';
  var evHints=evPack&&evPack.ev&&evPack.ev.hints?evPack.ev.hints:null;
  var isBigEv=!!(evPack&&evPack.isBig);
@@ -8556,8 +8521,8 @@ function offlineTurn(mode,inp){
 
  /* 文本 + 事件清单 */
  var text='', evList=[];
- /* Beta v2.0：简易模式大跨度回合也走"蒙太奇总结"路径 */
- var longSpan = (mode==='skip_week'||mode==='skip_month'||mode==='skip_season'||mode==='skip_year'||mode==='nextevent') || (easyMode && spanDays>=2);
+ /* v2.6：normal/world 跨度>=2天也走蒙太奇总结路径 */
+ var longSpan = (mode==='skip_week'||mode==='skip_month'||mode==='skip_season'||mode==='skip_year'||mode==='nextevent') || spanDays>=2;
  try{
   if(longSpan){
     var sum=offSkipSummary(mode, spanDays||(Math.round(addMin/60/24)), evText?evPack.ev:null);
