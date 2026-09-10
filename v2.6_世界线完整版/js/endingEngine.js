@@ -48,7 +48,37 @@
     {id:'survivor', name:'大难不死', weight:2,
      check: function(S){ return (S.player.健康||100) > 0 && (S.player.健康||100) < 30 && (S.turn||0) > 80; }},
     {id:'redeemed', name:'浪子回头', weight:2,
-     check: function(S){ return WL_hasFlag(S,'criminal') && (S.player.声望||0) > 0; }}
+     check: function(S){ return WL_hasFlag(S,'criminal') && (S.player.声望||0) > 0; }},
+    /* v2.6.2 扩充结局 —— 职业线 */
+    {id:'famous_doctor', name:'医界泰斗', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.智力||0)>70 && (p.职业||'').indexOf('医')>=0 && (p.声望||0)>40; }},
+    {id:'science_giant', name:'科学泰斗', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.智力||0)>85 && (st.科技||0)>70 && (p.声望||0)>30; }},
+    {id:'media_legend', name:'无冕之王', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.魅力||0)>70 && (p.职业||'').indexOf('记')>=0 && (p.声望||0)>40; }},
+    {id:'business_empire', name:'商业帝国', weight:2,
+     check: function(S){ var p=S.player||{}; var eco=p.经济||{}; return (eco.现金||0)+(eco.储蓄||0)>10000000 && (p.声望||0)>30; }},
+    /* v2.6.2 扩充结局 —— 情感线 */
+    {id:'free_spirit', name:'自由的灵魂', weight:3,
+     check: function(S){ var p=S.player||{}; var f=p.家庭||{}; return !f.配偶 && (p.声望||0)>=0 && (S.worldline.divergenceLevel||0)<30; }},
+    {id:'rekindled_love', name:'失而复得', weight:2,
+     check: function(S){ var p=S.player||{}; var f=p.家庭||{}; return f.配偶 && (S.turn||0)>60; }},
+    {id:'family_blessing', name:'三代同堂', weight:2,
+     check: function(S){ var p=S.player||{}; var f=p.家庭||{}; return f.配偶 && f.子女 && f.子女.length && (parseInt(p.年龄)||0)>=60; }},
+    /* v2.6.2 扩充结局 —— 人生线 */
+    {id:'academic_master', name:'学界巨匠', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.智力||0)>80 && (p.声望||0)>25 && (S.worldline.divergenceLevel||0)<35; }},
+    {id:'art_master', name:'艺术大师', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.魅力||0)>75 && (st.智力||0)>60 && (p.声望||0)>30; }},
+    {id:'sports_legend', name:'体坛传奇', weight:2,
+     check: function(S){ var p=S.player||{}; var st=p.属性||{}; return (st.体能||0)>85 && (st.敏捷||0)>80 && (p.声望||0)>40; }},
+    {id:'hermit_life', name:'归隐山林', weight:2,
+     check: function(S){ var p=S.player||{}; return (p.声望||0)>=0 && (p.声望||0)<20 && (S.worldline.divergenceLevel||0)<15; }},
+    /* v2.6.2 扩充结局 —— 道德灰度 */
+    {id:'gray_morality', name:'亦正亦邪', weight:2,
+     check: function(S){ var p=S.player||{}; return (p.声望||0)>10 && (p.声望||0)<40 && (S.worldline.divergenceLevel||0)>40 && !WL_hasFlag(S,'evil'); }},
+    {id:'abyss_gazer', name:'凝视深渊', weight:1,
+     check: function(S){ var p=S.player||{}; return (p.声望||0)>-20 && (p.声望||0)<10 && (S.worldline.divergenceLevel||0)>60 && !WL_hasFlag(S,'evil'); }}
   ];
 
   var EE = {

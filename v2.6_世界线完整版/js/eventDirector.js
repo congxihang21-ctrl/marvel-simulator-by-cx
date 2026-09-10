@@ -21,7 +21,23 @@
         {id:'d_poor_food',text:'今天只能吃便宜的快餐', weight:5, req:{tierMax:2}, effects:{stress:+2, 健康:-2}},
         {id:'d_rich_inv', text:'理财顾问来电推荐产品', weight:4, req:{tierMin:5}, effects:{}},
         {id:'d_rich_party',text:'有人邀请参加高端聚会', weight:3, req:{tierMin:5}, effects:{stress:-3, 声望:+2}},
-        {id:'d_mid_gym',  text:'要不要办张健身卡？', weight:4, req:{tierMin:3, tierMax:4}, effects:{money:-100, 体能:+1}}
+        {id:'d_mid_gym',  text:'要不要办张健身卡？', weight:4, req:{tierMin:3, tierMax:4}, effects:{money:-100, 体能:+1}},
+        /* v2.6.2: 更多日常事件 */
+        {id:'d_commute',  text:'通勤路上遇到了点状况', weight:6, effects:{stress:+2}},
+        {id:'d_cook',     text:'今天想自己做顿饭', weight:5, effects:{stress:-2, money:-20, 健康:+1}},
+        {id:'d_read',     text:'找了本好书来读', weight:4, effects:{stress:-3, 智力:+1}},
+        {id:'d_movie',    text:'去看了场电影', weight:4, effects:{stress:-3, money:-40}},
+        {id:'d_game',     text:'在家打了会游戏', weight:5, effects:{stress:-2}},
+        {id:'d_clean',    text:'大扫除了一番', weight:3, effects:{stress:-1, money:-10}},
+        {id:'d_laundry',  text:'洗衣服做家务', weight:4, effects:{stress:+1}},
+        {id:'d_haircut',  text:'去理了个发', weight:3, effects:{money:-30, stress:-1}},
+        {id:'d_dentist',  text:'去看了牙医', weight:2, effects:{money:-200, 健康:+1, stress:+1}},
+        {id:'d_pet',      text:'和宠物玩了一会', weight:4, effects:{stress:-3}},
+        {id:'d_garden',   text:'打理阳台上的花', weight:3, effects:{stress:-2}},
+        {id:'d_rain',     text:'下大雨被困在家里', weight:3, effects:{stress:+1}},
+        {id:'d_sunny',    text:'天气特别好，出去走走', weight:4, effects:{stress:-2, 健康:+1}},
+        {id:'d_insomnia', text:'昨晚失眠了', weight:3, effects:{stress:+3, 健康:-1}},
+        {id:'d_dream',    text:'做了一个奇怪的梦', weight:2, effects:{}}
       ],
       /* 人生选择 (Level 2) */
       life: [
@@ -31,7 +47,20 @@
         {id:'l_child',    text:'考虑要个孩子？', weight:2, stage:['early','adult'], req:{ageMin:25}},
         {id:'l_joinOrg',  text:'一个组织向你抛出橄榄枝', weight:2},
         {id:'l_invest',   text:'有个投资机会', weight:2},
-        {id:'l_education',text:'是否继续深造？', weight:3, stage:['teen','young']}
+        {id:'l_education',text:'是否继续深造？', weight:3, stage:['teen','young']},
+        /* v2.6.2: 节日事件 */
+        {id:'f_spring', text:'春节到了，回家过年', weight:3, effects:{stress:-3, money:-500}},
+        {id:'f_birthday', text:'今天是你的生日', weight:2, effects:{stress:-2}},
+        {id:'f_christmas', text:'圣诞节到了', weight:2, effects:{stress:-1}},
+        {id:'f_newyear', text:'新年倒计时', weight:2, effects:{stress:-1}},
+        {id:'f_reunion', text:'老同学聚会', weight:3, effects:{stress:-2, 声望:+1}},
+        /* v2.6.2: 财务事件 */
+        {id:'fin_lottery', text:'买彩票中了小奖', weight:1, effects:{money:+500}},
+        {id:'fin_scam', text:'遇到了诈骗', weight:2, effects:{money:-1000, stress:+5}},
+        {id:'fin_inheritance', text:'远房亲戚给你留了一笔遗产', weight:1, effects:{money:+50000}},
+        {id:'fin_stock', text:'股票涨了', weight:2, req:{tierMin:4}, effects:{money:+2000}},
+        {id:'fin_bonus', text:'公司发了年终奖', weight:3, effects:{money:+3000, stress:-2}},
+        {id:'fin_raise', text:'你加薪了', weight:3, effects:{money:+1000, 声望:+1}}
       ],
       /* 人物关系 (Level 3) */
       relation: [
@@ -69,7 +98,33 @@
         {id:'c_rep_danger', text:'你追查的线索牵扯到危险人物', weight:2, occupation:['reporter'], req:{careerLevel:2}, effects:{stress:+6}},
         {id:'c_rep_award', text:'你的报道获得了新闻奖提名', weight:1, occupation:['reporter'], req:{careerLevel:3}, effects:{声望:+5}},
         {id:'c_rep_source', text:'一个线人主动联系了你', weight:3, occupation:['reporter'], effects:{}},
-        {id:'c_rep_block', text:'你的报道被上级压了下来', weight:2, occupation:['reporter'], effects:{stress:+4}}
+        {id:'c_rep_block', text:'你的报道被上级压了下来', weight:2, occupation:['reporter'], effects:{stress:+4}},
+        /* v2.6.2: 军人事线 */
+        {id:'c_sol_drill', text:'今天的训练强度很大', weight:5, occupation:['soldier','军人'], effects:{stress:+4, 体能:+1, 格斗:+1}},
+        {id:'c_sol_mission', text:'接到了一次外出任务', weight:3, occupation:['soldier','军人'], effects:{stress:+6, 声望:+2}},
+        {id:'c_sol_promote', text:'上级考虑给你晋升', weight:2, occupation:['soldier','军人'], req:{careerLevel:2}, effects:{声望:+4}},
+        {id:'c_sol_comrade', text:'和战友的关系更近了', weight:4, occupation:['soldier','军人'], effects:{}},
+        /* v2.6.2: 科学家线 */
+        {id:'c_sci_exp', text:'实验室里有了新发现', weight:3, occupation:['scientist','科学家'], effects:{声望:+3, 智力:+1}},
+        {id:'c_sci_paper', text:'你的论文被顶级期刊收录', weight:1, occupation:['scientist','科学家'], req:{careerLevel:3}, effects:{声望:+6}},
+        {id:'c_sci_fail', text:'实验又失败了', weight:4, occupation:['scientist','科学家'], effects:{stress:+5}},
+        {id:'c_sci_grant', text:'申请到了一笔科研经费', weight:2, occupation:['scientist','科学家'], effects:{money:+5000}},
+        /* v2.6.2: 警察线 */
+        {id:'c_pol_patrol', text:'今天在街上巡逻', weight:5, occupation:['police','警察'], effects:{stress:+3}},
+        {id:'c_pol_case', text:'接手了一桩案子', weight:3, occupation:['police','警察'], effects:{stress:+5, 声望:+2}},
+        {id:'c_pol_bust', text:'你参与了一次抓捕行动', weight:2, occupation:['police','警察'], req:{careerLevel:2}, effects:{声望:+4, 健康:-3}},
+        {id:'c_pol_bribe', text:'有人想给你塞钱', weight:1, occupation:['police','警察'], effects:{}},
+        /* v2.6.2: 学生线 */
+        {id:'c_stu_exam', text:'快到期末考试了', weight:5, occupation:['student','学生'], effects:{stress:+4, 智力:+1}},
+        {id:'c_stu_club', text:'社团有活动要参加', weight:4, occupation:['student','学生'], effects:{stress:-1}},
+        {id:'c_stu_scholar', text:'你获得了奖学金', weight:2, occupation:['student','学生'], effects:{money:+2000, 声望:+2}},
+        {id:'c_stu_intern', text:'找到了一份实习', weight:3, occupation:['student','学生'], effects:{money:+1500}},
+        /* v2.6.2: 商人/程序员线 */
+        {id:'c_biz_deal', text:'谈成了一笔生意', weight:3, occupation:['business','商人'], effects:{money:+3000, 声望:+1}},
+        {id:'c_biz_client', text:'大客户约你见面', weight:3, occupation:['business','商人'], effects:{}},
+        {id:'c_dev_deadline', text:'项目要赶 Deadline 了', weight:5, occupation:['programmer','程序员','engineer'], effects:{stress:+5, money:+500}},
+        {id:'c_dev_bug', text:'线上出了个紧急 Bug', weight:3, occupation:['programmer','程序员'], effects:{stress:+6}},
+        {id:'c_dev_launch', text:'你的产品上线了', weight:2, occupation:['programmer','程序员'], req:{careerLevel:2}, effects:{声望:+3}}
       ],
       /* 世界新闻 (Level NEWS) */
       world: [
@@ -84,7 +139,15 @@
         {id:'h_meet_hero',   text:'你偶然见到了一位超级英雄', weight:1, level:'INDIRECT',
          req:{locationCity:true}},
         {id:'h_strange',     text:'你目睹了无法解释的现象', weight:1, req:{awarenessMin:30}},
-        {id:'h_recruit',     text:'有人邀请你加入一个秘密组织', weight:1, req:{influence:30}}
+        {id:'h_recruit',     text:'有人邀请你加入一个秘密组织', weight:1, req:{influence:30}},
+        /* v2.6.2: 更多英雄接触事件 */
+        {id:'h_sighting', text:'你亲眼目睹了一场超能力对决', weight:2, req:{awarenessMin:5}, effects:{stress:+3}},
+        {id:'h_rescue', text:'你在意外中被超级英雄救了', weight:2, req:{awarenessMin:10}, effects:{stress:+2, 声望:+2}},
+        {id:'h_artifact', text:'你捡到了一件奇怪的东西', weight:2, req:{awarenessMin:15}, effects:{}},
+        {id:'h_power', text:'你感觉身体里有什么在觉醒', weight:1, req:{awarenessMin:40}, effects:{声望:+4}},
+        {id:'h_mentor', text:'一位隐世高人想收你为徒', weight:1, req:{awarenessMin:35}, effects:{}},
+        {id:'h_villain', text:'你被反派盯上了', weight:1, req:{awarenessMin:25}, effects:{stress:+8, 声望:+3}},
+        {id:'h_accident', text:'你遭遇了一场改变命运的事故', weight:1, req:{awarenessMin:20}, effects:{健康:-5, 声望:+3}}
       ]
     },
 

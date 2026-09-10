@@ -1,0 +1,33 @@
+{
+  "name": "漫威宇宙·英雄纪元",
+  "short_name": "漫威模拟器",
+  "description": "沉浸式 AI 剧情模拟器——在漫威电影宇宙里活一次你的人生",
+  "start_url": "./v2.6_世界线完整版/2.6.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1420",
+  "theme_color": "#0d1420",
+  "lang": "zh-CN",
+  "categories": ["games", "entertainment", "roleplaying"],
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "开始新游戏",
+      "url": "./v2.6_世界线完整版/2.6.html"
+    }
+  ]
+}

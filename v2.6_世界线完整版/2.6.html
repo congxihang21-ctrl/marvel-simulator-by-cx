@@ -17,6 +17,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="漫威模拟器">
 <meta name="theme-color" content="#080b10">
+<!-- PWA: 可添加到手机桌面，全屏独立运行 -->
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-192.svg">
 <!-- 鸿蒙/安卓 全屏沉浸模式 -->
 <meta name="color-scheme" content="dark">
 <meta name="screen-orientation" content="portrait">
@@ -7052,6 +7055,16 @@ var ACHIEVEMENT_POOL=[
   {id:'ss_iron',   tier:'SS',ic:'❤️', name:'你打出了那一下响指',  desc:'「I am... Iron Man.」——愿意牺牲自己终结一切，你就真的成了那个人。'},
   {id:'ss_tva',    tier:'SS',ic:'📺', name:'TVA 把你记录为 Nexus 存在',desc:'你不再是时间线上的普通人，而是 Nexus Being——你本身会创造分支。'},
   {id:'ss_legend', tier:'SS',ic:'🎇', name:'你的故事，下一代会继续讲',desc:'当你老了，或者走了——街头、圣所、神盾、复仇者基地里，还会有人说：「当年，有那么一个人……」'}
+  /* v2.6.2: 普通人生活成就 */
+  ,{id:'c_firstpay', tier:'C',ic:'💵', name:'第一份工资', desc:'赚到人生第一笔合法收入的那一刻，你知道自己能养活自己了。'}
+  ,{id:'c_graduate', tier:'C',ic:'🎓', name:'顺利毕业', desc:'无论小学中学大学，拿到那张证书时，你又长大了一点。'}
+  ,{id:'b_married', tier:'B',ic:'💍', name:'执子之手', desc:'你和一个人决定，往后的日子一起过。'}
+  ,{id:'b_parent', tier:'B',ic:'👶', name:'为人父母', desc:'一个新生命叫你爸爸/妈妈，你的人生从此多了一份重量。'}
+  ,{id:'a_homeowner', tier:'A',ic:'🏠', name:'安家落户', desc:'有了一套真正属于自己的房子，门牌号写着你的名字。'}
+  /* v2.6.2: 负向成就 */
+  ,{id:'c_broke', tier:'C',ic:'💸', name:'身无分文', desc:'钱包比脸还干净，但你还活着——这就够了。'}
+  ,{id:'b_jail', tier:'B',ic:'⛓', name:'铁窗生涯', desc:'你进过局子，也出来了。这段经历会跟着你一辈子。'}
+  ,{id:'a_betrayed', tier:'A',ic:'💔', name:'最信任的人背叛了你', desc:'伤你最深的，永远是你最亲近的人。'}
 ];
 
 /* ================= Beta v2.0 · OVR 能力综评体系（8 维 0-99 + 综评 + 6 档位）=================
@@ -10266,6 +10279,12 @@ if(document.readyState==='loading'){
   else window.attachEvent('onload',_boot);
 }else{
   try{_boot()}catch(_){}
+}
+/* PWA: 注册 Service Worker，支持离线 + 添加到桌面 */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('../sw.js').catch(function(){});
+  });
 }
 </script>
 </body>
