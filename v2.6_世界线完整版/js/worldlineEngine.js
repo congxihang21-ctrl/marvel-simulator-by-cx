@@ -121,7 +121,7 @@
         else if(wealth < -10000) parts.push('负债累累');
         else parts.push('勉强糊口');
       }
-      if(S.stats && S.stats.声望 > 60) parts.push('声名远播');
+      if(S.player && (S.player.声望||0) > 60) parts.push('声名远播');
       if(S.flags && S.flags.injured) parts.push('身负伤病');
       if(S.rel && S.rel.length > 5) parts.push('交游广阔');
       if(S.worldline && S.worldline.divergenceLevel > 30) parts.push('世界线偏离');

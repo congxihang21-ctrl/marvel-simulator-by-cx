@@ -2636,15 +2636,15 @@ body.mode-easy #opts.busy .opt{
 <link rel="stylesheet" href="css/glass.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/responsive.css">
-<script src="js/rng.js?v=2.6"></script>
-<script src="js/worldlineEngine.js?v=2.6"></script>
-<script src="js/characterEngine.js?v=2.6"></script>
-<script src="js/relationshipEngine.js?v=2.6"></script>
-<script src="js/eventDirector.js?v=2.6"></script>
-<script src="js/endingEngine.js?v=2.6"></script>
-<script src="js/ai.js?v=2.6"></script>
-<script src="js/seed_data.js?v=2.6"></script>
-<script src="js/game_seed.js?v=2.6"></script>
+<script src="js/rng.js?v=2.6" defer></script>
+<script src="js/worldlineEngine.js?v=2.6" defer></script>
+<script src="js/characterEngine.js?v=2.6" defer></script>
+<script src="js/relationshipEngine.js?v=2.6" defer></script>
+<script src="js/eventDirector.js?v=2.6" defer></script>
+<script src="js/endingEngine.js?v=2.6" defer></script>
+<script src="js/ai.js?v=2.6" defer></script>
+<script src="js/seed_data.js?v=2.6" defer></script>
+<script src="js/game_seed.js?v=2.6" defer></script>
 </head>
 <body>
 
@@ -3665,10 +3665,20 @@ document.addEventListener('keydown',function(e){
    3. 存档注入：save() / openSave() / normalizeSave() 自动给存档注入 _author/_copyright
    ============================================================ */
 /* Beta v2.3 · 作者身份：高三在读学生，课余独立开发；署名保留 CX，介绍页补充"学生开发者"背景，更贴合抖音年轻观众 */
+var APP_VERSION = '漫威模拟器 2.6.2';
 var CX_AUTHOR = 'CX（高三学生开发者）';
 var CX_COPYRIGHT = '© ' + CX_AUTHOR + ' · 漫威电影宇宙人生模拟器 · 课余独立开发，保留一切权利。转载 / 二创 / 直播请标注原作者 CX。';
 var CX_WM_BADGE = 'CX · 漫威模拟器 · 学生原创';
 var CX_WM_TEXT = 'CX · 漫威模拟器 · 高三课余出品';
+
+/* v2.6.2: 调试开关 —— 生产环境静默 console.warn，仅在 URL 带 ?debug=1 或 localStorage 开启时输出 */
+var MCU_DEBUG = (function(){try{return localStorage.getItem('mcu_debug')==='1'||/[?&]debug=1/.test(location.search)}catch(_){return false}})();
+(function(){
+  if(MCU_DEBUG)return;
+  var _w=console.warn.bind(console);
+  console.warn=function(){ /* 生产静默 */ };
+  console.debug=function(){};
+})();
 
 /* =====================================================================
    v1.4：MCU / 时代金句库（Loading 标语板·双语版）
@@ -4909,22 +4919,8 @@ var ERA=[
  {k:'🌌 回归与多元宇宙（2023-2026）',d:'2024-09-01'},
  {k:'✏️ 自定义时代',d:'2025-01-01'}];
 
-/* [Beta v2.2 · 已迁移] FIELDS / CUSTOM_FIELDS / CUSTOM_PH 统一移到 buildForm 所在的创角模块（文件后半段），
-   这里保留占位，避免早期 `panel setup` 渲染逻辑出错（PANEL_DEF 仍在此段下方定义）。
-   简易模式使用 FIELDS.easy + EASY_FIELDS_KEYS 过滤成 6 字段；专家模式 12 字段分组。 */
-var FIELDS=[];
-/* [Beta v2.2 · 防御性兜底] 页面加载完成后，用新版 FIELDS 模块覆盖这个空占位，避免新旧顺序错配。
-   真正的 FIELDS 定义在下文 "var FIELDS=[" 处（约 5614 行）。 */
-(function(){
-  function _migrate(){
-    try{
-      // 仅当真的存在新版字段定义（window 上挂了标识）或运行到了后半段才合并 —— 但声明在同一 script，直接写 here-doc 会重复；
-      // 最小安全方案：不在此处做事，下一段会重新 `var FIELDS=[...]`。JS 允许同作用域重复 var，后者覆盖前者——0 风险。
-    }catch(_){}
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',_migrate);
-  else _migrate();
-})();
+/* v2.6.2: FIELDS / CUSTOM_FIELDS / CUSTOM_PH 统一在下文 buildForm 模块定义（约 6113 行），
+   简易模式用 FIELDS.easy 过滤成 6 字段；专家模式 12 字段分组。此处不再保留空占位。 */
 
 var WD=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
 var WORLD_KEYS=['政府','英雄界','反派与地下','科技与经济','宇宙','多元宇宙','你所在地区'];
@@ -4968,7 +4964,7 @@ function $(id){
   if(el)_domCache[id]=el;
   return el;
 }
-function clearDomCache(){_domCache={}}
+/* clearDomCache 由上文 IIFE 中的 Map 版本提供（global.clearDomCache），此处不再重复定义 */
 var RE_AMP=/&/g,RE_LT=/</g,RE_GT=/></g;
 function esc(s){return String(s==null?'':s).replace(RE_AMP,'&amp;').replace(RE_LT,'&lt;').replace(RE_GT,'&gt;')}
 
@@ -6470,7 +6466,7 @@ function _doStartGame(){
   /* v1.8：目标系统（🎯 人生目标 / 成就 / 里程碑） */
   goals:null,
   /* CX 原创水印：存档级溯源（盗发者保存/转发时原样保留作者信息）*/
-  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:'漫威模拟器 2.6',_createdAt:Date.now(),_mode:null
+  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:APP_VERSION,_createdAt:Date.now(),_mode:null
  };
  WORLD_KEYS.forEach(function(k){S.world[k]='—'});
  CUR_HINTS=[];updInputPH();
@@ -9115,49 +9111,43 @@ function _rotateBackups(valStr){
     try{window.sessionStorage&&sessionStorage.setItem(SKEY,valStr)}catch(_){}
   }catch(_){}
 }
-/* 同步落盘：visibilitychange hidden / pagehide / beforeunload 时调用 —— 不走节流、不 setTimeout，保证 iOS 切后台前写进去 */
-function _flushSaveSync(){
-  if(!S)return;
+/* v2.6.2: 存档写入公共逻辑 —— save()/saveGame() 合并，消除重复 */
+function _prepareSave(){
+  if(!S)return null;
   try{
     if(S.log&&S.log.length>220){S.log=S.log.slice(-150)}
     if(S.events&&S.events['已发生']&&S.events['已发生'].length>40){S.events['已发生']=S.events['已发生'].slice(-20)}
     if(S.rumors&&S.rumors.length>50){S.rumors=S.rumors.slice(-30)}
   }catch(_){}
-  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.3';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
+  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app=APP_VERSION;if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
+  try{return JSON.stringify(S)}catch(e){console.warn('save stringify fail',e);return null}
+}
+function _doWrite(s){
+  if(!s)return false;
   try{
-    var s=JSON.stringify(S);
     var ok=safeLS(KEY,s);
     if(ok){
       _rotateBackups(s);
-      /* Beta v2.3：同步落盘也加 cx_save_backup 双写（切后台/关页前最后一次机会）*/
       try{localStorage.setItem(CX_BACKUP_KEY,s)}catch(_){}
+      return true;
     }
-  }catch(_){}
+  }catch(e){console.warn('save write fail',e)}
+  return false;
+}
+/* 同步落盘：visibilitychange hidden / pagehide / beforeunload 时调用 —— 不走节流、不 setTimeout，保证 iOS 切后台前写进去 */
+function _flushSaveSync(){
+  var s=_prepareSave();
+  if(s)_doWrite(s);
 }
 function save(){
-  if(!S)return;
-  try{
-    if(S.log&&S.log.length>220){S.log=S.log.slice(-150)}
-    if(S.events&&S.events['已发生']&&S.events['已发生'].length>40){S.events['已发生']=S.events['已发生'].slice(-20)}
-    if(S.rumors&&S.rumors.length>50){S.rumors=S.rumors.slice(-30)}
-  }catch(_){}
-  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.3';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
   /* 合并短时间多次 save（正常推进时节流；切后台场景直接走 _flushSaveSync）*/
   clearTimeout(_saveT);
   _saveT=setTimeout(function(){
-    try{
-      var s=JSON.stringify(S);
-      var ok=safeLS(KEY,s);
-      if(ok){
-        _rotateBackups(s);
-        /* Beta v2.3：主落盘 + 滚动链条成功后，再把 cx_save_backup 独立写一遍（二次保险，即使 _rotateBackups 被抛错也有双写）*/
-        try{localStorage.setItem(CX_BACKUP_KEY,s)}catch(_){}
-        // 只要有任何一次 save 成功落盘 —— 说明用户已经开过档了，以后就不要再自动弹教程（即使关掉浏览器再回来）。
-        // 仍然保留手动「❔ 新手帮助」入口。
-        try{if(typeof window._MCU_MARK_TUT_DONE==='function')window._MCU_MARK_TUT_DONE()}catch(_){}
-      }
-      _maybeRemindExport();
-    }catch(e){console.warn('save fail',e)}
+    var s=_prepareSave();
+    if(_doWrite(s)){
+      try{if(typeof window._MCU_MARK_TUT_DONE==='function')window._MCU_MARK_TUT_DONE()}catch(_){}
+    }
+    _maybeRemindExport();
   },80);
 }
 /* 每 15 回合 / 每 10 分钟，温和提醒一下"最好导出到本地文件"（用户关过当天就不弹）*/
@@ -9260,6 +9250,15 @@ function normalizeSave(o){
    if(o.player){
      var pDefaults = {'职业':'待业','财富':'普通','家庭':'未知','社会地位':'平民','身体与能力':'健康','战斗能力':'普通人','科技与工程':'—','技能':'—','声望':'0','所属势力':'无','当前目标':'活下去','身体状态':'健康','情绪':'平静','当前任务':'—'};
      for(var pk in pDefaults){ if(o.player[pk]==null||o.player[pk]==='')o.player[pk]=pDefaults[pk]; }
+     /* v2.6.2: 关键数值字段类型断言 —— AI 可能返回字符串数字，统一转 number，避免事件检查 `p.声望 > 50` 时字符串比较出错 */
+     var numFields = ['声望','健康','压力','年龄','财富值','现金','储蓄'];
+     for(var ni=0;ni<numFields.length;ni++){
+       var fk = numFields[ni];
+       if(o.player[fk]!=null && typeof o.player[fk]!=='number'){
+         var n = parseFloat(o.player[fk]);
+         o.player[fk] = isNaN(n) ? 0 : n;
+       }
+     }
    }
    /* 世界线引擎数据 */
    if(!o.worldline || typeof o.worldline !== 'object'){
@@ -9284,7 +9283,7 @@ function normalizeSave(o){
  }catch(_){}
  /* 导入存档时补全作者字段，即使存档被人手动抠掉也会自动回填 CX */
  try{
-   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app='漫威模拟器 2.6';
+   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app=APP_VERSION;
    o._lastImportedAt=Date.now();
  }catch(_){}
  return o;
@@ -9308,7 +9307,7 @@ function openSave(){
  var m=$('ioModal');if(m){m.style.display='block';if(m.scrollTop!=null)m.scrollTop=0;setTimeout(function(){_fixModalAnchors(m)},16)}
  /* 导出存档前强制回填 CX 作者字段，防止别人存档分发时匿名 */
  try{
-  S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.2';
+  S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app=APP_VERSION;
   if(!S._createdAt)S._createdAt=Date.now();S._lastExportedAt=Date.now();
  }catch(_){}
  var txt=JSON.stringify(S);

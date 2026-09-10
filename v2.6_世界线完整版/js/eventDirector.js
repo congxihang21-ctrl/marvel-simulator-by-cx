@@ -169,7 +169,7 @@
       if(req.reputation && (p.声望||0) < req.reputation) return false;
       if(req.influence && (wl.playerInfluence||0) < req.influence) return false;
       if(req.awarenessMin && (wl.publicAwareness||0) < req.awarenessMin) return false;
-      if(req.careerLevel && (p.职业路径&&p.职业路径.等级||0) < req.careerLevel) return false;
+      if(req.careerLevel && ((p.职业路径 && p.职业路径.等级) || 0) < req.careerLevel) return false;
       if(req.minFriend){
         var friendCount = (S.rel||[]).filter(function(r){return (r.信任==='高'||r.信任==='中等偏高')}).length;
         if(friendCount < req.minFriend) return false;
