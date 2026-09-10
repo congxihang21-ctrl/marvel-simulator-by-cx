@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -27,9 +27,9 @@
 <meta name="browsermode" content="application">
 <!-- 禁止 IE 兼容模式 -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.2</title>
+<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.3（抖音公测版）</title>
 <script>
-/* v1.9 · 面板去重精简（9→8卡）+ 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端最新版适配：iOS17/18 Beta / 鸿蒙4+ / 安卓14+ X5 / Win Edge
+/* 面板去重精简 + 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端适配：iOS / 鸿蒙 / 安卓 X5 / Win Edge
    在 CSS 之前跑一丢丢 JS：给 :root 注入 --vh / --sat / --sab 三个"真·视口尺寸"变量。
    为什么要在 CSS 前跑？因为 100dvh 在 iOS17 Beta + WebView 某些组合下仍会被地址栏高度带偏，
    而 visualViewport.height 才是"真实的、排除了工具栏/键盘的可见高度"。
@@ -82,7 +82,7 @@ window._MCU_FIXED_VH = true;
 ========================================================================= */
 
 /* ============================================================
-   Beta v2.2 · 电影感主题令牌（深色·深夜蓝黑金 / 浅色·羊皮纸）
+   Beta v2.3 · 电影感主题令牌（深色·深夜蓝黑金 / 浅色·羊皮纸）
    —— 把颜色拆成：背景(4层) / 前景(4层) / 强调色(6色) / 描边(3层) / 玻璃材质(4种)
       所有组件统一调用令牌，做到换主题零硬编码色值。
    ============================================================ */
@@ -946,7 +946,7 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
  .topbar{padding:8px 10px;gap:7px}
  #engstat{flex:1 1 100%;min-width:0;font-size:11.5px}
  .topbtns{flex:1 1 100%;gap:5px}
- .topbtns button{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:42px}
+ .topbtns button{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px}
  .panel h3{padding:9px 10px;font-size:13px;min-height:44px}
  .ptime{flex:1 1 100%;margin-left:22px;text-align:left;font-size:10.5px;margin-top:1px}
  .opt{padding:10px;gap:8px}
@@ -998,8 +998,8 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
  .panel h3{padding:7px 8px;min-height:36px;font-size:12px}
  .panel .body{padding:8px 10px;max-height:min(220px,60vh)}
  #story{max-height:min(260px,60vh)}
- .opt{padding:8px;min-height:36px}
- button{min-height:38px;padding:6px 10px}
+ .opt{padding:8px;min-height:44px}
+ button{min-height:44px;padding:7px 11px}
 }
 @media(min-width:900px){
  .ffield{max-width:none}
@@ -1849,13 +1849,13 @@ body.mode-easy .easy-go-side button{flex:1;padding:13px 10px;font-size:13.5px;bo
   contain:style;
   overscroll-behavior:auto;
 }
-#body_story{max-height:min(640px,74vh) !important;overflow:auto !important;-webkit-overflow-scrolling:touch;padding:4px 0 38px 0}
+#body_story{max-height:min(640px,74vh) !important;overflow:auto !important;-webkit-overflow-scrolling:touch;padding:4px 0 44px 0}
 body.mode-easy #body_story{max-height:min(580px,72vh) !important}
 #body_story .entry:last-child{margin-bottom:0}
-/* 手机端底部安全区 + 40px：iOS 小横条 / 安卓手势条 不盖住日志最后一句 */
+/* 手机端底部安全区 + 64px：iOS 小横条 / 安卓手势条 不盖住日志最后一句（v2.3 复核：再 + 2px 避免华为鸿蒙圆形手势条） */
 @media(max-width:720px){
-  #body_story{padding:4px 0 62px 0}
-  #story{padding-bottom:52px}
+  #body_story{padding:4px 0 64px 0}
+  #story{padding-bottom:56px}
 }
 @media(max-height:520px) and (orientation:landscape){
   #body_story{max-height:min(360px,70vh) !important}
@@ -2443,6 +2443,25 @@ body.mode-easy #opts.busy .opt{
 }
 /* 专家模式 opt 也把 hint-dir 放右上角，txt 开 position:relative（已在上面统一设置） */
 
+/* ============ Beta v2.3 · P1 修复：子代选择器 > → 后代选择器（去掉 >），并扩展实际在用的底部按钮栏类名。
+   之前用 > 时如果项目中间多一层 <div class="row">/wrapper 包裹 actions 就完全命中不到，
+   现在改成后代选择器，模态框里任何层级的 .actions/.ft/buttons/modal-actions/footer bar 都会被加 safe-area padding，
+   顺带加上 .modal-actions 和 .tut-btns（虽然教程 tut-btns 已单独加过，这里再兜底）。*/
+.modal .box .ft,
+.modal .box .actions,
+.modal .box .footer,
+.modal .box .modal-btns,
+.modal .box .btn-row,
+.modal .box .buttons,
+.modal .box .modal-actions,
+.modal .box .tut-btns,
+.modal .box .modal-footer,
+.modal .box .form-actions,
+.modal .box .action-bar{
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  box-sizing: border-box !important;
+}
+
 /* ============ Beta v2.2 · Hints 三方向分化强化视觉 · 只剩颜色方案（结构已在 S5 中 absolute 化） ============ */
 .hint-dir.dA{background:linear-gradient(90deg,rgba(242,207,106,.22),rgba(242,207,106,.08));color:#f2d272;border:1px solid rgba(242,207,106,.45)}
 .hint-dir.dB{background:linear-gradient(90deg,rgba(143,224,160,.22),rgba(143,224,160,.06));color:#9fe8b4;border:1px solid rgba(143,224,160,.4)}
@@ -2627,7 +2646,7 @@ body.mode-easy #opts.busy .opt{
       <button onclick="openSettings()">⚙ 引擎设置</button>
       <button onclick="openThemePanel()">🎨 外观主题</button>
       <button onclick="openAbout()">ℹ 关于作者</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">❤️ 赞助作者</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">🧋 请学生开发者喝杯奶茶</button>
       <button onclick="openTutorial()" style="background:color-mix(in srgb,var(--magic) 15%,var(--bg-2));border-color:color-mix(in srgb,var(--magic) 45%,var(--line-2))">❔ 新手帮助</button>
     </div>
     <div id="load" style="max-width:860px;margin:14px auto 0;display:none" class="setup-card">
@@ -2663,7 +2682,7 @@ body.mode-easy #opts.busy .opt{
       <button onclick="openSave()">💾 存档</button>
       <button onclick="openLoad()">📂 读档</button>
       <button onclick="openAbout()">ℹ 关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="请作者喝一杯可乐～">❤️ 赞助</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="高三课佘写代码辛苦，买杯奶茶支持一下～">🧋 请喝奶茶</button>
     </div>
   </div>
 
@@ -2754,14 +2773,14 @@ body.mode-easy #opts.busy .opt{
     </div>
   </div>
 
-  <div class="foot">作者：<span class="cx-sign" title="CX 原创作品 · 漫威模拟器">© CX</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
+  <div class="foot">作者：<span class="cx-sign" title="高三学生开发者 CX · 课余独立作品 · 漫威模拟器">© CX（高三学生开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
     <div class="foot-beta" style="margin-top:8px;font-size:12px;line-height:1.9;color:var(--fg-2);padding:0 6px">
-      🔬 本作 <b>仍在 Beta 内测阶段</b>（当前版本 Beta v2.2），剧情/系统/离线文笔会持续打磨升级。<br>
-        🐞 游玩中遇到 Bug、白屏、剧情不合逻辑，或想提出角色设定建议？<b>欢迎反馈给作者</b>：<br>
-        🎵 <b>抖音同名</b>：<span class="cx-sign" title="搜索抖音号 cxh20080910 关注发私信即可">CX</span>（<b>抖音号：cxh20080910</b> · 发私信/评论区留言都可以）<br>
-      💖 感谢每一位耐心游玩、愿意陪这个模拟器慢慢长大的朋友——你们的反馈就是我继续写下去的最大动力。<br>
-      ⚠️ <b>温馨提示</b>：手机浏览器（尤其微信/抖音内置）的本地存储可能被系统自动清理，<b>玩到重要节点务必点「💾 存档 → 导出到本地文件」备份一份到自己相册/云盘</b>，避免下次回来进度丢失。<br>
-      🛡 <b>免责声明（摘要）</b>：本作是<b>非官方同人作品</b>，漫威相关 IP / 角色 / 商标 归属<b>华特迪士尼公司 / 漫威娱乐</b>；AI 生成剧情<b>仅供娱乐参考，请勿当真</b>；详细条款点 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u> 查看。<br>
+      🔬 本作 <b>仍在 Beta 公测阶段</b>（当前版本 Beta v2.3 · 抖音首发版），剧情、人设文笔、AI 正典同步会持续打磨升级。<br>
+        🐞 游玩中遇到 Bug、白屏、剧情 OOC，或想提出脑洞设定？<b>随时 @我发抖音私信 / 评论区留言</b>：<br>
+        🎵 <b>抖音同名</b>：<span class="cx-sign" title="搜索抖音号 cxh20080910 关注发私信即可">CX</span>（<b>抖音号：cxh20080910</b> · 私信、评论、合拍我都能看到）<br>
+      💖 感谢每一位耐心游玩、愿意陪这个高中生模拟器慢慢长大的朋友——<b>你们的每一条评论我晚自习下课后都会看</b>。<br>
+      ⚠️ <b>温馨提示</b>：手机浏览器（尤其微信 / 抖音内置 WebView）的 localStorage 可能被系统自动清理，<b>玩到重要节点务必点「💾 存档 → ⬇ 导出 TXT 文件」存一份到自己相册 / 云盘</b>，进度归零真的会哭。<br>
+      🛡 <b>免责声明（摘要）</b>：本作是<b>非官方同人作品</b>，漫威相关 IP / 角色 / 商标 归属<b>华特迪士尼公司 / 漫威娱乐</b>；AI 生成剧情<b>仅供娱乐参考，请勿当真</b>；完整条款点 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u> 查看。<br>
       🎂 <b style="color:#e8c66a">年龄建议：本作建议 16 周岁以上用户游玩</b>；16 周岁以下未成年人请在家长 / 监护人知情并指导下使用，合理安排时间，避免沉迷。
     </div>
   </div>
@@ -2918,7 +2937,7 @@ body.mode-easy #opts.busy .opt{
     <div class="eng-tabs">
       <div class="eng-tab rec" id="etab_rec" onclick="switchEngineTab('rec')">
         <div class="t"><span class="emoji">🚀</span>推荐档 · 作者共享池（零配置·开箱即玩）</div>
-        <div class="d">默认走<b>作者 CX 共享的智谱 AI 池（glm-4.7）</b>，朋友拿到 HTML 直接开玩；网络不通时自动降级到离线引擎，绝不卡进度。</div>
+        <div class="d">默认走<b>高三开发者 CX 共享的智谱 AI 池（glm-4.7）</b>——朋友拿到 HTML，复制到浏览器直接开玩；网络不通 / Key 过期时自动降级为离线推演，绝不卡你进度。<br><span style="font-size:12px;color:#9aa6b8">💡 提示：抖音内置浏览器偶尔会拦截外域请求，如果一直卡「推理中」，右上角 ⋯ → 「在浏览器打开」就能秒解。</span></div>
         <span class="badge">默认 / 朋友分享首选</span>
       </div>
       <div class="eng-tab adv" id="etab_adv" onclick="switchEngineTab('adv')">
@@ -2997,15 +3016,15 @@ body.mode-easy #opts.busy .opt{
     </div>
     <div id="cfg_msg" style="margin-top:10px;font-size:12.5px;line-height:1.6"></div>
 
-    <!-- Beta v2.2 · 收款码硬编码（只读展示·防篡改·作者 CX 硬编码进源码·所有玩家直接可见）-->
+    <!-- Beta v2.3 · 收款码硬编码（只读展示·防篡改·高三学生开发者 CX 硬编码进源码·所有玩家直接可见）-->
     <div style="margin-top:22px;padding:14px;border-radius:12px;border:1px dashed rgba(109,62,240,.45);background:linear-gradient(180deg,rgba(109,62,240,.08),rgba(109,62,240,.02))">
-      <div class="subh" style="font-size:13px;color:#9d7cff">❤️ 赞助收款码（源码硬编码·只读展示）</div>
+      <div class="subh" style="font-size:13px;color:#9d7cff">🧋 请喝奶茶收款码（源码硬编码·只读展示）</div>
       <div style="font-size:12px;color:#9fb3c7;line-height:1.8;margin-top:6px">
-        收款码图片已由作者 <b style="color:#9d7cff">CX</b> 以 base64 形式直接写进源码——<b>所有玩家打开 HTML 即可直接看到，无需额外配置，也无法被玩家浏览器修改/覆盖/篡改。</b><br>
-        作者如需更新收款码：打开 HTML 搜索 <code style="background:var(--bg-2);padding:1px 5px;border-radius:4px">CX_DONATE_WX</code>，替换两张 base64 图片并重新发布 HTML 即可。
+        收款码图片已由<b style="color:#9d7cff">高三学生开发者 CX</b> 以 base64 形式直接写进源码——<b>所有玩家打开 HTML 即可直接看到，无需额外配置，也无法被浏览器/平台插件篡改。</b><br>
+        更新收款码：打开 HTML 搜索 <code style="background:var(--bg-2);padding:1px 5px;border-radius:4px">CX_DONATE_WX</code>，替换两张 base64 图片并重新发布 HTML 即可。
       </div>
       <div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">
-        <button class="primary" onclick="openDonate()">👀 预览赞助弹窗</button>
+        <button class="primary" onclick="openDonate()">👀 预览「请喝奶茶」弹窗</button>
       </div>
     </div>
   </div>
@@ -3017,10 +3036,11 @@ body.mode-easy #opts.busy .opt{
     <h3>ℹ 关于作者 · 版权声明</h3>
     <div class="author-hero">
       <div class="cx-name">CX</div>
-      <div class="role">漫威电影宇宙 · 英雄纪元人生模拟器 ｜ 作者 & 版权所有者</div>
+      <div class="role">漫威电影宇宙 · 英雄纪元人生模拟器 ｜ <span style="color:#f2c54d">高三学生开发者</span> · 课余独立作品</div>
     </div>
     <div style="font-size:14px;line-height:1.9;color:#dbe3ee">
-      本作品《漫威模拟器》（又名《漫威电影宇宙 · 英雄纪元人生模拟器》）由 <b style="color:#9d7cff">CX</b> 独立设计与开发完成。
+      本作品《漫威模拟器》（又名《漫威电影宇宙 · 英雄纪元人生模拟器》）由 <b style="color:#9d7cff">一名普通高三学生 CX</b> 在课余时间独立设计、敲代码、调 AI 参数完成。<br>
+      我没有商业团队、没有大厂资源，只有热爱漫威 + 喜欢写代码的一颗心 🔥 如果你玩得开心，我最想要的回报就是——<b>发一条抖音 @我 / 留一句评论 / 分享给朋友</b>。
     </div>
     <div class="line">
       <b>🛡 版权所有：</b>© CX，保留一切权利。<br>
@@ -3043,16 +3063,16 @@ body.mode-easy #opts.busy .opt{
   </div>
 </div>
 
-<!-- ================= 赞助打赏（Beta v2.0 · 作者自费内测） ================= -->
+<!-- ================= 赞助打赏（Beta v2.3 · 高三学生·课余独立开发·AI算力全自费） ================= -->
 <div class="modal about-modal" id="donateModal" onclick="if(event.target===this)closeDonate()" style="z-index:122">
   <div class="box" style="max-width:540px">
-    <h3>❤️ 请作者喝一杯 ☕</h3>
-    <div class="author-hero" style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(242,197,77,.10),rgba(255,98,98,.08));border:1px dashed rgba(242,197,77,.45)">
-      <div class="cx-name" style="color:#f2c54d">内测期间 · 作者自费撑服 💦</div>
+    <h3>🧋 请高三开发者喝杯奶茶 ☕</h3>
+    <div class="author-hero" style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(242,197,77,.10),rgba(157,124,255,.08));border:1px dashed rgba(242,197,77,.45)">
+      <div class="cx-name" style="color:#f2c54d">高三自习课偷摸写代码 · 自费跑 AI 中 💦</div>
       <div class="role" style="line-height:1.85;margin-top:6px">
-        本作 <b>完全免费</b> 开放给大家玩。<b>你每点一次「推进」，消耗的都是作者 CX 自掏腰包买的 AI 算力 Token。</b><br>
-        如果你玩得开心、想支持作者继续把游戏打磨得更细——<b>几毛钱、一块钱都是心意。</b><br>
-        无论你是否打赏，<b>你都已经是作者最珍惜的人了。</b>凡人之躯，亦可比肩神明 🛡
+        本作 <b>永久免费</b> 开放给所有同学玩。<b>你每点一次「推进」，消耗的都是我自己生活费里挤出来买的 AI Token。</b><br>
+        玩得开心、想让我在高考前还能多修几个 bug、多加几条正典大事件？<b>一杯珍珠奶茶、一根老冰棍都是爱。</b><br>
+        不打赏也完全 OK —— <b>你点进来玩、愿意发一条抖音 @朋友来看，就是我最大的成就感 🛡</b>
       </div>
     </div>
     <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -3070,11 +3090,11 @@ body.mode-easy #opts.busy .opt{
       </div>
     </div>
     <div class="dim" style="margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--bg-1);border:1px dashed var(--line-2);line-height:1.9">
-      🛡️ 收款码由作者 <b style="color:#9d7cff">CX</b> 直接嵌入源码，<b>只读展示·无法被篡改·所有玩家打开即见。</b><br>
-      扫码时请注意核对头像与昵称：<b>微信收款显示「S0mb1t(**杭)」；支付宝收款显示「**杭」。</b> 如发现二维码被调换，请第一时间联系作者本人。
+      🛡️ 收款码由<b style="color:#9d7cff">高三学生开发者 CX</b> 直接嵌入源码，<b>只读展示·无法被篡改·所有玩家打开即见。</b><br>
+      扫码时请注意核对头像与昵称：<b>微信收款显示「S0mb1t(**杭)」；支付宝收款显示「**杭」。</b> 如发现二维码被调换，请第一时间通过抖音私信 @我。
     </div>
     <div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button class="primary" onclick="closeDonate()">收到啦～谢谢作者 CX 🥰</button>
+      <button class="primary" onclick="closeDonate()">收到啦～谢谢你陪我高考前的自习时间 🥰</button>
     </div>
   </div>
 </div>
@@ -3426,10 +3446,11 @@ body.mode-easy #opts.busy .opt{
    2. 常量签名：AUTHOR / CX_COPYRIGHT 多处引用，grep 源码即能搜到 CX
    3. 存档注入：save() / openSave() / normalizeSave() 自动给存档注入 _author/_copyright
    ============================================================ */
-var CX_AUTHOR = 'CX';
-var CX_COPYRIGHT = '© ' + CX_AUTHOR + ' · 漫威电影宇宙人生模拟器 · 原创作品，保留一切权利。转载与二创需标注原作者 ' + CX_AUTHOR + '。';
-var CX_WM_BADGE = CX_AUTHOR + ' · 漫威模拟器 · 原创';
-var CX_WM_TEXT = CX_AUTHOR + ' · 漫威模拟器';
+/* Beta v2.3 · 作者身份：高三在读学生，课余独立开发；署名保留 CX，介绍页补充"学生开发者"背景，更贴合抖音年轻观众 */
+var CX_AUTHOR = 'CX（高三学生开发者）';
+var CX_COPYRIGHT = '© ' + CX_AUTHOR + ' · 漫威电影宇宙人生模拟器 · 课余独立开发，保留一切权利。转载 / 二创 / 直播请标注原作者 CX。';
+var CX_WM_BADGE = 'CX · 漫威模拟器 · 学生原创';
+var CX_WM_TEXT = 'CX · 漫威模拟器 · 高三课余出品';
 
 /* =====================================================================
    v1.4：MCU / 时代金句库（Loading 标语板·双语版）
@@ -5899,7 +5920,8 @@ function _renderFieldInput(f){
     if(f.custable){
       html+='<div class="cust cx-chip-wrap" id="cust_'+f.k+'">'+
         '<label style="margin-top:9px">自定义内容：</label>'+
-        '<input id="fc_'+f.k+'" type="text" placeholder="'+(CUSTOM_PH[f.k]||'自定义，请输入')+'">'+
+        /* Beta v2.2 · 三建议之 N2 · Enter/Done 提交：iOS 键盘按一下 Done 就确认（等价于选了自定义 chip + 填写完毕） */
+        '<input id="fc_'+f.k+'" type="text" placeholder="'+(CUSTOM_PH[f.k]||'自定义，请输入')+'" onkeydown="_cxInputEnter(event,this,\''+f.k+'\',\'custom\')">'+
         '<div class="cust-err" id="ce_'+f.k+'"></div></div>';
     }
   }else if(f.isTextChip && f.presetChip){
@@ -5910,9 +5932,9 @@ function _renderFieldInput(f){
       html+='<span class="cx-chip'+(i===0?' on':'')+'" onclick="_cxChipFillText(this,\''+f.k+'\','+String(isLast).toLowerCase()+')">'+esc(o)+'</span>';
     });
     html+='</div>';
-    html+='<input id="f_'+f.k+'" type="'+f.type+'" placeholder="'+esc(f.ph||'想自定义就写在这里，不写也可以～')+'" style="margin-top:8px"'+(f.def?' value="'+f.def+'"':'')+'>';
+    html+='<input id="f_'+f.k+'" type="'+f.type+'" placeholder="'+esc(f.ph||'想自定义就写在这里，不写也可以～')+'" style="margin-top:8px" onkeydown="_cxInputEnter(event,this,\''+f.k+'\',\'preset\')"'+(f.def?' value="'+f.def+'"':'')+'>';
   }else{
-    html+='<input id="f_'+f.k+'" type="'+f.type+'" placeholder="'+esc(f.ph||'')+'"'+(f.def?' value="'+f.def+'"':'')+'>';
+    html+='<input id="f_'+f.k+'" type="'+f.type+'" placeholder="'+esc(f.ph||'')+'" onkeydown="_cxInputEnter(event,this,\''+f.k+'\',\'text\')"'+(f.def?' value="'+f.def+'"':'')+'>';
   }
   html+='</div>';
   return html;
@@ -5954,6 +5976,46 @@ function _cxChipFillText(chip,fk,clearFirst){
     var txt=String(chip.textContent||'').trim();
     /* 剔除 chip 里的冗余说明 */
     inp.value=txt;
+  }catch(_){}
+}
+
+/* ============ Beta v2.3 · P2 修复：_cxInputEnter（Enter/Done 提交）
+   删除 v2.2 遗留死代码 `var wrap=$('cx-chips')||null`（无效赋值、没用到）；
+   custom 分支精简为：一次 querySelector 找到第一个「自定义」chip → 直接 _cxChipPick(spans[0]) 不再双重循环；
+   preset 分支改 querySelector（只可能有一个「留空」chip）不再 for 循环；
+   所有分支合并到同一 try，减少嵌套，读起来更清楚。*/
+function _cxInputEnter(ev, inp, fk, kind){
+  try{
+    if(!ev)ev=window.event;
+    if((ev.keyCode||ev.which)!==13)return;       /* 只处理 Enter / iOS Done */
+    if(ev.preventDefault)ev.preventDefault();
+    try{if(ev.stopPropagation)ev.stopPropagation()}catch(_){}
+
+    if(kind==='custom'){
+      /* 选自定义 chip（让隐藏 select 切到 自定义、on 态同步）→ 只抓第一个匹配 chip，避免手风琴重渲多份容器 */
+      var chip=document.querySelector('.cx-chips[data-fk="'+fk+'"] .cx-chip');
+      if(chip){
+        var host=chip.parentNode;
+        var firstCustom=null;
+        if(host){
+          var nodes=host.querySelectorAll('.cx-chip');
+          for(var i=0;i<nodes.length;i++){if(/自定义/.test(nodes[i].textContent||'')){firstCustom=nodes[i];break}}
+        }
+        if(firstCustom){_cxChipPick(firstCustom)}
+      }
+      var ce=$('ce_'+fk);if(ce)ce.textContent='';   /* 清理历史错误提示 */
+    }else if(kind==='preset'){
+      /* 用户写了非空内容 → 视觉上取消「留空」chip 的选中态 */
+      if(String(inp.value||'').trim()!==''){
+        var emptyChip=document.querySelector('.cx-chips[data-fk="'+fk+'_preset"] .cx-chip');
+        if(emptyChip){
+          var nodes2=emptyChip.parentNode.querySelectorAll('.cx-chip');
+          for(var j=0;j<nodes2.length;j++){if(/留空/.test(nodes2[j].textContent||'')){nodes2[j].classList.remove('on');break}}
+        }
+      }
+    }
+    /* 所有模式统一失焦 → iOS 键盘收起 */
+    try{inp.blur()}catch(_){}
   }catch(_){}
 }
 
@@ -7619,6 +7681,15 @@ function renderOpts(){
  }
  $('opts').innerHTML=h.join('');
  updInputPH();
+ /* Beta v2.2 · 三建议之 N3 · 简易模式剧情完，instant 把选项滚到视口顶——剧情长的时候，小白不用手指滑半天找选项 */
+ try{
+   if(getMode()==='easy' && $('opts')){
+     var r=$('opts').getBoundingClientRect();
+     if(r.top > window.innerHeight * 0.45){  /* 只当选项确实在视口下方时才滚，避免刚切到游戏时乱跳 */
+       try{$('opts').scrollIntoView({behavior:'instant',block:'start'})}catch(_){}
+     }
+   }
+ }catch(_){}
 }
 /* Beta v2.0：D 卡自定义区展开/收起（简易模式默认收起；专家模式常驻不受影响）*/
 function toggleEasyCustom(show){
@@ -8515,6 +8586,10 @@ function doSkip(kind){
 var KEY='mcu_sim_state_v1', CKEY='mcu_sim_api_v1';
 var KEY_B1='mcu_sim_state_v1_b1', KEY_B2='mcu_sim_state_v1_b2', KEY_B3='mcu_sim_state_v1_b3';
 var SKEY='mcu_sim_state_v1_session';        /* sessionStorage 镜像：同一个 tab 生命周期内兜底 */
+/* Beta v2.3 · 抖音 iOS WebView 存档易失加固：再额外加一份独立备份键 cx_save_backup
+   命名短、语义清晰；save 时与主 KEY 同时双写；safeTryRestoreFromBackups 中优先读它，
+   避免 B1/B2/B3 滚动备份被异常清缓存时一起干掉。 */
+var CX_BACKUP_KEY='cx_save_backup';
 var DEFAULT_CFG={base:'https://open.bigmodel.cn/api/paas/v4',key:'',model:'glm-4.7',temp:0.7,max:2048};
 var EXPORT_REMIND_KEY='mcu_v14_export_tip'; /* 最近一次点关闭的时间戳，避免同天反复弹 */
 var SAVE_TURN_REMIND='mcu_v14_save_lastturn';
@@ -8529,6 +8604,8 @@ function _rotateBackups(valStr){
     if(b1!=null){try{localStorage.setItem(KEY_B2,b1)}catch(_){}}
     if(b2!=null){try{localStorage.setItem(KEY_B3,b2)}catch(_){}}
     try{localStorage.setItem(KEY_B1,valStr)}catch(_){}
+    /* Beta v2.3 · 抖音 iOS WebView 易失加固：独立备份键 cx_save_backup 单独落盘（不参与滚动链条，清缓存最容易被放过）*/
+    try{localStorage.setItem(CX_BACKUP_KEY,valStr)}catch(_){}
     /* sessionStorage 也镜像一份（sessionStorage 5MB 配额一般够，失败忽略）*/
     try{window.sessionStorage&&sessionStorage.setItem(SKEY,valStr)}catch(_){}
   }catch(_){}
@@ -8541,11 +8618,15 @@ function _flushSaveSync(){
     if(S.events&&S.events['已发生']&&S.events['已发生'].length>40){S.events['已发生']=S.events['已发生'].slice(-20)}
     if(S.rumors&&S.rumors.length>50){S.rumors=S.rumors.slice(-30)}
   }catch(_){}
-  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.2';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
+  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.3';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
   try{
     var s=JSON.stringify(S);
     var ok=safeLS(KEY,s);
-    if(ok)_rotateBackups(s);
+    if(ok){
+      _rotateBackups(s);
+      /* Beta v2.3：同步落盘也加 cx_save_backup 双写（切后台/关页前最后一次机会）*/
+      try{localStorage.setItem(CX_BACKUP_KEY,s)}catch(_){}
+    }
   }catch(_){}
 }
 function save(){
@@ -8555,7 +8636,7 @@ function save(){
     if(S.events&&S.events['已发生']&&S.events['已发生'].length>40){S.events['已发生']=S.events['已发生'].slice(-20)}
     if(S.rumors&&S.rumors.length>50){S.rumors=S.rumors.slice(-30)}
   }catch(_){}
-  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.2';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
+  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.3';if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
   /* 合并短时间多次 save（正常推进时节流；切后台场景直接走 _flushSaveSync）*/
   clearTimeout(_saveT);
   _saveT=setTimeout(function(){
@@ -8564,7 +8645,9 @@ function save(){
       var ok=safeLS(KEY,s);
       if(ok){
         _rotateBackups(s);
-        // v1.6：只要有任何一次 save 成功落盘 —— 说明用户已经开过档了，以后就不要再自动弹教程（即使关掉浏览器再回来）。
+        /* Beta v2.3：主落盘 + 滚动链条成功后，再把 cx_save_backup 独立写一遍（二次保险，即使 _rotateBackups 被抛错也有双写）*/
+        try{localStorage.setItem(CX_BACKUP_KEY,s)}catch(_){}
+        // 只要有任何一次 save 成功落盘 —— 说明用户已经开过档了，以后就不要再自动弹教程（即使关掉浏览器再回来）。
         // 仍然保留手动「❔ 新手帮助」入口。
         try{if(typeof window._MCU_MARK_TUT_DONE==='function')window._MCU_MARK_TUT_DONE()}catch(_){}
       }
@@ -8606,6 +8689,8 @@ function _maybeRemindExport(){
 function safeTryRestoreFromBackups(){
   try{
     var sources=[
+      /* Beta v2.3 · cx_save_backup 独立备份键放第一位：清缓存/杀进程后它最容易活下来，命名语义清晰也便于玩家手动找 */
+      {k:CX_BACKUP_KEY,t:'CxBack',read:function(){try{return localStorage.getItem(CX_BACKUP_KEY)}catch(_){return null}}},
       {k:KEY,   t:KEY,   read:function(){try{return localStorage.getItem(KEY)}catch(_){return null}}},
       {k:KEY_B1,t:'B1',  read:function(){try{return localStorage.getItem(KEY_B1)}catch(_){return null}}},
       {k:KEY_B2,t:'B2',  read:function(){try{return localStorage.getItem(KEY_B2)}catch(_){return null}}},

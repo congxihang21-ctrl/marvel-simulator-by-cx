@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- ============================================================
+     四端适配优化版 · viewport 组合拳
+     1. width=device-width: 基础
+     2. initial-scale=1.0 + maximum-scale=1.0 + user-scalable=no: 禁双指缩放（抖音投放必选）
+     3. viewport-fit=cover: 刘海屏/灵动岛沉浸式（iOS/鸿蒙）
+     4. 加 viewport-fit 后须用 env(safe-area-inset-*) 避让
+============================================================ -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="漫威模拟器">
+<meta name="theme-color" content="#080b10">
+<!-- 鸿蒙/安卓 全屏沉浸模式 -->
+<meta name="color-scheme" content="dark">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
+<meta name="x5-fullscreen" content="true">
+<meta name="x5-page-mode" content="app">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+<!-- 禁止 IE 兼容模式 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.4 · 种子人生</title>
+<script>
+/* 面板去重精简 + 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端适配：iOS / 鸿蒙 / 安卓 X5 / Win Edge
+   在 CSS 之前跑一丢丢 JS：给 :root 注入 --vh / --sat / --sab 三个"真·视口尺寸"变量。
+   为什么要在 CSS 前跑？因为 100dvh 在 iOS17 Beta + WebView 某些组合下仍会被地址栏高度带偏，
+   而 visualViewport.height 才是"真实的、排除了工具栏/键盘的可见高度"。
+   safe-area 也顺手通过 JS 拉一次，作为 CSS env() 的兜底（鸿蒙/部分安卓没有 env() 实现）。*/
+(function(){try{
+  var r=document.documentElement;
+  var setV=function(){
+    try{
+      var w=window, vv=w.visualViewport;
+      var vh = vv && vv.height ? vv.height : (w.innerHeight||r.clientHeight||screen.height||667);
+      var vw = vv && vv.width  ? vv.width  : (w.innerWidth ||r.clientWidth ||screen.width ||375);
+      r.style.setProperty('--vh',(vh*0.01).toFixed(3)+'px');
+      r.style.setProperty('--dvh',(vh*0.01).toFixed(3)+'px');
+      r.style.setProperty('--vw',(vw*0.01).toFixed(3)+'px');
+      /* safe-area：优先 CSS env()，拿不到就用 getComputedStyle 反推 */
+      try{
+        var st=getComputedStyle(r);
+        var sat=parseFloat(st.getPropertyValue('--sat')||'0')||0;
+        var sab=parseFloat(st.getPropertyValue('--sab')||'0')||0;
+        if(!sat||!sab){
+          // 用一个临时元素去读 env()，因为 CSS 变量不会自己展开 env()
+          var t=document.createElement('div');
+          t.style.cssText='position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);left:-9999px;top:-9999px;width:1px;height:1px';
+          document.head.appendChild(t);
+          var cs=getComputedStyle(t);
+          r.style.setProperty('--sat',parseFloat(cs.paddingTop||'0')+'px');
+          r.style.setProperty('--sab',parseFloat(cs.paddingBottom||'0')+'px');
+          t.remove();
+        }
+      }catch(_){}
+    }catch(_){}
+  };
+  setV();
+  var evs=['resize','orientationchange','load','pageshow','scroll'];
+  if(window.visualViewport){window.visualViewport.addEventListener('resize',setV);window.visualViewport.addEventListener('scroll',setV)}
+  for(var i=0;i<evs.length;i++){window.addEventListener(evs[i],setV,{passive:true})}
+  setTimeout(setV,80);setTimeout(setV,500);
+}catch(_){}
+})();
+/* iOS 17 Beta pageshow 兜底：用户从 bfcache（前进/后退缓存）回来时，_boot 可能不会再跑，
+   所以我们在 window 上埋一个全局标记，pageshow.persisted=true 时强制重跑。后续 _boot 里会读它。*/
+window._MCU_FIXED_VH = true;
+</script>
+<link rel="stylesheet" href="css/design-tokens.css"><link rel="stylesheet" href="css/glass.css"><link rel="stylesheet" href="css/components.css"><link rel="stylesheet" href="css/responsive.css">
+<!-- ================= v1.8 · 华为/旧版浏览器兼容 polyfill（在 body 前、主脚本前执行） ================= -->
+<script>
+/* 防御：华为默认浏览器（华为浏览器/Quark 内核）可能缺少部分 ES2017+ API，
+   页面白屏大多是因为某行代码用了不支持的 API 直接报错，后续脚本全挂。
+   这里在最前面补齐 polyfill，保证主脚本能跑完。 */
+(function(){
+  try{
+    /* Promise.allSettled：离线目标启发式里用到了 */
+    if(!Promise.allSettled){
+      Promise.allSettled=function(arr){
+        return Promise.all((arr||[]).map(function(p){
+          return Promise.resolve(p).then(function(v){return{status:'fulfilled',value:v}},
+          function(r){return{status:'rejected',reason:r}})
+        }))
+      }
+    }
+    /* Array.prototype.flat / flatMap */
+    if(!Array.prototype.flat){
+      Array.prototype.flat=function(d){
+        d=d===undefined?1:d;var r=[];(function f(a,dep){
+          for(var i=0;i<a.length;i++){
+            if(Array.isArray(a[i])&&dep<d)f(a[i],dep+1);else r.push(a[i])
+          }
+        })(this,0);return r
+      }
+    }
+    if(!Array.prototype.flatMap){
+      Array.prototype.flatMap=function(cb){return Array.prototype.flat.call(this.map(cb),1)}
+    }
+    /* String.prototype.padStart */
+    if(!String.prototype.padStart){
+      String.prototype.padStart=function(t,s){
+        s=s||' ';t=t|0;var str=String(this);
+        while(str.length<t)str=s+str;return str.slice(0,t)
+      }
+    }
+    /* Object.assign 兜底（极旧内核） */
+    if(!Object.assign){
+      Object.assign=function(t){
+        t=t||{};for(var i=1;i<arguments.length;i++){
+          var s=arguments[i];if(s)for(var k in s){if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k]}
+        }return t
+      }
+    }
+    /* Number.isNaN */
+    if(!Number.isNaN){
+      Number.isNaN=function(v){return typeof v==='number'&&isNaN(v)}
+    }
+    /* requestAnimationFrame 兜底（极旧内核） */
+    if(!window.requestAnimationFrame){
+      window.requestAnimationFrame=function(cb){return setTimeout(cb,16)}
+      window.cancelAnimationFrame=function(id){clearTimeout(id)}
+    }
+    /* visualViewport 兜底：华为某些内核没有，用 innerHeight 代替 */
+    if(!window.visualViewport){
+      window.visualViewport={height:window.innerHeight||667,width:window.innerWidth||375,
+        addEventListener:function(){},removeEventListener:function(){}}
+    }
+    /* fetch 兜底：用 XMLHttpRequest 模拟一个最简版 */
+    if(!window.fetch){
+      window.fetch=function(url,opts){
+        opts=opts||{};
+        return new Promise(function(resolve,reject){
+          var xhr=new XMLHttpRequest();
+          xhr.open(opts.method||'GET',url,true);
+          var hs=opts.headers||{};for(var k in hs){if(hs[k])xhr.setRequestHeader(k,hs[k])}
+          xhr.responseType='text';
+          xhr.onload=function(){
+            resolve({ok:xhr.status>=200&&xhr.status<300,status:xhr.status,
+              text:function(){return Promise.resolve(xhr.responseText)},
+              json:function(){return Promise.resolve(JSON.parse(xhr.responseText))},
+              body:null})
+          };
+          xhr.onerror=function(){reject(new Error('Network error'))};
+          xhr.ontimeout=function(){reject(new Error('Timeout'))};
+          xhr.send(opts.body||null)
+        })
+      }
+    }
+    /* TextDecoder 兜底：极旧内核没有，用纯 JS decode */
+    if(typeof TextDecoder==='undefined'){
+      window.TextDecoder=function(){
+        this.decode=function(buf){
+          var s='', i;
+          if(buf){ for(i=0;i<buf.length;i++){ s+=String.fromCharCode(buf[i]); } }
+          try{ return decodeURIComponent(escape(s)); }catch(e){ return s; }
+        };
+        return this;
+      };
+    }
+    /* AbortController 兜底 */
+    if(typeof AbortController==='undefined'){
+      window.AbortController=function(){this.signal={aborted:false};this.abort=function(){this.signal.aborted=true}}
+    }
+  }catch(_){}
+})();
+</script>
+</head><body data-theme="dark" class="bg-cosmic">
+<div id="app" class="surface-page">
+  <!-- ============ 首页 ============ -->
+  <section id="page-home" class="page active">
+    <div class="home-wrap">
+      <div class="home-hero">
+        <div class="home-earth">EARTH · 616</div>
+        <div class="home-logo">MCU</div>
+        <h1 class="home-title">漫威电影宇宙 · 英雄纪元</h1>
+        <p class="home-subtitle">一段人生 · 一条时间线 · 无数种可能</p>
+        <div class="home-version">v2.4 · SEED &amp; FATE</div>
+      </div>
+      <div class="home-btns">
+        <button class="btn btn-primary btn-large glass-shine" onclick="UI.goCreate()">开始人生</button>
+        <button class="btn btn-glass btn-large" onclick="UI.goLoad()">继续人生</button>
+        <button class="btn btn-glass" onclick="UI.goCodex()">成就图鉴</button>
+        <button class="btn btn-glass" onclick="UI.goSettings()">设置</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 创角：时代选择 ============ -->
+  <section id="page-era" class="page">
+    <div class="page-header">
+      <button class="btn-back" onclick="UI.back()">←</button>
+      <h2>STEP 01 · 选择时代</h2>
+    </div>
+    <div class="era-grid" id="eraGrid"></div>
+  </section>
+
+  <!-- ============ 创角：出身选择 ============ -->
+  <section id="page-origin" class="page">
+    <div class="page-header">
+      <button class="btn-back" onclick="UI.back()">←</button>
+      <h2>STEP 02 · 选择出身</h2>
+    </div>
+    <div class="origin-grid" id="originGrid"></div>
+  </section>
+
+  <!-- ============ 创角：角色信息 ============ -->
+  <section id="page-char" class="page">
+    <div class="page-header">
+      <button class="btn-back" onclick="UI.back()">←</button>
+      <h2>STEP 03 · 角色信息</h2>
+    </div>
+    <div class="char-form">
+      <div class="form-row"><label>姓名</label><input id="charName" placeholder="输入你的名字" maxlength="12"></div>
+      <div class="form-row"><label>性别</label>
+        <select id="charGender"><option value="男">男</option><option value="女">女</option></select>
+      </div>
+      <div class="form-row"><label>年龄</label><input id="charAge" type="number" value="20" min="16" max="60"></div>
+      <div id="originPreview" class="origin-preview"></div>
+      <button class="btn btn-primary btn-large" onclick="Game.createSeed()">生成人生种子 →</button>
+    </div>
+  </section>
+
+  <!-- ============ 创角：种子生成 ============ -->
+  <section id="page-seed" class="page">
+    <div class="seed-result">
+      <div class="seed-label">LIFE SEED</div>
+      <div class="seed-code" id="seedCode">—</div>
+      <div class="seed-info" id="seedInfo"></div>
+      <button class="btn btn-primary btn-large" onclick="Game.start()">进入人生</button>
+    </div>
+  </section>
+
+  <!-- ============ 游戏主界面 Dashboard ============ -->
+  <section id="page-game" class="page game-page">
+    <header class="game-topbar">
+      <div class="topbar-info">
+        <div class="topbar-name" id="topName">—</div>
+        <div class="topbar-meta"><span id="topAge">—</span> · <span id="topDate">—</span> · <span id="topLoc">—</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-ovr" id="ovrBadge">0<small>OVR</small></div>
+        <button class="topbar-menu" onclick="UI.openMenu()">☰</button>
+      </div>
+    </header>
+    <div class="game-body">
+      <!-- 状态模块条 -->
+      <div class="status-strip">
+        <div class="status-chip"><span class="sc-label">健康</span><span class="sc-value health" id="chipHealth">健康</span></div>
+        <div class="status-chip"><span class="sc-label">压力</span><span class="sc-value stress-low" id="chipStress">0</span></div>
+        <div class="status-chip"><span class="sc-label">金钱</span><span class="sc-value money" id="chipMoney">$0</span></div>
+        <div class="status-chip"><span class="sc-label">势力</span><span class="sc-value" id="chipFaction">—</span></div>
+      </div>
+      <!-- 事件卡 -->
+      <div class="event-card" id="eventCard">
+        <div class="event-head">
+          <span class="event-level-badge" id="eventLevel">日常</span>
+          <span class="event-date" id="eventDate">—</span>
+        </div>
+        <h3 class="event-title" id="eventTitle">—</h3>
+        <p class="event-text" id="eventText">—</p>
+        <div class="choices" id="choices"></div>
+      </div>
+    </div>
+    <div class="game-bottom">
+      <button class="btn-bottom" onclick="UI.toggleSide()">属性</button>
+      <button class="btn-bottom" onclick="UI.showTimeline()">时间轴</button>
+      <button class="btn-bottom" onclick="UI.showNPCs()">人物</button>
+      <button class="btn-bottom" onclick="UI.showAchievements()">成就</button>
+    </div>
+  </section>
+
+  <!-- ============ 侧边抽屉 ============ -->
+  <div class="drawer-mask" id="drawerMask" onclick="UI.toggleSide()"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-tabs">
+      <button class="dtab active" data-tab="stats" onclick="UI.switchTab('stats')">属性</button>
+      <button class="dtab" data-tab="equip" onclick="UI.switchTab('equip')">装备</button>
+      <button class="dtab" data-tab="rel" onclick="UI.switchTab('rel')">关系</button>
+      <button class="dtab" data-tab="state" onclick="UI.switchTab('state')">状态</button>
+    </div>
+    <div class="drawer-content" id="drawerContent"></div>
+  </aside>
+
+  <!-- ============ 模态框 ============ -->
+  <div class="modal" id="modal">
+    <div class="modal-box" id="modalBox">
+      <button class="modal-close" onclick="UI.closeModal()">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ 判定动画层 ============ -->
+  <div class="judge-overlay" id="judgeOverlay">
+    <div class="judge-box">
+      <div class="judge-title">命运判定</div>
+      <div class="judge-rate" id="judgeRate">—</div>
+      <div class="judge-bar">
+        <div class="judge-zone fail">失败</div>
+        <div class="judge-zone success">成功</div>
+        <div class="judge-pointer" id="judgePointer">▲</div>
+      </div>
+      <div class="judge-result" id="judgeResult"></div>
+    </div>
+  </div>
+
+  <!-- ============ Toast ============ -->
+  <div class="toast-wrap" id="toastWrap"></div>
+</div>
+<script>
+/* ===== v2.4 种子人生 · 核心数据与逻辑 ===== */
+const STAT_DEFS = [
+  {key:"体能",icon:"💪"},{key:"格斗",icon:"🥊"},{key:"敏捷",icon:"🏃"},{key:"智力",icon:"🧠"},
+  {key:"科技",icon:"🔬"},{key:"超能",icon:"✨"},{key:"魅力",icon:"🗣"},{key:"意志",icon:"🛡"}
+];
+const STAT_KEYS = STAT_DEFS.map(s=>s.key);
+const OVR_TIERS = [
+  {min:80,name:"传奇",color:"#f59e0b"},{min:65,name:"英雄",color:"#ef4444"},
+  {min:50,name:"义警",color:"#8b5cf6"},{min:35,name:"精锐",color:"#3b82f6"},
+  {min:20,name:"受训者",color:"#10b981"},{min:0,name:"凡人",color:"#6b7280"}
+];
+function calcOvr(stats){
+  let s = stats, v = (s.体能+s.格斗+s.敏捷+s.智力+s.科技+s.魅力+s.意志 + (s.超能||0)*1.5)/8.5;
+  return Math.max(0,Math.min(99,Math.round(v)));
+}
+function ovrTier(ovr){for(let t of OVR_TIERS){if(ovr>=t.min)return t;}return OVR_TIERS[OVR_TIERS.length-1];}
+
+const ERAS = [
+  {no:"ERA 01",id:"ww2",name:"二战与超级士兵",years:"1943–1945",difficulty:"★★☆",tags:["战争","血清","九头蛇"],factions:["美军","SSR","九头蛇"],desc:"世界仍处于战争之中。九头蛇正在暗中崛起。超级士兵计划即将改变历史。这是一个普通人也可能成为传奇的时代。"},
+  {no:"ERA 02",id:"coldwar",name:"冷战与神盾局",years:"1950–1995",difficulty:"★★★",tags:["间谍","情报","潜伏"],factions:["SHIELD","HYDRA","独立"],desc:"铁幕降下，世界分裂为两大阵营。神盾局在阴影中守护和平，而九头蛇从未真正消亡。每一份情报都可能改变历史走向。"},
+  {no:"ERA 03",id:"heroage",name:"英雄黎明",years:"2008–2011",difficulty:"★★☆",tags:["科技","钢铁侠","崛起"],factions:["Stark Ind.","SHIELD","平民"],desc:"托尼·斯塔克在沙漠中宣布自己是钢铁侠。一个属于超级英雄的时代即将开启，但黎明前总是最黑暗的。"},
+  {no:"ERA 04",id:"newyork",name:"纽约大战",years:"2012–2013",difficulty:"★★★",tags:["入侵","复仇者","生存"],factions:["Avengers","SHIELD","市民"],desc:"洛基带着奇塔瑞大军降临纽约。天空中出现了虫洞，城市陷入战火。这是复仇者联盟的第一次集结，也是普通人的灾难日。"},
+  {no:"ERA 05",id:"ultron",name:"奥创与索科维亚",years:"2014–2015",difficulty:"★★★",tags:["AI","毁灭","幻视"],factions:["Avengers","HYDRA","Sokovia"],desc:"托尼的和平愿景诞生了奥创——一个想要毁灭人类的人工智能。索科维亚漂浮在天空，而幻视第一次睁开了眼睛。"},
+  {no:"ERA 06",id:"civilwar",name:"内战与协议",years:"2016–2017",difficulty:"★★★★",tags:["阵营","分裂","选择"],factions:["Team Iron Man","Team Cap","独立"],desc:"索科维亚协议将超级英雄撕裂为两个阵营。钢铁侠与美国队长对立，而你必须做出选择——这个选择将改变一切。"},
+  {no:"ERA 07",id:"infinity",name:"无限战争与消失",years:"2018–2023",difficulty:"★★★★★",tags:["灭霸","宝石","Blip"],factions:["Avengers","幸存者","消失者"],desc:"灭霸来了。六颗无限宝石，一个响指，半个宇宙化为尘埃。你可能战斗，可能求生，可能消失，也可能在废墟中等待五年。"},
+  {no:"ERA 08",id:"multiverse",name:"归来与多元宇宙",years:"2023–2026",difficulty:"★★★★",tags:["多元宇宙","时间异常","新英雄"],factions:["Avengers遗产","新英雄","异常者"],desc:"Blip之后，世界回来了，但一切都不同了。多元宇宙的裂缝正在打开，时间出现异常，新的英雄在混乱中崛起。"},
+];
+
+let SEEDS = {
+  soldier:{name:"🪖 陆军步兵",tag:"前线战斗",desc:"一名普通步兵。你没有特殊能力，但在枪林弹雨中，每一个选择都可能改变命运。",start:"ww2_s_001",
+    stats:{体能:55,格斗:40,敏捷:35,智力:28,科技:12,超能:0,魅力:30,意志:55}},
+  pilot:{name:"✈️ 陆军航空队飞行员",tag:"空战王牌",desc:"驾驶战机翱翔天际。一次被击落，可能改变你的整个人生。",start:"ww2_p_001",
+    stats:{体能:45,格斗:25,敏捷:60,智力:35,科技:40,超能:0,魅力:35,意志:45}},
+  medic:{name:"🏥 随军军医",tag:"生死之间",desc:"在战场上救人。你见过太多死亡，这会改变你的灵魂。",start:"ww2_m_001",
+    stats:{体能:35,格斗:20,敏捷:35,智力:60,科技:45,超能:0,魅力:40,意志:50}},
+  worker:{name:"🔧 兵工厂工人",tag:"后方支柱",desc:"在流水线上制造武器。一次意外，可能让你接触到不该知道的东西。",start:"ww2_w_001",
+    stats:{体能:40,格斗:20,敏捷:30,智力:35,科技:40,超能:0,魅力:30,意志:40}},
+  journalist:{name:"📰 报社记者",tag:"真相追寻者",desc:"用笔记录战争。有些真相，知道的人会消失。",start:"ww2_j_001",
+    stats:{体能:30,格斗:15,敏捷:35,智力:55,科技:20,超能:0,魅力:55,意志:45}},
+  musician:{name:"🎷 爵士音乐家",tag:"夜色人生",desc:"在酒吧里吹萨克斯。人脉、黑帮、毒品，战争从不会放过任何人。",start:"ws_mu_001",
+    stats:{体能:30,格斗:25,敏捷:40,智力:40,科技:15,超能:0,魅力:65,意志:35}},
+  gangster:{name:"🔫 街头黑帮",tag:"地下之王",desc:"在布鲁克林收保护费。战争让生意变好，也让风险变大。",start:"ws_g_001",
+    stats:{体能:45,格斗:50,敏捷:40,智力:30,科技:10,超能:0,魅力:45,意志:40}},
+  japanese:{name:"🚧 日裔美国人",tag:"集中营囚徒",desc:"珍珠港之后，你被关进了集中营。在这里，你要决定怎么活。",start:"ws_jp_001",
+    stats:{体能:35,格斗:20,敏捷:30,智力:45,科技:30,超能:0,魅力:35,意志:55}},
+  wakandan:{name:"🐆 瓦坎达留学生",tag:"振金之子",desc:"你来自一个隐藏的非洲王国。振金的秘密，不能让外人知道。",start:"ws_wk_001",
+    stats:{体能:40,格斗:35,敏捷:40,智力:55,科技:50,超能:0,魅力:40,意志:50}},
+  mutant:{name:"🧬 隐藏变种人",tag:"异类",desc:"你发现自己有特殊能力。在这个时代，被发现意味着死亡。",start:"ws_mt_001",
+    stats:{体能:35,格斗:30,敏捷:40,智力:40,科技:25,超能:20,魅力:30,意志:45}},
+};
+let NODES = {
+/* ===== 士兵路线 ===== */
+ww2_s_001:{title:"入伍",level:"日常",text:"你站在征兵办公室里。1943年的春天，战争还在继续。你签下了名字，成为了美国陆军的一名步兵。",choices:[
+  {label:"满怀热血，准备战斗",next:"ww2_s_002"},
+  {label:"有点害怕，但还是上了",next:"ww2_s_002",effects:{意志:+3}},
+  {label:"先打听一下部队情况",next:"ww2_s_002",effects:{魅力:+2}}]},
+ww2_s_002:{title:"新兵营",level:"日常",text:"六周的基础训练。每天凌晨五点起床，跑步、射击、匍匐前进。你的身体在变硬，心也在变硬。",choices:[
+  {label:"全力以赴训练",check:"体能",base:60,success:{next:"ww2_s_003",effects:{体能:+5,格斗:+3}},fail:{next:"ww2_s_003",effects:{体能:+2,injured:true}}},
+  {label:"和战友搞好关系",check:"魅力",base:55,success:{next:"ww2_s_003",effects:{魅力:+3,rel_bucky:15}},fail:{next:"ww2_s_003"}},
+  {label:"保持中等水平",next:"ww2_s_003",effects:{体能:+2}}]},
+ww2_s_003:{title:"认识巴基",level:"人生",text:"训练间隙，一个叫巴基的中士走过来拍了拍你的肩。\"嘿，新兵，听说你布鲁克林来的？我也是。\"",choices:[
+  {label:"热情地打招呼",check:"魅力",base:65,success:{next:"ww2_s_004",effects:{rel_bucky:20,魅力:+2}},fail:{next:"ww2_s_004",effects:{rel_bucky:5}}},
+  {label:"礼貌但保持距离",next:"ww2_s_004",effects:{rel_bucky:8}},
+  {label:"问问他认不认识史蒂夫·罗杰斯",check:"智力",base:45,success:{next:"ww2_s_004",effects:{rel_bucky:10,flag_knowSteve:true}},fail:{next:"ww2_s_004"}}]},
+ww2_s_004:{title:"酒吧之夜",level:"日常",text:"周末休假，你和巴基去了镇上的酒吧。角落里有个瘦弱的年轻人正在被两个大兵欺负。",choices:[
+  {label:"上去帮忙",check:"格斗",base:50,success:{next:"ww2_s_005",effects:{rel_steve:30,魅力:+3}},fail:{next:"ww2_s_005",effects:{injured:true,rel_steve:10}}},
+  {label:"叫上巴基一起上",check:"魅力",base:60,success:{next:"ww2_s_005",effects:{rel_steve:25,rel_bucky:10}},fail:{next:"ww2_s_005",effects:{rel_steve:15}}},
+  {label:"多一事不如少一事",next:"ww2_s_005",effects:{rel_bucky:-5}}]},
+ww2_s_005:{title:"史蒂夫·罗杰斯",level:"人生",text:"那个瘦弱的年轻人叫史蒂夫·罗杰斯。他眼神坚定，虽然身材瘦小，但有一种不服输的劲头。他说他想参军，但总是被拒绝。",choices:[
+  {label:"鼓励他坚持下去",check:"意志",base:60,success:{next:"ww2_s_006",effects:{rel_steve:20,意志:+3}},fail:{next:"ww2_s_006"}},
+  {label:"帮他想想办法",check:"智力",base:50,success:{next:"ww2_s_006",effects:{rel_steve:25,智力:+2}},fail:{next:"ww2_s_006"}},
+  {label:"劝他放弃",next:"ww2_s_006",effects:{rel_steve:-10}}]},
+ww2_s_006:{title:"神秘的招募",level:"英雄",text:"一位叫厄斯金的博士找到了你。他说有一个秘密计划，需要身体素质优秀的志愿者。\"你愿意改变世界吗？\"",cond:{flag_knowSteve:true},choices:[
+  {label:"我愿意",check:"意志",base:55,success:{next:"ww2_s_007",effects:{flag_serum:true}},fail:{next:"ww2_s_010"}},
+  {label:"先问问史蒂夫的想法",check:"智力",base:60,success:{next:"ww2_s_007_steve"},fail:{next:"ww2_s_010"}},
+  {label:"不感兴趣",next:"ww2_s_010"}]},
+ww2_s_007:{title:"超级士兵计划",level:"英雄",text:"你躺在实验台上。血清注入你的身体。剧痛，然后是力量。你感觉自己在蜕变。",choices:[
+  {label:"咬牙挺住",check:"意志",base:50,success:{next:"ww2_s_008",effects:{体能:+30,格斗:+20,敏捷:+15,意志:+10}},fail:{next:"ending_serum_fail"}}]},
+ww2_s_007_steve:{title:"推荐史蒂夫",level:"英雄",text:"你告诉厄斯金博士，史蒂夫·罗杰斯虽然瘦弱，但他的内心比任何人都强大。博士若有所思。",choices:[
+  {label:"坚持推荐史蒂夫",next:"ww2_s_009",effects:{rel_steve:40,flag_steveCap:true}}]},
+ww2_s_008:{title:"新的身体",level:"英雄",text:"血清成功了。你变得强壮、敏捷、充满力量。你成为了超级士兵。但这只是开始。",choices:[
+  {label:"接受使命",next:"ww2_s_011"}]},
+ww2_s_009:{title:"史蒂夫的选择",level:"英雄",text:"史蒂夫接受了血清。他从一个瘦弱的青年变成了完美的人类。你看着他，知道历史已经开始改变。",choices:[
+  {label:"为他高兴",next:"ww2_s_010",effects:{rel_steve:30}},
+  {label:"有点嫉妒",next:"ww2_s_010",effects:{意志:-3}}]},
+ww2_s_010:{title:"前线",level:"日常",text:"无论如何，你被派往了欧洲前线。子弹在头顶飞过，泥土和血的气味充斥鼻腔。这就是真正的战争。",choices:[
+  {label:"英勇作战",check:"格斗",base:50,success:{next:"ww2_s_012",effects:{格斗:+3,魅力:+2}},fail:{next:"ww2_s_012",effects:{injured:true}}},
+  {label:"小心行事",check:"敏捷",base:55,success:{next:"ww2_s_012"},fail:{next:"ww2_s_012",effects:{体能:-2}}},
+  {label:"照顾受伤的战友",check:"意志",base:60,success:{next:"ww2_s_012",effects:{魅力:+3,rel_bucky:15}},fail:{next:"ww2_s_012"}}]},
+ww2_s_011:{title:"美国队长",level:"世界",text:"你被赋予了星条旗战衣和振金圆盾。你成为了美国队长。红骷髅在前方等着你。",choices:[
+  {label:"追击红骷髅",next:"ww2_s_013"}]},
+ww2_s_012:{title:"1944年的冬天",level:"日常",text:"战争进入第二个冬天。你经历了太多。有人死了，有人疯了，有人还在坚持。",choices:[
+  {label:"继续战斗",next:"ww2_s_014"},
+  {label:"申请调回后方",check:"魅力",base:40,success:{next:"ww2_s_015"},fail:{next:"ww2_s_014"}}]},
+ww2_s_013:{title:"红骷髅",level:"世界",text:"约翰·施密特站在你面前，脸上带着扭曲的红色面具。\"你以为你能阻止我吗？\"",choices:[
+  {label:"正面决战",check:"格斗",base:60,success:{next:"ending_captain_america"},fail:{next:"ending_red_skull_victor"}},
+  {label:"智取",check:"智力",base:55,success:{next:"ending_captain_america"},fail:{next:"ending_red_skull_victor"}}]},
+ww2_s_014:{title:"战争结束",level:"日常",text:"1945年，德国投降。战争结束了。你还活着，这就够了。",choices:[
+  {label:"回家",next:"ending_survivor"}]},
+ww2_s_015:{title:"后方",level:"日常",text:"你被调到后方训练新兵。远离了前线，但战争的阴影还在。",choices:[
+  {label:"安稳度日",next:"ending_war_hero"}]},
+/* ===== 飞行员路线 ===== */
+ww2_p_001:{title:"蓝天之上",level:"日常",text:"你坐在P-47战斗机的座舱里。引擎轰鸣，蓝天在你脚下。你是陆军航空队的一名飞行员。",choices:[
+  {label:"热爱飞行",next:"ww2_p_002",effects:{敏捷:+2}},
+  {label:"只是服从命令",next:"ww2_p_002"}]},
+ww2_p_002:{title:"第一次轰炸",level:"人生",text:"你执行第一次轰炸任务。高射炮在你周围炸开，僚机被击中了。",choices:[
+  {label:"坚持投弹",check:"意志",base:60,success:{next:"ww2_p_003",effects:{意志:+3}},fail:{next:"ww2_p_003",effects:{injured:true}}},
+  {label:"寻找僚机",check:"敏捷",base:50,success:{next:"ww2_p_003",effects:{魅力:+3}},fail:{next:"ww2_p_003"}}]},
+ww2_p_003:{title:"王牌",level:"日常",text:"你的击落数在增加。战友们叫你\"王牌\"。但每次出击，你都可能回不来。",choices:[
+  {label:"继续出击",check:"敏捷",base:55,success:{next:"ww2_p_004"},fail:{next:"ww2_p_005"}}]},
+ww2_p_004:{title:"勋章",level:"人生",text:"你获得了飞行十字勋章。你是真正的英雄。",choices:[
+  {label:"接受荣誉",next:"ending_ace_pilot"}]},
+ww2_p_005:{title:"被击落",level:"人生",text:"你的战机中弹了。你跳伞了，落在了敌占区。",choices:[
+  {label:"躲起来等待救援",check:"敏捷",base:50,success:{next:"ww2_p_006"},fail:{next:"ending_pow"}},
+  {label:"尝试逃回盟军防线",check:"意志",base:45,success:{next:"ww2_p_006"},fail:{next:"ending_pow"}}]},
+ww2_p_006:{title:"归队",level:"日常",text:"你终于回到了部队。但你已经变了。",choices:[
+  {label:"重返蓝天",next:"ww2_p_004"}]},
+/* ===== 军医路线 ===== */
+ww2_m_001:{title:"野战医院",level:"日常",text:"你是一名随军军医。帐篷里全是伤兵，尖叫声和血腥味让你几乎窒息。",choices:[
+  {label:"全力救治",next:"ww2_m_002",effects:{智力:+2}},
+  {label:"先稳定情绪",next:"ww2_m_002",effects:{意志:+2}}]},
+ww2_m_002:{title:"第一个死亡",level:"人生",text:"一个19岁的士兵死在了你的手术台上。你握着他的手，看着他的眼睛失去光泽。",choices:[
+  {label:"继续工作",check:"意志",base:55,success:{next:"ww2_m_003"},fail:{next:"ww2_m_003",effects:{stress:+20}}},
+  {label:"走出帐篷喘口气",next:"ww2_m_003",effects:{stress:-10}}]},
+ww2_m_003:{title:"药品短缺",level:"日常",text:"吗啡快用完了。你必须决定谁能得到镇痛，谁只能咬牙忍着。",choices:[
+  {label:"优先重伤员",check:"智力",base:60,success:{next:"ww2_m_004"},fail:{next:"ww2_m_004",effects:{魅力:-3}}},
+  {label:"平均分配",next:"ww2_m_004",effects:{魅力:+2}}]},
+ww2_m_004:{title:"医学突破",level:"英雄",text:"你在战场上摸索出了一种新的止血方法。也许能救下更多人。",choices:[
+  {label:"推广这个方法",check:"科技",base:50,success:{next:"ending_medic_hero"},fail:{next:"ww2_m_005"}}]},
+ww2_m_005:{title:"坚持",level:"日常",text:"你继续在前线救死扶伤。每救一个人，你就多一份活下去的理由。",choices:[
+  {label:"等到战争结束",next:"ending_survivor_medic"}]},
+/* ===== 兵工厂工人路线 ===== */
+ww2_w_001:{title:"流水线",level:"日常",text:"你在底特律的兵工厂工作。每天12小时，制造步枪和子弹。你的手被机油染黑。",choices:[
+  {label:"努力工作",next:"ww2_w_002",effects:{科技:+2}},
+  {label:"摸鱼",next:"ww2_w_002",effects:{stress:-5}}]},
+ww2_w_002:{title:"安全事故",level:"人生",text:"冲压机出了故障。你的工友被卷了进去。你冲上去按下了急停。",choices:[
+  {label:"救人",check:"敏捷",base:55,success:{next:"ww2_w_003",effects:{魅力:+5}},fail:{next:"ww2_w_003",effects:{injured:true}}},
+  {label:"去找工头",next:"ww2_w_003",effects:{魅力:-3}}]},
+ww2_w_003:{title:"改进建议",level:"人生",text:"你发现了一个提高产量的方法。工头说可以试试，但如果失败了你会被开除。",choices:[
+  {label:"提出改进",check:"科技",base:50,success:{next:"ww2_w_004",effects:{科技:+5,钱:200}},fail:{next:"ww2_w_004",effects:{钱:-50}}},
+  {label:"保守一点",next:"ww2_w_004"}]},
+ww2_w_004:{title:"升职",level:"人生",text:"你的改进成功了。你被提拔为车间主任。",choices:[
+  {label:"继续搞发明",next:"ww2_w_005"},
+  {label:"安稳当主任",next:"ending_factory_manager"}]},
+ww2_w_005:{title:"秘密武器",level:"英雄",text:"你听说军方在秘密研究一种能量武器。你有机会参与。",choices:[
+  {label:"参与研究",check:"科技",base:45,success:{next:"ending_weapon_scientist"},fail:{next:"ww2_w_004"}}]},
+/* ===== 记者路线 ===== */
+ww2_j_001:{title:"编辑部",level:"日常",text:"你是《纽约时报》的实习记者。主编扔给你一篇征兵报道。\"去前线看看。\"",choices:[
+  {label:"兴奋地出发",next:"ww2_j_002",effects:{魅力:+2}},
+  {label:"有点紧张",next:"ww2_j_002",effects:{意志:+1}}]},
+ww2_j_002:{title:"前线报道",level:"人生",text:"你跟着部队来到了欧洲。你第一次看到真正的战场。",choices:[
+  {label:"如实报道",check:"意志",base:60,success:{next:"ww2_j_003",effects:{意志:+3}},fail:{next:"ww2_j_003"}},
+  {label:"写点英雄故事",check:"魅力",base:55,success:{next:"ww2_j_003",effects:{魅力:+3}},fail:{next:"ww2_j_003"}}]},
+ww2_j_003:{title:"丑闻",level:"人生",text:"你发现了军方掩盖的一起事故。如果报道出来，会有大麻烦。",choices:[
+  {label:"揭露真相",check:"意志",base:50,success:{next:"ww2_j_004"},fail:{next:"ending_journalist_killed"}},
+  {label:"假装没看见",next:"ww2_j_004",effects:{意志:-5}}]},
+ww2_j_004:{title:"普利策",level:"人生",text:"你的系列报道引起了轰动。你获得了普利策奖提名。",choices:[
+  {label:"继续追查",next:"ending_pulitzer"}]},
+/* ===== 音乐家路线 ===== */
+ws_mu_001:{title:"哈莱姆之夜",level:"日常",text:"你在哈莱姆的爵士俱乐部吹萨克斯。夜色、酒精、音乐，这是你的世界。",choices:[
+  {label:"沉浸在音乐里",next:"ws_mu_002",effects:{魅力:+2}},
+  {label:"看看台下的观众",next:"ws_mu_002"}]},
+ws_mu_002:{title:"经纪人",level:"人生",text:"一个叫乔的经纪人找到你。\"孩子，你有天赋。想不想出唱片？\"",choices:[
+  {label:"签约",check:"魅力",base:55,success:{next:"ws_mu_003",effects:{钱:150}},fail:{next:"ws_mu_003",effects:{钱:-30}}},
+  {label:"再想想",next:"ws_mu_003"}]},
+ws_mu_003:{title:"毒瘾诱惑",level:"人生",text:"后台有人递过来一包东西。\"试试这个，灵感会来的。\"",choices:[
+  {label:"拒绝",check:"意志",base:60,success:{next:"ws_mu_004",effects:{意志:+3}},fail:{next:"ws_mu_004",effects:{stress:+10}}},
+  {label:"试试看",next:"ws_mu_004",effects:{stress:-10,钱:-50}}]},
+ws_mu_004:{title:"成名",level:"人生",text:"你的唱片火了。你成了哈莱姆的明星。",choices:[
+  {label:"继续唱歌",next:"ending_jazz_star"}]},
+/* ===== 黑帮路线 ===== */
+ws_g_001:{title:"布鲁克林",level:"日常",text:"你是布鲁克林一个小帮派的成员。今天的任务是收保护费。",choices:[
+  {label:"强硬收债",next:"ws_g_002",effects:{魅力:-2,钱:30}},
+  {label:"客气一点",next:"ws_g_002",effects:{魅力:+2,钱:20}}]},
+ws_g_002:{title:"火并",level:"人生",text:"和意大利帮的地盘争端升级了。今晚要动手。",choices:[
+  {label:"冲在前面",check:"格斗",base:50,success:{next:"ws_g_003",effects:{格斗:+3,钱:100}},fail:{next:"ws_g_003",effects:{injured:true}}},
+  {label:"放风",next:"ws_g_003",effects:{钱:40}}]},
+ws_g_003:{title:"老大的赏识",level:"人生",text:"老大注意到了你。\"小子，有胆。跟我干大的吧。\"",choices:[
+  {label:"跟着老大",check:"意志",base:55,success:{next:"ws_g_004"},fail:{next:"ws_g_004"}},
+  {label:"想洗白",check:"智力",base:50,success:{next:"ending_gangster_clean"},fail:{next:"ws_g_004"}}]},
+ws_g_004:{title:"战争财",level:"人生",text:"战争让黑市生意火爆。你走私武器、食品、药品。",choices:[
+  {label:"继续赚钱",next:"ending_gangster_boss"}]},
+/* ===== 日裔美国人路线 ===== */
+ws_jp_001:{title:"集中营",level:"日常",text:"珍珠港之后，你和家人被关进了集中营。铁丝网、守卫、尘土。这就是你的新家。",choices:[
+  {label:"忍耐",next:"ws_jp_002",effects:{意志:+2}},
+  {label:"愤怒",next:"ws_jp_002",effects:{意志:-2}}]},
+ws_jp_002:{title:"抗争",level:"人生",text:"营里有人在组织抗议。你要加入吗？",choices:[
+  {label:"加入抗议",check:"意志",base:55,success:{next:"ws_jp_003",effects:{魅力:+5}},fail:{next:"ws_jp_003",effects:{injured:true}}},
+  {label:"默默忍受",next:"ws_jp_003"}]},
+ws_jp_003:{title:"参军证明",level:"人生",text:"政府说日裔可以参军证明忠诚。你的家人不同意。",choices:[
+  {label:"参军",check:"意志",base:50,success:{next:"ww2_s_010"},fail:{next:"ws_jp_004"}},
+  {label:"留在营里",next:"ws_jp_004"}]},
+ws_jp_004:{title:"自由",level:"人生",text:"1945年，集中营关闭了。你自由了，但你的人生已经改变了。",choices:[
+  {label:"重建生活",next:"ending_japanese_freed"}]},
+/* ===== 瓦坎达路线 ===== */
+ws_wk_001:{title:"异乡",level:"日常",text:"你是瓦坎达派往美国的留学生。你的任务是学习，同时保护振金的秘密。",choices:[
+  {label:"专注学业",next:"ws_wk_002",effects:{智力:+2}},
+  {label:"观察这个国家",next:"ws_wk_002",effects:{魅力:+2}}]},
+ws_wk_002:{title:"振金危机",level:"人生",text:"你听说有人在走私振金。是瓦坎达的叛徒。",choices:[
+  {label:"追查",check:"智力",base:55,success:{next:"ws_wk_003"},fail:{next:"ws_wk_003"}},
+  {label:"报告国内",next:"ws_wk_003"}]},
+ws_wk_003:{title:"守护者",level:"英雄",text:"你必须决定是保护秘密，还是利用这个机会。",choices:[
+  {label:"保护振金",check:"意志",base:60,success:{next:"ending_wakandan_guardian"},fail:{next:"ws_wk_004"}},
+  {label:"暗中交易",check:"智力",base:50,success:{next:"ending_wakandan_traitor"},fail:{next:"ws_wk_004"}}]},
+ws_wk_004:{title:"回家",level:"人生",text:"战争结束了。你该回瓦坎达了。",choices:[
+  {label:"带着秘密回家",next:"ending_wakandan_return"}]},
+/* ===== 变种人路线 ===== */
+ws_mt_001:{title:"觉醒",level:"日常",text:"最近你发现自己不对劲。一紧张，周围的东西就会移动。你是...变种人？",choices:[
+  {label:"害怕",next:"ws_mt_002",effects:{超能:+5}},
+  {label:"好奇",next:"ws_mt_002",effects:{超能:+3,智力:+2}}]},
+ws_mt_002:{title:"暴露",level:"人生",text:"有人看到你用了能力。你必须做出选择。",choices:[
+  {label:"逃跑",check:"敏捷",base:55,success:{next:"ws_mt_003"},fail:{next:"ending_mutant_captured"}},
+  {label:"隐藏起来",check:"意志",base:50,success:{next:"ws_mt_003"},fail:{next:"ending_mutant_captured"}}]},
+ws_mt_003:{title:"地下",level:"英雄",text:"你加入了一个隐藏变种人的组织。他们说你有潜力。",choices:[
+  {label:"训练能力",check:"超能",base:50,success:{next:"ending_mutant_legend"},fail:{next:"ws_mt_004"}},
+  {label:"过普通生活",next:"ending_mutant_hidden"}]},
+ws_mt_004:{title:"坚持",level:"日常",text:"你每天都在练习。能力在变强。",choices:[
+  {label:"继续训练",next:"ending_mutant_legend"}]},
+/* ===== 共享彩蛋节点 ===== */
+easter_tesseract:{title:"💎 神秘碎片",level:"英雄",text:"你在废墟中捡到一块发着蓝光的石头。它温暖你的手掌，仿佛有生命。",choices:[
+  {label:"收起来",effects:{科技:+10,flag_tesseract:true}},
+  {label:"扔掉",effects:{}}]},
+};
+let ENDINGS = {
+  captain_america:{name:"🇺🇸 美国队长",rarity:"传奇",text:"你成为了美国队长，击败了红骷髅，为自由而战。历史将永远铭记你的名字。"},
+  red_skull_victor:{name:"💀 红骷髅的胜利",rarity:"史诗",text:"你没能阻止红骷髅。九头蛇的阴影笼罩了世界。"},
+  serum_fail:{name:"💉 实验体 #002",rarity:"稀有",text:"血清在你体内产生了剧烈反应。你活了下来，但你再也不是原来的你了。"},
+  kia:{name:"💀 战死沙场",rarity:"普通",text:"你倒在了异国的土地上。你的名字被刻在了阵亡将士纪念碑上。"},
+  war_hero:{name:"🎖️ 战争英雄",rarity:"稀有",text:"你活着回来了，带着勋章和伤疤。你是英雄。"},
+  survivor:{name:"🏠 平安老兵",rarity:"普通",text:"你平安度过了战争。回到家乡，继续做一个普通人。这也是一种胜利。"},
+  frozen:{name:"❄️ 冰封沉睡",rarity:"传奇",text:"你被冰封在了北极。几十年后，你会醒来，看到一个完全不同的世界。"},
+  hydra:{name:"🐍 九头蛇潜伏者",rarity:"史诗",text:"你加入了九头蛇。在阴影中，你改变了世界的走向。"},
+  ace_pilot:{name:"✈️ 王牌飞行员",rarity:"稀有",text:"你击落了无数敌机，成为了空军的传奇。"},
+  pow:{name:"🏳️ 战俘幸存者",rarity:"稀有",text:"你在战俘营里熬过了战争。这段经历改变了你。"},
+  medic_hero:{name:"🏥 战地神医",rarity:"稀有",text:"你救下了数百名士兵。他们叫你天使。"},
+  survivor_medic:{name:"🏥 幸存的军医",rarity:"普通",text:"你活了下来，带着那些没能救回来的人的记忆。"},
+  factory_manager:{name:"🔧 车间主任",rarity:"普通",text:"你在兵工厂干到了战争结束，成了车间主任。安稳的一生。"},
+  weapon_scientist:{name:"🔬 武器科学家",rarity:"稀有",text:"你参与了秘密武器的研发。你的发明改变了战争。"},
+  journalist_killed:{name:"📰 真相殉道者",rarity:"史诗",text:"你揭露了真相，但他们让你消失了。你的报道改变了历史。"},
+  pulitzer:{name:"📰 普利策奖得主",rarity:"稀有",text:"你的报道获得了普利策奖。你用一支笔改变了世界。"},
+  jazz_star:{name:"🎷 爵士明星",rarity:"稀有",text:"你成了哈莱姆最火的爵士乐手。音乐让你忘记了战争。"},
+  gangster_clean:{name:"💼 黑道从良",rarity:"稀有",text:"你洗白了，成了合法商人。但过去的影子还在。"},
+  gangster_boss:{name:"🔫 地下之王",rarity:"史诗",text:"你在战争中发了财，成了纽约地下世界的王。"},
+  japanese_freed:{name:"✊ 自由",rarity:"稀有",text:"集中营关闭了。你自由了，但代价是失去的那些年。"},
+  wakandan_guardian:{name:"🐆 瓦坎达守护者",rarity:"传奇",text:"你保护了振金的秘密。瓦坎达永远感激你。"},
+  wakandan_traitor:{name:"🐆 振金叛徒",rarity:"史诗",text:"你出卖了振金的秘密。瓦坎达的诅咒将跟随你一生。"},
+  wakandan_return:{name:"🐆 归乡",rarity:"普通",text:"你回到了瓦坎达。外面的世界很复杂，但家永远在这里。"},
+  mutant_captured:{name:"🧬 实验体 X",rarity:"史诗",text:"你被军方抓走了。他们想研究你的能力。你再也没回来。"},
+  mutant_legend:{name:"🧬 变种人传奇",rarity:"传奇",text:"你用能力改变了历史。未来的变种人会传颂你的故事。"},
+  mutant_hidden:{name:"🧬 隐藏的一生",rarity:"普通",text:"你隐藏了能力，过完了普通的一生。没有人知道你的秘密。"},
+  unknown_hero:{name:"🕯️ 无名英雄",rarity:"稀有",text:"没有人知道你的名字，但有人因为你活了下来。"},
+  ordinary_life:{name:"🏠 平凡人生",rarity:"普通",text:"你没有成为英雄，也没有成为反派。你只是一个普通人，过完了普通的一生。这就够了。"},
+};
+
+const ACHIEVEMENTS = [
+/* 小成就 - 日常积累 */
+{id:"a001",name:"初出茅庐",desc:"完成第一个事件",cat:"小",check:s=>s.flags.eventCount>=1},
+{id:"a002",name:"坚持就是胜利",desc:"连续完成10个日常事件",cat:"小",check:s=>s.flags.dailyCount>=10},
+{id:"a003",name:"家书抵万金",desc:"收到5封家书",cat:"小",check:s=>s.flags.lettersRecv>=5},
+{id:"a004",name:"社交达人",desc:"与3个NPC好感达到50",cat:"小",check:s=>Object.values(s.relations||{}).filter(r=>r.favor>=50).length>=3},
+{id:"a005",name:"生存专家",desc:"连续20回合不受伤",cat:"小",check:s=>s.flags.noInjure>=20},
+{id:"a006",name:"小富即安",desc:"累计储蓄超过$500",cat:"小",check:s=>s.money>=500},
+{id:"a007",name:"勤劳的人",desc:"工作/训练20次",cat:"小",check:s=>s.flags.workCount>=20},
+{id:"a008",name:"夜猫子",desc:"夜间活动10次",cat:"小",check:s=>s.flags.nightCount>=10},
+{id:"a009",name:"读者",desc:"阅读5本书",cat:"小",check:s=>s.flags.booksRead>=5},
+{id:"a010",name:"笔友",desc:"写10封家书",cat:"小",check:s=>s.flags.lettersSent>=10},
+{id:"a011",name:"早起鸟",desc:"5点起床10次",cat:"小",check:s=>s.flags.earlyBird>=10},
+{id:"a012",name:"节俭",desc:"连续10天不消费",cat:"小",check:s=>s.flags.thriftyDays>=10},
+{id:"a013",name:"健身狂人",desc:"体能达到60",cat:"小",check:s=>s.stats.体能>=60},
+{id:"a014",name:"书呆子",desc:"智力达到60",cat:"小",check:s=>s.stats.智力>=60},
+{id:"a015",name:"万人迷",desc:"魅力达到60",cat:"小",check:s=>s.stats.魅力>=60},
+{id:"a016",name:"钢铁意志",desc:"意志达到60",cat:"小",check:s=>s.stats.意志>=60},
+{id:"a017",name:"飞毛腿",desc:"敏捷达到60",cat:"小",check:s=>s.stats.敏捷>=60},
+{id:"a018",name:"格斗家",desc:"格斗达到60",cat:"小",check:s=>s.stats.格斗>=60},
+{id:"a019",name:"发明家",desc:"科技达到60",cat:"小",check:s=>s.stats.科技>=60},
+{id:"a020",name:"觉醒者",desc:"超能达到30",cat:"小",check:s=>s.stats.超能>=30},
+{id:"a021",name:"OVR 30",desc:"OVR达到30",cat:"小",check:s=>s.ovr>=30},
+{id:"a022",name:"OVR 50",desc:"OVR达到50",cat:"小",check:s=>s.ovr>=50},
+{id:"a023",name:"老兵",desc:"游戏时间达到1944年",cat:"小",check:s=>s.date.year>=1944},
+{id:"a024",name:"幸存者",desc:"活到1945年",cat:"小",check:s=>s.date.year>=1945},
+{id:"a025",name:"收藏家",desc:"获得5件装备",cat:"小",check:s=>s.inventory.length>=5},
+{id:"a026",name:"装备升级",desc:"获得一件T5以上装备",cat:"小",check:s=>s.inventory.some(i=>i.tier<=5)},
+{id:"a027",name:"压力山大",desc:"压力值达到80",cat:"小",check:s=>s.stress>=80},
+{id:"a028",name:"心态平和",desc:"压力值降到20以下",cat:"小",check:s=>s.stress<=20},
+{id:"a029",name:"富甲一方",desc:"拥有$2000",cat:"小",check:s=>s.money>=2000},
+{id:"a030",name:"身无分文",desc:"钱降到0",cat:"小",check:s=>s.money<=0},
+/* 中成就 - 人生事件 */
+{id:"a031",name:"战火洗礼",desc:"参加第一次战斗",cat:"中",check:s=>s.flags.battleCount>=1},
+{id:"a032",name:"救人一命",desc:"救下一个NPC",cat:"中",check:s=>s.flags.savedNPC>=1},
+{id:"a033",name:"真相追寻者",desc:"揭露一个丑闻",cat:"中",check:s=>s.flags.exposedScandal>=1},
+{id:"a034",name:"黑市之王",desc:"控制3个地盘",cat:"中",check:s=>s.flags.turfCount>=3},
+{id:"a035",name:"振金守护者",desc:"保护振金秘密",cat:"中",check:s=>s.flags.protectedVibranium},
+{id:"a036",name:"能力觉醒",desc:"首次使用变种能力",cat:"中",check:s=>s.flags.usedPower>=1},
+{id:"a037",name:"集中营斗士",desc:"组织一次抗议",cat:"中",check:s=>s.flags.protestCount>=1},
+{id:"a038",name:"血浓于水",desc:"与家人关系达到80",cat:"中",check:s=>(s.relations.family?.favor||0)>=80},
+{id:"a039",name:"生死之交",desc:"与一个NPC关系达到90",cat:"中",check:s=>Object.values(s.relations||{}).some(r=>r.favor>=90)},
+{id:"a040",name:"受伤",desc:"第一次受伤",cat:"中",check:s=>s.flags.injuredCount>=1},
+{id:"a041",name:"康复",desc:"从伤病中恢复",cat:"中",check:s=>s.flags.recovered>=1},
+{id:"a042",name:"勋章",desc:"获得一枚勋章",cat:"中",check:s=>s.flags.medals>=1},
+{id:"a043",name:"升职",desc:"获得一次晋升",cat:"中",check:s=>s.flags.promoted>=1},
+{id:"a044",name:"发明家",desc:"完成一项发明",cat:"中",check:s=>s.flags.invention>=1},
+{id:"a045",name:"情圣",desc:"谈一次恋爱",cat:"中",check:s=>s.flags.romance>=1},
+{id:"a046",name:"结婚",desc:"结婚",cat:"中",check:s=>s.flags.married},
+{id:"a047",name:"父亲",desc:"有了孩子",cat:"中",check:s=>s.flags.children>=1},
+{id:"a048",name:"失去",desc:"目睹一个NPC死亡",cat:"中",check:s=>s.flags.witnessedDeath>=1},
+{id:"a049",name:"逃亡",desc:"从危险中逃脱",cat:"中",check:s=>s.flags.escaped>=1},
+{id:"a050",name:"俘虏",desc:"被俘虏过",cat:"中",check:s=>s.flags.captured>=1},
+{id:"a051",name:"越狱",desc:"成功越狱",cat:"中",check:s=>s.flags.escapedPrison},
+{id:"a052",name:"情报员",desc:"获取一份重要情报",cat:"中",check:s=>s.flags.intel>=1},
+{id:"a053",name:"破坏者",desc:"破坏一次敌方设施",cat:"中",check:s=>s.flags.sabotage>=1},
+{id:"a054",name:"谈判专家",desc:"成功谈判3次",cat:"中",check:s=>s.flags.negotiated>=3},
+{id:"a055",name:"信仰",desc:"参加宗教活动5次",cat:"中",check:s=>s.flags.prayed>=5},
+{id:"a056",name:"赌徒",desc:"赌博10次",cat:"中",check:s=>s.flags.gambled>=10},
+{id:"a057",name:"酒鬼",desc:"喝酒20次",cat:"中",check:s=>s.flags.drank>=20},
+{id:"a058",name:"烟鬼",desc:"抽烟20次",cat:"中",check:s=>s.flags.smoked>=20},
+{id:"a059",name:"戒毒",desc:"从毒瘾中恢复",cat:"中",check:s=>s.flags.overcameAddiction},
+{id:"a060",name:"导师",desc:"指导过3个新人",cat:"中",check:s=>s.flags.mentored>=3},
+/* 大成就 - 英雄/世界事件 */
+{id:"a061",name:"🇺🇸 时代的守护者",desc:"取代美国队长",cat:"大",check:s=>s.flags.becameCaptain},
+{id:"a062",name:"🧬 超级士兵",desc:"成功接受超级士兵血清",cat:"大",check:s=>s.flags.serumSuccess},
+{id:"a063",name:"🩸 红骷髅终结者",desc:"亲手击败红骷髅",cat:"大",check:s=>s.flags.killedRedSkull},
+{id:"a064",name:"🕯️ 无名英雄",desc:"在二战中牺牲自己拯救他人",cat:"大",check:s=>s.flags.sacrificed},
+{id:"a065",name:"🦸 另一个美国队长",desc:"成为新的美国队长并存活",cat:"大",check:s=>s.flags.newCaptain},
+{id:"a066",name:"🐆 瓦坎达之盾",desc:"成为瓦坎达守护者",cat:"大",check:s=>s.flags.wakandanGuardian},
+{id:"a067",name:"⚡ 神域见证者",desc:"接触阿斯加德力量",cat:"大",check:s=>s.flags.asgardContact},
+{id:"a068",name:"🧬 变种人传奇",desc:"以变种人身份改变历史",cat:"大",check:s=>s.flags.mutantLegend},
+{id:"a069",name:"✈️ 王牌",desc:"击落10架敌机",cat:"大",check:s=>s.flags.kills>=10},
+{id:"a070",name:"🏥 战地天使",desc:"救下50名伤员",cat:"大",check:s=>s.flags.saved>=50},
+{id:"a071",name:"📰 真相之王",desc:"揭露5个丑闻",cat:"大",check:s=>s.flags.exposedScandal>=5},
+{id:"a072",name:"🔫 教父",desc:"成为纽约地下之王",cat:"大",check:s=>s.flags.godfather},
+{id:"a073",name:"✊ 民权先驱",desc:"为民权而战",cat:"大",check:s=>s.flags.civilRights},
+{id:"a074",name:"🔬 科学巨匠",desc:"完成3项发明",cat:"大",check:s=>s.flags.invention>=3},
+{id:"a075",name:"🎷 音乐传奇",desc:"成为爵士明星",cat:"大",check:s=>s.flags.jazzStar},
+{id:"a076",name:"💎 魔方碎片",desc:"获得宇宙魔方碎片",cat:"大",check:s=>s.flags.tesseract},
+{id:"a077",name:"🛡️ 传奇战士",desc:"OVR达到80",cat:"大",check:s=>s.ovr>=80},
+{id:"a078",name:"🐍 九头蛇",desc:"加入九头蛇",cat:"大",check:s=>s.flags.joinedHydra},
+{id:"a079",name:"❄️ 冰封",desc:"被冰封",cat:"大",check:s=>s.flags.frozen},
+{id:"a080",name:"🏆 战争英雄",desc:"获得3枚勋章",cat:"大",check:s=>s.flags.medals>=3},
+/* 隐藏成就 */
+{id:"a081",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg1},
+{id:"a082",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg2},
+{id:"a083",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg3},
+{id:"a084",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg4},
+{id:"a085",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg5},
+{id:"a086",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg6},
+{id:"a087",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg7},
+{id:"a088",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg8},
+{id:"a089",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg9},
+{id:"a090",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg10},
+{id:"a091",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg11},
+{id:"a092",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg12},
+{id:"a093",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg13},
+{id:"a094",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg14},
+{id:"a095",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg15},
+{id:"a096",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg16},
+{id:"a097",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg17},
+{id:"a098",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg18},
+{id:"a099",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg19},
+{id:"a100",name:"？？？",desc:"隐藏成就",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg20},
+/* ===== v2.4 第三阶段新增成就 ===== */
+{id:"a101",name:"初次邂逅",desc:"与一位NPC进行对话",cat:"小",check:s=>s.flags.npcChatCount>=1},
+{id:"a102",name:"健谈者",desc:"与NPC对话10次",cat:"小",check:s=>s.flags.npcChatCount>=10},
+{id:"a103",name:"知心好友",desc:"与一位NPC信任度达到60",cat:"中",check:s=>(s.npcs||[]).some(n=>n.trust>=60)},
+{id:"a104",name:"莫逆之交",desc:"与一位NPC信任度达到80",cat:"大",check:s=>(s.npcs||[]).some(n=>n.trust>=80)},
+{id:"a105",name:"AI增强体验",desc:"使用AI生成叙事",cat:"小",check:s=>s.flags.aiNarrative>=1},
+{id:"a106",name:"自由意志",desc:"使用AI自定义选择",cat:"中",check:s=>s.flags.aiCustomChoice>=1},
+{id:"a107",name:"创意无限",desc:"使用AI自定义选择5次",cat:"大",check:s=>s.flags.aiCustomChoice>=5},
+{id:"a108",name:"跨时代旅人",desc:"体验2个不同时代",cat:"大",check:s=>s.flags.erasPlayed>=2},
+{id:"a109",name:"时代见证者",desc:"体验5个不同时代",cat:"大",check:s=>s.flags.erasPlayed>=5},
+{id:"a110",name:"漫威全史",desc:"体验全部8个时代",cat:"隐藏",hidden:true,check:s=>s.flags.erasPlayed>=8},
+{id:"a111",name:"身经百战",desc:"经历5次战斗",cat:"中",check:s=>s.flags.battleCount>=5},
+{id:"a112",name:"百战老兵",desc:"经历20次战斗",cat:"大",check:s=>s.flags.battleCount>=20},
+{id:"a113",name:"伤痕累累",desc:"受伤5次",cat:"中",check:s=>s.flags.injuredTotal>=5},
+{id:"a114",name:"不死之身",desc:"受伤10次仍存活",cat:"大",check:s=>s.flags.injuredTotal>=10},
+{id:"a115",name:"OVR 70",desc:"OVR达到70",cat:"中",check:s=>s.ovr>=70},
+{id:"a116",name:"OVR 90",desc:"OVR达到90",cat:"大",check:s=>s.ovr>=90},
+{id:"a117",name:"富可敌国",desc:"拥有$5000",cat:"中",check:s=>s.money>=5000},
+{id:"a118",name:"压力爆表",desc:"压力值达到100",cat:"中",check:s=>s.stress>=100},
+{id:"a119",name:"心如止水",desc:"压力值降为0",cat:"中",check:s=>s.stress<=0},
+{id:"a120",name:"人生百年",desc:"年龄达到60岁",cat:"大",check:s=>s.age>=60},
+{id:"a121",name:"抉择者",desc:"做出50个选择",cat:"中",check:s=>s.flags.eventCount>=50},
+{id:"a122",name:"命运主宰",desc:"做出100个选择",cat:"大",check:s=>s.flags.eventCount>=100},
+{id:"a123",name:"宇宙魔方",desc:"发现宇宙魔方彩蛋",cat:"隐藏",hidden:true,check:s=>s.flags.easterEgg1},
+{id:"a124",name:"MCU学者",desc:"解锁20个成就",cat:"大",check:s=>s.achievements.length>=20},
+{id:"a125",name:"传奇人生",desc:"解锁50个成就",cat:"隐藏",hidden:true,check:s=>s.achievements.length>=50},
+];
+/* ===== 核心状态 ===== */
+const Game = {
+  state:null,
+  selectedEra:null,
+  selectedOrigin:null,
+  
+  init(){
+    this.loadAchievements();
+    UI.showPage("home");
+  },
+  
+  createSeed(){
+    const name = document.getElementById("charName").value.trim()||"无名氏";
+    const gender = document.getElementById("charGender").value;
+    const age = parseInt(document.getElementById("charAge").value)||20;
+    if(!Game.selectedOrigin){ this.toast("请先选择出身"); return; }
+    const origin = SEEDS[Game.selectedOrigin];
+    if(!origin){ this.toast("出身数据缺失"); return; }
+    const eraStart = {ww2:1943,coldwar:1960,heroage:2008,newyork:2012,ultron:2015,civilwar:2016,infinity:2018,multiverse:2024};
+    const startYear = eraStart[Game.selectedEra]||1943;
+    const seed = "CX-"+startYear+"-"+Math.floor(Math.random()*90000+10000);
+    const stats = JSON.parse(JSON.stringify(origin.stats));
+    // 时代专属 NPC
+    const eraNPCs = {
+      ww2:[
+        {name:"Steve Rogers",role:"新兵",personality:"坚定善良",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Bucky Barnes",role:"老兵",personality:"豪爽仗义",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Peggy Carter",role:"SSR特工",personality:"干练果断",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      coldwar:[
+        {name:"Howard Stark",role:"科学家",personality:"天才自负",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Peggy Carter",role:"SHIELD创始人",personality:"干练果断",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      heroage:[
+        {name:"Tony Stark",role:"天才富豪",personality:"傲慢聪明",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Pepper Potts",role:"Stark高管",personality:"职业冷静",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      newyork:[
+        {name:"Tony Stark",role:"Iron Man",personality:"傲慢聪明",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Steve Rogers",role:"Captain America",personality:"坚定善良",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      ultron:[
+        {name:"Tony Stark",role:"Iron Man",personality:"傲慢聪明",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Wanda Maximoff",role:"超能者",personality:"复杂感性",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      civilwar:[
+        {name:"Tony Stark",role:"Iron Man",personality:"傲慢聪明",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+        {name:"Steve Rogers",role:"Captain America",personality:"坚定善良",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      infinity:[
+        {name:"Thanos",role:"泰坦星人",personality:"冷酷宿命",relation:"敌人",trust:0,alive:true,knowsSecret:false},
+        {name:"Tony Stark",role:"Iron Man",personality:"傲慢聪明",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+      multiverse:[
+        {name:"Stephen Strange",role:"至尊法师",personality:"神秘睿智",relation:"陌生",trust:30,alive:true,knowsSecret:false},
+      ],
+    };
+    // 记录体验过的时代（全局统计）
+    var erasPlayed = 0;
+    try{
+      var played = JSON.parse(localStorage.getItem("mcu_eras_played")||"[]");
+      if(played.indexOf(Game.selectedEra)<0){ played.push(Game.selectedEra); localStorage.setItem("mcu_eras_played", JSON.stringify(played)); }
+      erasPlayed = played.length;
+    }catch(e){}
+    this.state = {
+      seed, name, gender, age,
+      origin:Game.selectedOrigin,
+      originName:origin.name,
+      era:Game.selectedEra,
+      eraName:ERAS.find(e=>e.id===Game.selectedEra)?.name||"",
+      stats, ovr:calcOvr(stats),
+      date:{year:startYear,month:3,day:17},
+      location:"美国",
+      faction:"平民",
+      money:50, stress:0,
+      inventory:[],
+      relations:{family:{favor:60,trust:50,hostility:0}},
+      npcs: eraNPCs[Game.selectedEra]||[],
+      lifePhase:"青年",
+      originStartYear:startYear,
+      flags:{eventCount:0,dailyCount:0,noInjure:0,battleCount:0,injuredTotal:0,erasPlayed:erasPlayed},
+      timeline:[],
+      achievements:[],
+      ending:null,
+      currentNode:origin.start,
+    };
+    document.getElementById("seedCode").textContent = seed;
+    document.getElementById("seedInfo").innerHTML = `${name} · ${gender} · ${age}岁<br>${origin.name}<br>OVR ${this.state.ovr}`;
+    UI.showPage("seed");
+  },
+  
+  start(){
+    UI.showPage("game");
+    this.renderNode();
+  },
+  
+  renderNode(){
+    const s = this.state;
+    const node = NODES[s.currentNode];
+    if(!node){ this.toast("节点缺失："+s.currentNode); return; }
+    s.flags.eventCount++;
+    if(node.level==="日常") s.flags.dailyCount++;
+    // 记录时间轴
+    s.timeline.push({date:`${s.date.year}年${s.date.month}月`, text:node.title, level:node.level});
+    if(s.timeline.length>100) s.timeline.shift();
+    document.getElementById("topName").textContent = s.name;
+    document.getElementById("topAge").textContent = s.age+"岁";
+    document.getElementById("topDate").textContent = `${s.date.year}年${s.date.month}月`;
+    document.getElementById("topLoc").textContent = s.location;
+    document.getElementById("ovrBadge").innerHTML = s.ovr+"<small>OVR</small>";
+    // 状态模块条
+    const inj = s.flags.injuredCount||0;
+    const hEl = document.getElementById("chipHealth");
+    hEl.textContent = inj>0?(inj>2?"重伤":"受伤"):"健康";
+    hEl.className = "sc-value "+(inj>2?"stress-high":inj>0?"stress-mid":"health");
+    const stEl = document.getElementById("chipStress");
+    stEl.textContent = s.stress;
+    stEl.className = "sc-value "+(s.stress>70?"stress-high":s.stress>40?"stress-mid":"stress-low");
+    document.getElementById("chipMoney").textContent = "$"+s.money;
+    document.getElementById("chipFaction").textContent = s.faction||"平民";
+    // 事件卡 - 叙事包装
+    document.getElementById("eventTitle").textContent = node.title;
+    document.getElementById("eventDate").textContent = `${s.date.year}.${String(s.date.month).padStart(2,'0')}`;
+    const lv = document.getElementById("eventLevel");
+    lv.textContent = node.level||"日常";
+    lv.className = "event-level-badge "+(node.level==="英雄"?"lv-hero":node.level==="世界"?"lv-world":node.level==="人生"?"lv-life":"");
+    document.getElementById("eventCard").className = "event-card "+(node.level==="世界"?"world":node.level==="英雄"?"hero":"");
+    // 事件正文：先显示原始文字，AI 异步增强
+    const textEl = document.getElementById("eventText");
+    textEl.textContent = node.text;
+    textEl.style.opacity = "1";
+    // AI 叙事增强（英雄/世界/人生事件才增强，日常保持简洁）
+    if(node.level!=="日常" && AIService.isEnabled() && AIService.hasKey()){
+      textEl.style.opacity = "0.6";
+      AIService.generateNarrative(node, s).then(narrative=>{
+        if(narrative && narrative!==node.text){
+          textEl.style.transition = "opacity .4s";
+          textEl.style.opacity = "0";
+          setTimeout(()=>{ textEl.textContent = narrative; textEl.style.opacity = "1"; }, 300);
+          s.flags.aiNarrative = (s.flags.aiNarrative||0)+1;
+        } else {
+          textEl.style.opacity = "1";
+        }
+      }).catch(()=>{ textEl.style.opacity = "1"; });
+    }
+    // 选项
+    const choices = document.getElementById("choices");
+    choices.innerHTML = "";
+    node.choices.forEach((c,i)=>{
+      const div = document.createElement("div");
+      div.className = "choice glass-shine";
+      let meta = "";
+      if(c.check && c.base!==undefined){
+        const chance = this.calcChance(c.base, c.check);
+        const risk = chance>70?"low":chance>40?"mid":"high";
+        const riskLabel = risk==="low"?"低风险":risk==="mid"?"中风险":"高风险";
+        meta = `<div class="choice-meta"><span class="rate-text">${chance}%</span><div class="rate-bar"><div class="rate-fill" style="width:${chance}%;background:${chance>70?'var(--success)':chance>40?'var(--warning)':'var(--danger)'}"></div></div><span class="risk-tag risk-${risk}">${riskLabel}</span></div>`;
+      }
+      div.innerHTML = `<div class="choice-label"><span class="choice-letter">${String.fromCharCode(65+i)}</span>${c.label}</div>${meta}`;
+      div.onclick = ()=>this.makeChoice(c);
+      choices.appendChild(div);
+    });
+    // AI 自定义选项
+    const aiDiv = document.createElement("div");
+    aiDiv.className = "choice";
+    aiDiv.innerHTML = `<div class="choice-label"><span class="choice-letter" style="background:var(--magic);color:#fff">✨</span>自定义行动</div><div class="choice-meta"><span style="font-size:11px;color:var(--text-3)">用 AI 解析你的想法</span></div>`;
+    aiDiv.onclick = ()=>UI.aiCustomOption(node);
+    choices.appendChild(aiDiv);
+    this.checkAchievements();
+  },
+  
+  makeChoice(choice){
+    const s = this.state;
+    if(choice.check && choice.base!==undefined){
+      const chance = this.calcChance(choice.base, choice.check);
+      this.runJudge(chance, choice);
+    } else {
+      if(choice.effects) this.applyEffects(choice.effects);
+      if(choice.next){
+        s.currentNode = choice.next;
+        if(choice.next.startsWith("ending_")){ this.showEnding(choice.next.replace("ending_","")); return; }
+      }
+      this.advanceTime();
+      this.renderNode();
+    }
+  },
+  
+  calcChance(base, stat){
+    const s = this.state;
+    let v = base + (s.stats[stat]-30)*1.2;
+    if(s.flags.injured) v -= 10;
+    if(s.stress>70) v -= 8;
+    v = Math.max(5, Math.min(95, Math.round(v)));
+    return v;
+  },
+  
+  runJudge(chance, choice){
+    const ov = document.getElementById("judgeOverlay");
+    const rate = document.getElementById("judgeRate");
+    const ptr = document.getElementById("judgePointer");
+    const res = document.getElementById("judgeResult");
+    ov.classList.add("show");
+    rate.textContent = chance+"%";
+    res.textContent = "";
+    let pos = 50, dir = 1, speed = 4;
+    const totalTime = 1500 + Math.random()*500;
+    const start = Date.now();
+    const tick = ()=>{
+      pos += dir*speed;
+      if(pos>95){pos=95;dir=-1;}
+      if(pos<5){pos=5;dir=1;}
+      ptr.style.left = pos+"%";
+      if(Date.now()-start < totalTime){
+        requestAnimationFrame(tick);
+      } else {
+        const stopPos = Math.random()*100;
+        const success = stopPos < chance;
+        ptr.style.left = stopPos+"%";
+        res.textContent = success?"✓ 成功":"✗ 失败";
+        res.style.color = success?"#10b981":"#ef4444";
+        setTimeout(()=>{
+          ov.classList.remove("show");
+          this.resolveChoice(choice, success);
+        }, 1200);
+      }
+    };
+    tick();
+  },
+  
+  resolveChoice(choice, success){
+    const s = this.state;
+    const result = success ? choice.success : choice.fail;
+    if(result){
+      if(result.effects) this.applyEffects(result.effects);
+      if(result.next){
+        s.currentNode = result.next;
+        if(result.next.startsWith("ending_")){
+          this.showEnding(result.next.replace("ending_",""));
+          return;
+        }
+      }
+    }
+    this.advanceTime();
+    this.renderNode();
+  },
+  
+  applyEffects(eff){
+    const s = this.state;
+    for(let k in eff){
+      if(STAT_KEYS.includes(k)){
+        s.stats[k] = Math.max(0, Math.min(99, s.stats[k]+eff[k]));
+      } else if(k.startsWith("rel_")){
+        const n = k.slice(4);
+        if(!s.relations[n]) s.relations[n] = {favor:50,trust:30,hostility:0};
+        s.relations[n].favor = Math.max(0,Math.min(100,s.relations[n].favor+eff[k]));
+      } else if(k.startsWith("flag_")){
+        s.flags[k.slice(5)] = true;
+      } else if(k==="injured"){
+        s.flags.injuredCount = (s.flags.injuredCount||0)+1;
+        s.flags.injuredTotal = (s.flags.injuredTotal||0)+1;
+        s.flags.noInjure = 0;
+        s.stats.体能 = Math.max(0, s.stats.体能-8);
+        s.stats.格斗 = Math.max(0, s.stats.格斗-5);
+        s.stress = Math.min(100, s.stress+15);
+      } else if(k==="stress"){
+        s.stress = Math.max(0, Math.min(100, s.stress+eff[k]));
+      } else if(k==="钱"){
+        s.money = Math.max(0, s.money+eff[k]);
+      }
+    }
+    s.ovr = calcOvr(s.stats);
+    if(!eff.injured) s.flags.noInjure = (s.flags.noInjure||0)+1;
+  },
+  
+  advanceTime(){
+    const s = this.state;
+    s.date.month++;
+    if(s.date.month>12){s.date.month=1;s.date.year++;}
+    s.age = s.age + (s.date.month===1?1:0);
+    s.stress = Math.max(0, s.stress-2);
+    // 伤病恢复
+    if(s.flags.injuredCount>0){
+      s.stats.体能 = Math.min(99, s.stats.体能+3);
+      s.stats.格斗 = Math.min(99, s.stats.格斗+2);
+      s.flags.injuredCount--;
+      if(s.flags.injuredCount===0) this.toast("伤势已痊愈");
+    }
+    // 随机彩蛋触发（2%概率）
+    if(Math.random()<0.02 && !s.flags.easterEgg1){
+      s.flags.easterEgg1 = true;
+      this.unlockAchievement("a081");
+      s.currentNode = "easter_tesseract";
+      this.renderNode();
+      return;
+    }
+    // 军饷
+    s.money += 15;
+  },
+  
+  showEnding(id){
+    const e = ENDINGS[id]||ENDINGS.ordinary_life;
+    const s = this.state;
+    s.ending = id;
+    // 人生统计
+    const years = s.date.year - (s.originStartYear||1943);
+    const battles = s.flags.battleCount||0;
+    const injuries = s.flags.injuredTotal||0;
+    const choices = s.flags.eventCount||0;
+    const achCount = s.achievements.length;
+    const html = `
+      <div class="ending-cinematic">
+        <div class="ending-tier">${e.rarity||'END'}</div>
+        <h2 class="ending-title">${e.name}</h2>
+        <div class="ending-divider"></div>
+        <div class="ending-narrative" id="endingNarrative">${e.text.replace(/{name}/g,s.name)}</div>
+        <div class="life-stats">
+          <div class="stat-row"><span>最终年龄</span><span>${s.age} 岁</span></div>
+          <div class="stat-row"><span>人生跨度</span><span>${years} 年</span></div>
+          <div class="stat-row"><span>最终 OVR</span><span>${s.ovr}</span></div>
+          <div class="stat-row"><span>重大选择</span><span>${choices} 次</span></div>
+          <div class="stat-row"><span>战斗经历</span><span>${battles} 次</span></div>
+          <div class="stat-row"><span>受伤次数</span><span>${injuries} 次</span></div>
+          <div class="stat-row"><span>解锁成就</span><span>${achCount} 个</span></div>
+        </div>
+        <div class="ending-actions">
+          <button class="btn btn-glass" onclick="UI.closeModal();UI.goHome()">返回首页</button>
+          <button class="btn btn-primary" onclick="UI.closeModal();Game.saveSlotPrompt()">保存人生</button>
+        </div>
+      </div>
+    `;
+    UI.openModal(html);
+    // AI 结局叙事增强
+    if(AIService.isEnabled() && AIService.hasKey()){
+      const narrEl = document.getElementById("endingNarrative");
+      if(narrEl){
+        AIService.generateEnding(e, s).then(text=>{
+          if(text && text!==e.text){ narrEl.style.opacity="0"; setTimeout(()=>{narrEl.textContent=text;narrEl.style.opacity="1";},300); }
+        }).catch(()=>{});
+      }
+    }
+    this.unlockAchievementByEnding(id);
+    this.saveAchievements();
+  },
+  
+  unlockAchievementByEnding(id){
+    const map = {
+      captain_america:"a061", serum_fail:"a062", red_skull_victor:"a063",
+      kia:"a064", frozen:"a079", hydra:"a078", wakandan_guardian:"a066",
+      mutant_legend:"a068",
+    };
+    if(map[id]) this.unlockAchievement(map[id]);
+  },
+  
+  checkAchievements(){
+    const s = this.state;
+    ACHIEVEMENTS.forEach(a=>{
+      if(!s.achievements.includes(a.id) && !a.hidden && a.check(s)){
+        this.unlockAchievement(a.id);
+      }
+    });
+  },
+  
+  unlockAchievement(id){
+    const s = this.state;
+    if(!s.achievements.includes(id)){
+      s.achievements.push(id);
+      const a = ACHIEVEMENTS.find(x=>x.id===id);
+      if(a) this.toast(`🏆 成就解锁：${a.name}`);
+    }
+  },
+  
+  toast(msg){
+    const w = document.getElementById("toastWrap");
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = msg;
+    w.appendChild(t);
+    setTimeout(()=>t.remove(), 2500);
+  },
+  
+  saveAchievements(){
+    try{
+      const all = JSON.parse(localStorage.getItem("mcu_ach_all")||"{}");
+      this.state.achievements.forEach(id=>all[id]=true);
+      localStorage.setItem("mcu_ach_all", JSON.stringify(all));
+    }catch(e){}
+  },
+  
+  loadAchievements(){
+    try{ return JSON.parse(localStorage.getItem("mcu_ach_all")||"{}"); }catch(e){ return {}; }
+  },
+  
+  saveSlotPrompt(){
+    let html = `<h3 style="color:var(--fg-0)">保存到存档槽</h3>`;
+    for(let i=0;i<4;i++){
+      const slot = this.getSlot(i);
+      html += `<div class="save-slot" onclick="Game.saveToSlot(${i})">
+        <div class="save-name">存档槽 ${i+1} ${slot?`· ${slot.name}`:"（空）"}</div>
+        ${slot?`<div class="save-meta">${slot.date.year}年 · OVR ${slot.ovr} · ${slot.saveTime}</div>`:""}
+      </div>`;
+    }
+    UI.openModal(html);
+  },
+  
+  saveToSlot(i){
+    const s = this.state;
+    s.saveTime = new Date().toLocaleString("zh-CN");
+    try{
+      localStorage.setItem("mcu_save_"+i, JSON.stringify(s));
+      this.toast("已保存到存档槽 "+(i+1));
+      UI.closeModal();
+    }catch(e){ this.toast("保存失败"); }
+  },
+  
+  getSlot(i){
+    try{ return JSON.parse(localStorage.getItem("mcu_save_"+i)||"null"); }catch(e){ return null; }
+  },
+  
+  loadSlot(i){
+    const s = this.getSlot(i);
+    if(!s){ this.toast("存档为空"); return; }
+    // 兼容性：补全新字段
+    if(!s.npcs) s.npcs = [];
+    if(!s.lifePhase) s.lifePhase = "青年";
+    if(!s.originStartYear) s.originStartYear = 1943;
+    if(!s.flags) s.flags = {};
+    if(s.flags.battleCount===undefined) s.flags.battleCount = 0;
+    if(s.flags.injuredTotal===undefined) s.flags.injuredTotal = 0;
+    if(!s.eraName){
+      var eraObj = ERAS.find(e=>e.id===s.era);
+      s.eraName = eraObj ? eraObj.name : "";
+    }
+    this.state = s;
+    UI.showPage("game");
+    this.renderNode();
+    UI.closeModal();
+  },
+};
+/* ===== UI 层 ===== */
+const UI = {
+  history:[],
+  currentTab:"stats",
+  
+  showPage(id){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.getElementById("page-"+id).classList.add("active");
+    if(id!=="home") this.history.push(id);
+  },
+  
+  back(){
+    this.history.pop();
+    const prev = this.history.pop()||"home";
+    this.showPage(prev);
+  },
+  
+  goHome(){ this.showPage("home"); },
+  goCreate(){ this.history=[]; this.renderEras(); this.showPage("era"); },
+  goLoad(){
+    let html = `<h3 style="color:var(--fg-0)">读取存档</h3>`;
+    for(let i=0;i<4;i++){
+      const s = Game.getSlot(i);
+      html += `<div class="save-slot" onclick="Game.loadSlot(${i})">
+        <div class="save-name">存档槽 ${i+1} ${s?`· ${s.name}`:"（空）"}</div>
+        ${s?`<div class="save-meta">${s.originName||""} · ${s.date.year}年${s.date.month}月 · OVR ${s.ovr} · ${s.saveTime||""}</div>`:""}
+      </div>`;
+    }
+    this.openModal(html);
+  },
+  goCodex(){
+    const all = Game.loadAchievements();
+    let html = `<h3 style="color:var(--fg-0)">成就图鉴</h3><div style="font-size:12px;color:var(--fg-3);margin-bottom:12px">已解锁 ${Object.keys(all).length} / ${ACHIEVEMENTS.filter(a=>!a.hidden).length}</div>`;
+    const cats = {小:"🌱 小成就",中:"⚔️ 中成就",大:"🏆 大成就",隐藏:"🥚 隐藏"};
+    for(let cat in cats){
+      const list = ACHIEVEMENTS.filter(a=>a.cat===cat);
+      html += `<div style="font-size:13px;color:var(--accent);margin:12px 0 8px;font-weight:600">${cats[cat]}</div>`;
+      list.forEach(a=>{
+        const unlocked = !!all[a.id];
+        html += `<div class="ach-card ${unlocked?"":"locked"}">
+          <div class="ach-icon">${unlocked?"🏆":"🔒"}</div>
+          <div class="ach-info">
+            <div class="ach-name">${a.hidden&&!unlocked?"？？？":a.name}</div>
+            <div class="ach-desc">${a.hidden&&!unlocked?"隐藏成就":a.desc}</div>
+          </div>
+        </div>`;
+      });
+    }
+    this.openModal(html);
+  },
+  goSettings(){
+    const cur = localStorage.getItem("mcu_theme")||"dark";
+    const aiOn = AIService.isEnabled();
+    const cfg = AIService.getCfg();
+    const ready = AIService.hasKey();
+    let html = `<h3 style="color:var(--fg-0)">设置</h3>
+      <div class="ai-section">
+        <h4>主题</h4>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn ${cur==='dark'?'btn-primary':'btn-glass'} btn-sm" style="flex:1" onclick="UI.setTheme('dark')">深色</button>
+          <button class="btn ${cur==='light'?'btn-primary':'btn-glass'} btn-sm" style="flex:1" onclick="UI.setTheme('light')">浅色</button>
+          <button class="btn ${cur==='system'?'btn-primary':'btn-glass'} btn-sm" style="flex:1" onclick="UI.setTheme('system')">跟随</button>
+        </div>
+      </div>
+      <div class="ai-section">
+        <h4>AI 增强</h4>
+        <div class="ai-toggle">
+          <span>AI 叙事增强</span>
+          <div class="switch ${aiOn?'on':''}" id="aiSwitch" onclick="UI.toggleAI()"></div>
+        </div>
+        <div class="ai-status ${ready?'ready':'off'}" id="aiStatus">${aiOn?(ready?'● AI 已连接（智谱 glm-4.7）':'○ 未配置 API Key'):'AI 已关闭'}</div>
+        ${aiOn?`
+        <div class="ai-field" style="margin-top:12px">
+          <label>服务商</label>
+          <select id="aiProvider" onchange="UI.applyAIConfig()">
+            <option value="zhipu" ${cfg.model.indexOf('glm')>=0?'selected':''}>智谱 AI</option>
+            <option value="deepseek" ${cfg.model.indexOf('deepseek')>=0?'selected':''}>DeepSeek</option>
+            <option value="openai">OpenAI</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <label>模型</label>
+          <input id="aiModel" value="${cfg.model}" placeholder="glm-4.7 / deepseek-chat / gpt-4o">
+        </div>
+        <div class="ai-field">
+          <label>API Key</label>
+          <input id="aiKey" type="password" value="${cfg.key}" placeholder="sk-...">
+        </div>
+        <div class="ai-field">
+          <label>API 地址</label>
+          <input id="aiBase" value="${cfg.base}" placeholder="https://open.bigmodel.cn/api/paas/v4">
+        </div>
+        <button class="ai-test-btn" onclick="UI.applyAIConfig();UI.testAI()">测试连接并保存</button>
+        `:''}
+      </div>
+      <div class="ai-section">
+        <h4>存档</h4>
+        <div class="menu-item" onclick="Game.saveSlotPrompt()">保存游戏</div>
+        <div class="menu-item" onclick="UI.confirmRestart()" style="color:var(--danger)">重开人生</div>
+      </div>`;
+    this.openModal(html);
+  },
+
+  toggleAI(){
+    const on = !AIService.isEnabled();
+    AIService.setEnabled(on);
+    const sw = document.getElementById("aiSwitch");
+    if(sw) sw.classList.toggle("on", on);
+    const st = document.getElementById("aiStatus");
+    if(st){
+      const ready = AIService.hasKey();
+      st.textContent = on?(ready?'● AI 已连接（智谱 glm-4.7）':'○ 未配置 API Key'):'AI 已关闭';
+      st.className = "ai-status "+(on&&ready?'ready':'off');
+    }
+    Game.toast(on?"AI 增强已开启":"AI 增强已关闭");
+  },
+
+  applyAIConfig(){
+    const provider = document.getElementById("aiProvider")?.value;
+    const model = document.getElementById("aiModel")?.value;
+    const key = document.getElementById("aiKey")?.value;
+    const base = document.getElementById("aiBase")?.value;
+    let finalBase = base, finalModel = model;
+    if(provider==="zhipu"){ finalBase = "https://open.bigmodel.cn/api/paas/v4"; if(!model||model==="") finalModel="glm-4.7"; }
+    else if(provider==="deepseek"){ finalBase = "https://api.deepseek.com/v1"; if(!model) finalModel="deepseek-chat"; }
+    else if(provider==="openai"){ finalBase = "https://api.openai.com/v1"; if(!model) finalModel="gpt-4o"; }
+    AIService.saveCfg({base:finalBase,key:key,model:finalModel,temp:0.85,max:4096});
+  },
+
+  async testAI(){
+    Game.toast("正在测试 AI 连接...");
+    const ok = await AIService.testConnection();
+    Game.toast(ok?"✓ AI 连接成功":"✗ AI 连接失败，请检查 Key");
+    const st = document.getElementById("aiStatus");
+    if(st){ st.textContent = ok?"● AI 连接正常":"✗ 连接失败"; st.className="ai-status "+(ok?'ready':'off'); }
+  },
+  
+  setTheme(t){
+    localStorage.setItem("mcu_theme", t);
+    let actual = t;
+    if(t==="system") actual = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    document.body.setAttribute("data-theme", actual);
+    Game.toast("主题："+(t==="dark"?"深色":t==="light"?"浅色":"跟随系统"));
+    this.closeModal();
+  },
+  
+  initTheme(){
+    const t = localStorage.getItem("mcu_theme")||"dark";
+    let actual = t;
+    if(t==="system") actual = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    document.body.setAttribute("data-theme", actual);
+  },
+  
+  confirmRestart(){
+    this.openModal(`
+      <h3 style="color:var(--danger)">重开人生</h3>
+      <p style="color:var(--fg-1);line-height:1.8">确定要结束当前人生吗？<br>当前未保存的进度可能会丢失。</p>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-glass" style="flex:1" onclick="UI.closeModal()">继续人生</button>
+        <button class="btn btn-primary" style="flex:1;background:var(--danger)" onclick="UI.closeModal();UI.goHome()">重开人生</button>
+      </div>
+    `);
+  },
+  
+  renderEras(){
+    const grid = document.getElementById("eraGrid");
+    grid.innerHTML = "";
+    ERAS.forEach(e=>{
+      const div = document.createElement("div");
+      div.className = "era-card glass-shine";
+      const tags = (e.tags||[]).map(t=>`<span class="era-tag">${t}</span>`).join("");
+      div.innerHTML = `
+        <div class="era-diff">${e.difficulty||""}</div>
+        <div class="era-no">${e.no||""}</div>
+        <div class="era-name">${e.name}</div>
+        <div class="era-years">${e.years}</div>
+        <div class="era-desc">${e.desc}</div>
+        <div class="era-tags">${tags}</div>`;
+      div.onclick = ()=>{ Game.selectedEra=e.id; this.renderOrigins(); this.showPage("origin"); };
+      grid.appendChild(div);
+    });
+  },
+  
+  renderOrigins(){
+    const grid = document.getElementById("originGrid");
+    grid.innerHTML = "";
+    const era = Game.selectedEra;
+    for(let id in SEEDS){
+      const o = SEEDS[id];
+      // 二战出身没有 era 字段，其他时代有
+      const isWw2 = !o.era;
+      if((era==="ww2" && !isWw2) || (era!=="ww2" && o.era!==era)) continue;
+      const div = document.createElement("div");
+      div.className = "origin-card glass-shine";
+      let statsHtml = "";
+      STAT_DEFS.forEach(s=>{ statsHtml += `<div class="stat-mini">${s.icon}<b>${o.stats[s.key]}</b></div>`; });
+      div.innerHTML = `<div class="origin-name">${o.name}</div><div class="origin-tag">${o.tag}</div><div class="origin-desc">${o.desc}</div><div class="origin-stats">${statsHtml}</div>`;
+      div.onclick = ()=>{ Game.selectedOrigin=id; this.showCharPreview(); this.showPage("char"); };
+      grid.appendChild(div);
+    }
+    // AI 自定义
+    const ai = document.createElement("div");
+    ai.className = "origin-card glass-shine";
+    ai.style.borderColor = "var(--magic)";
+    ai.innerHTML = `<div class="origin-name">✨ AI 自定义出身</div><div class="origin-tag">描述你自己</div><div class="origin-desc">用一段话描述你的出身，AI 会为你生成属性和路线。</div>`;
+    ai.onclick = ()=>this.aiCustomOrigin();
+    grid.appendChild(ai);
+  },
+  
+  showCharPreview(){
+    const o = SEEDS[Game.selectedOrigin];
+    document.getElementById("originPreview").innerHTML = `<div style="font-weight:600;color:var(--fg-0)">${o.name}</div><div style="font-size:12px;color:var(--fg-3);margin-top:4px">${o.desc}</div>`;
+  },
+  
+  aiCustomOrigin(){
+    const text = prompt("请描述你的出身（例如：我是布鲁克林街头的意大利裔移民，父亲是码头工人，从小打架，没读过书但够义气）");
+    if(!text) return;
+    Game.toast("AI 正在解析你的出身...");
+    // 模拟 AI 解析（实际应调用 AI）
+    setTimeout(()=>{
+      const stats = {体能:40,格斗:30,敏捷:35,智力:30,科技:15,超能:0,魅力:35,意志:40};
+      const customId = "custom_"+Date.now();
+      const eraStart = {ww2:"ww2_s_001",coldwar:"cw_a_001",heroage:"ha_o_001",newyork:"ny_a_001",ultron:"ul_a_001",civilwar:"cw_ti_001",infinity:"iw_f_001",multiverse:"mv_h_001"};
+      SEEDS[customId] = {name:"✨ 自定义",tag:"AI生成",desc:text,start:eraStart[Game.selectedEra]||"ww2_s_001",stats};
+      Game.selectedOrigin = customId;
+      this.showCharPreview();
+      this.showPage("char");
+      Game.toast("出身解析完成！");
+    }, 800);
+  },
+  
+  toggleSide(){
+    const mask = document.getElementById("drawerMask");
+    const drawer = document.getElementById("drawer");
+    const show = !drawer.classList.contains("show");
+    mask.classList.toggle("show", show);
+    drawer.classList.toggle("show", show);
+    if(show) this.renderDrawer();
+  },
+  
+  switchTab(tab){
+    this.currentTab = tab;
+    document.querySelectorAll(".dtab").forEach(d=>d.classList.toggle("active", d.dataset.tab===tab));
+    this.renderDrawer();
+  },
+  
+  renderDrawer(){
+    const s = Game.state;
+    const c = document.getElementById("drawerContent");
+    if(!s){ c.innerHTML=""; return; }
+    if(this.currentTab==="stats"){
+      let html = `<div style="text-align:center;margin-bottom:16px"><div class="ovr-badge" style="margin:0 auto">${s.ovr}</div><div style="font-size:11px;color:var(--fg-3);margin-top:4px">${ovrTier(s.ovr).name}</div></div>`;
+      STAT_DEFS.forEach(st=>{
+        const v = s.stats[st.key];
+        html += `<div class="stat-row"><div class="stat-icon">${st.icon}</div><div class="stat-name">${st.key}</div><div class="stat-bar"><div class="stat-fill" style="width:${v}%"></div></div><div class="stat-val">${v}</div></div>`;
+      });
+      c.innerHTML = html;
+    } else if(this.currentTab==="equip"){
+      let html = `<div style="font-size:13px;color:var(--fg-2);margin-bottom:12px">装备栏</div>`;
+      if(s.inventory.length===0) html += `<div style="color:var(--fg-3);font-size:13px">暂无装备</div>`;
+      s.inventory.forEach(it=>{ html += `<div class="inv-item"><div class="inv-icon">${it.icon||"📦"}</div><div class="inv-name">${it.name}</div><div class="inv-tier">T${it.tier}</div></div>`; });
+      c.innerHTML = html;
+    } else if(this.currentTab==="rel"){
+      let html = "";
+      for(let n in s.relations){
+        const r = s.relations[n];
+        html += `<div class="rel-card"><div class="rel-name">${n} <button class="btn" style="padding:4px 8px;font-size:11px;margin-left:8px" onclick="UI.chatWith('${n}')">💬聊天</button></div>
+          <div class="rel-bars"><div class="rel-bar"><div class="rel-fill" style="width:${r.favor}%;background:#10b981"></div></div><div class="rel-bar"><div class="rel-fill" style="width:${r.trust}%;background:#3b82f6"></div></div><div class="rel-bar"><div class="rel-fill" style="width:${r.hostility}%;background:#ef4444"></div></div></div>
+          <div style="font-size:10px;color:var(--fg-3);margin-top:4px">好感${r.favor} 信任${r.trust} 敌意${r.hostility}</div></div>`;
+      }
+      if(!html) html = `<div style="color:var(--fg-3)">暂无关系</div>`;
+      c.innerHTML = html;
+    } else if(this.currentTab==="state"){
+      c.innerHTML = `
+        <div class="state-row"><span class="k">金钱</span><span class="v">$${s.money}</span></div>
+        <div class="state-row"><span class="k">压力</span><span class="v" style="color:${s.stress>70?'#ef4444':s.stress>40?'#f59e0b':'#10b981'}">${s.stress}/100</span></div>
+        <div class="state-row"><span class="k">伤病</span><span class="v" style="color:${s.flags.injuredCount>0?'#ef4444':'#10b981'}">${s.flags.injuredCount>0?'受伤中('+s.flags.injuredCount+'月)':'健康'}</span></div>
+        <div class="state-row"><span class="k">所在地</span><span class="v">${s.location}</span></div>
+        <div class="state-row"><span class="k">出身</span><span class="v">${s.originName}</span></div>
+        <div class="state-row"><span class="k">种子</span><span class="v">${s.seed}</span></div>`;
+    }
+  },
+  
+  chatWith(npc){
+    const s = Game.state;
+    const r = s.relations[npc];
+    if(!r) return;
+    const html = `
+      <h3 style="color:var(--fg-0)">💬 ${npc}</h3>
+      <div style="font-size:12px;color:var(--fg-3);margin-bottom:12px">好感${r.favor} · 信任${r.trust} · 敌意${r.hostility}</div>
+      <div id="chatLog" style="background:var(--bg-2);border-radius:8px;padding:12px;min-height:120px;margin-bottom:12px;font-size:13px;color:var(--fg-1)">${npc}：你来了。今天怎么样？</div>
+      <input id="chatInput" placeholder="说点什么..." style="width:100%;padding:10px;background:var(--bg-2);border:1px solid var(--stroke-1);border-radius:8px;color:var(--fg-0);font-family:inherit;box-sizing:border-box">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-glass" style="flex:1;padding:8px;font-size:12px" onclick="UI.chatQuick('聊聊近况')">聊聊近况</button>
+        <button class="btn btn-glass" style="flex:1;padding:8px;font-size:12px" onclick="UI.chatQuick('问问战争')">问问战争</button>
+        <button class="btn btn-primary" style="flex:1;padding:8px;font-size:12px" onclick="UI.chatSend()">发送</button>
+      </div>`;
+    this.openModal(html);
+    this._chatNPC = npc;
+  },
+  
+  chatQuick(msg){
+    document.getElementById("chatInput").value = msg;
+    this.chatSend();
+  },
+  
+  chatSend(){
+    const input = document.getElementById("chatInput");
+    const msg = input.value.trim();
+    if(!msg) return;
+    const log = document.getElementById("chatLog");
+    const npc = this._chatNPC;
+    const s = Game.state;
+    log.innerHTML += `<br><br>你：${msg}`;
+    input.value = "";
+    // AI 回复（模拟）
+    setTimeout(()=>{
+      const replies = ["嗯，我明白你的意思。","这事儿不好说啊。","你觉得呢？","希望一切都会好起来。","战争总会结束的。","你今天看起来不太一样。"];
+      const reply = replies[Math.floor(Math.random()*replies.length)];
+      log.innerHTML += `<br><br>${npc}：${reply}`;
+      log.scrollTop = log.scrollHeight;
+      // 关系变化
+      const r = s.relations[npc];
+      r.favor = Math.max(0, Math.min(100, r.favor + (Math.random()>0.3?1:-1)));
+    }, 600);
+  },
+  
+  async aiCustomOption(node){
+    const text = prompt("你想怎么做？（描述你的行动，例如：偷偷调查那辆车）");
+    if(!text) return;
+    Game.toast("AI 正在解析你的行动...");
+    try{
+      const parsed = await AIService.generateCustomChoice(text, Game.state);
+      // 根据 AI 解析的风险和属性，映射到最接近的预设选项
+      let bestIdx = 0, bestScore = -1;
+      node.choices.forEach((c,i)=>{
+        if(!c.check) return;
+        let score = 0;
+        if(parsed.requiredStats.includes(c.check)) score += 50;
+        const chance = Game.calcChance(c.base, c.check);
+        score += (100 - Math.abs(chance - (100-parsed.risk)));
+        if(score>bestScore){ bestScore = score; bestIdx = i; }
+      });
+      Game.toast(`AI 判定：${parsed.action} · 风险${parsed.risk}% · 对应选项 ${String.fromCharCode(65+bestIdx)}`);
+      Game.state.flags.aiCustomChoice = (Game.state.flags.aiCustomChoice||0)+1;
+      Game.makeChoice(node.choices[bestIdx]);
+    }catch(e){
+      console.warn(e);
+      // Fallback：随机选一个
+      const idx = Math.floor(Math.random()*node.choices.length);
+      Game.makeChoice(node.choices[idx]);
+    }
+  },
+  
+  showTimeline(){
+    const s = Game.state;
+    let html = `<h3 style="color:var(--fg-0)">人生时间轴</h3>`;
+    s.timeline.forEach(t=>{
+      html += `<div class="timeline-item"><div class="timeline-date">${t.date}</div><div class="timeline-text">${t.text}</div></div>`;
+    });
+    if(s.timeline.length===0) html += `<div style="color:var(--fg-3);font-size:13px">你的人生才刚刚开始...</div>`;
+    this.openModal(html);
+  },
+  showNPCs(){
+    const s = Game.state;
+    const npcs = s.npcs||[];
+    let html = `<h3 style="color:var(--fg-0)">认识的人</h3>`;
+    if(npcs.length===0){ html += `<div style="color:var(--fg-3);font-size:13px;padding:20px 0;text-align:center">你还不认识任何人...</div>`; }
+    npcs.forEach((n,i)=>{
+      if(n.alive===false){
+        html += `<div class="menu-item" style="opacity:.4"><b>${n.name}</b> <span style="font-size:11px;color:var(--fg-3)">（已故）</span></div>`;
+      } else {
+        html += `<div class="menu-item" onclick="UI.npcChat(${i})">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b>${n.name}</b>
+            <span style="font-size:10px;color:var(--fg-3)">${n.role||''}</span>
+          </div>
+          <div style="font-size:11px;color:var(--fg-3);margin-top:4px">${n.relation||''} · 信任 ${n.trust||0}</div>
+        </div>`;
+      }
+    });
+    this.openModal(html);
+  },
+  async npcChat(idx){
+    const s = Game.state;
+    const npc = s.npcs[idx];
+    if(!npc || npc.alive===false) return;
+    let html = `<div class="npc-chat">
+      <div class="npc-chat-header">
+        <div class="npc-avatar">${npc.name.charAt(0)}</div>
+        <div class="npc-info">
+          <div class="npc-name">${npc.name}</div>
+          <div class="npc-meta">${npc.role||''} · ${npc.relation||''} · 信任 ${npc.trust||0}</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chatMsgs"></div>
+      <div class="chat-input-row">
+        <input id="chatInput" placeholder="对 ${npc.name} 说点什么..." onkeydown="if(event.key==='Enter')UI.sendChat(${idx})">
+        <button onclick="UI.sendChat(${idx})">发送</button>
+      </div>
+    </div>`;
+    this.openModal(html);
+    // 开场白
+    const opener = npc.personality ? `（${npc.name}看了你一眼，${npc.personality}的气质让人印象深刻。）` : `（你遇到了 ${npc.name}。）`;
+    this._addChatMsg("npc", opener);
+  },
+  async sendChat(idx){
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if(!text) return;
+    input.value = "";
+    this._addChatMsg("player", text);
+    const s = Game.state;
+    const npc = s.npcs[idx];
+    // 调用 AI 生成回复
+    if(AIService.isEnabled() && AIService.hasKey()){
+      const reply = await AIService.generateNPCDialogue(npc, text, s);
+      this._addChatMsg("npc", reply);
+      // 对话增加信任度
+      npc.trust = Math.min(100, (npc.trust||30)+1);
+      s.flags.npcChatCount = (s.flags.npcChatCount||0)+1;
+    } else {
+      this._addChatMsg("npc", `（${npc.name}似乎在听你说话，但没有做出明确回应。）`);
+    }
+  },
+  _addChatMsg(role, text){
+    const box = document.getElementById("chatMsgs");
+    if(!box) return;
+    const div = document.createElement("div");
+    div.className = "chat-msg "+role;
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  },
+  showRelations(){ this.currentTab="rel"; document.querySelectorAll(".dtab").forEach(d=>d.classList.toggle("active",d.dataset.tab==="rel")); this.toggleSide(); },
+  showInventory(){ this.currentTab="equip"; document.querySelectorAll(".dtab").forEach(d=>d.classList.toggle("active",d.dataset.tab==="equip")); this.toggleSide(); },
+  showAchievements(){ this.goCodex(); },
+  openMenu(){ this.goSettings(); },
+  
+  openModal(html){
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("modal").classList.add("show");
+  },
+  closeModal(){ document.getElementById("modal").classList.remove("show"); },
+};
+
+/* ===== 启动 ===== */
+window.addEventListener("DOMContentLoaded", ()=>{ UI.initTheme(); Game.init(); });
+</script>
+<script src="js/ai.js?v=2.4.3"></script>
+<script src="js/eras.js?v=2.4.3"></script>
+</body>
+</html>

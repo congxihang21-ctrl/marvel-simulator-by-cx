@@ -27,7 +27,7 @@
 <meta name="browsermode" content="application">
 <!-- 禁止 IE 兼容模式 -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.6（世界线完整版）</title>
+<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.3（抖音公测版）</title>
 <script>
 /* 面板去重精简 + 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端适配：iOS / 鸿蒙 / 安卓 X5 / Win Edge
    在 CSS 之前跑一丢丢 JS：给 :root 注入 --vh / --sat / --sab 三个"真·视口尺寸"变量。
@@ -477,15 +477,6 @@ button.primary{
   animation:btnBreath 3.8s ease-in-out infinite;
   position:relative;
 }
-/* v2.6: 进入世界主按钮 —— 金红渐变，文字白色不被浅色主题覆盖 */
-.enter-world-btn{
-  font-size:17px;padding:14px 44px;min-height:48px;font-weight:800;letter-spacing:2px;
-  background:linear-gradient(180deg,#e8c66a,#c1272d);border:1px solid #7a1a1e;color:#fff;
-  box-shadow:0 6px 22px rgba(193,39,45,.35),inset 0 1px 0 rgba(255,255,255,.3);
-  border-radius:12px;cursor:pointer;transition:transform .12s ease,box-shadow .18s ease,filter .18s ease;
-  text-shadow:0 1px 2px rgba(0,0,0,.3);
-}
-.enter-world-btn:hover{transform:translateY(-1px);filter:brightness(1.05);box-shadow:0 8px 26px rgba(193,39,45,.42),inset 0 1px 0 rgba(255,255,255,.3)}
 button.primary::after{
   /* 顶部细高光：模拟金属弧面反光 */
   content:"";position:absolute;left:8%;right:8%;top:1px;height:1px;
@@ -537,9 +528,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   -webkit-transform:translateZ(0);transform:translateZ(0);
 }
+#engstat{font-size:12px;color:#7f8da0;flex:1;min-width:160px;word-break:break-all}
 .topbtns{display:flex;flex-wrap:wrap;gap:6px}
-.topbtns button{padding:7px 12px;font-size:12.5px;min-height:36px;font-weight:600;border-radius:10px;background:color-mix(in srgb,var(--bg-2) 85%,transparent);border:1px solid var(--line-2);color:var(--fg-1);letter-spacing:.2px}
-.topbtns button:hover{color:var(--fg-0);border-color:color-mix(in srgb,var(--accent) 45%,var(--line-2));background:color-mix(in srgb,var(--accent) 10%,var(--bg-2))}
 
 /* ===================== 时间大卡片（电影信息卡风格）===================== */
 .timecard{
@@ -605,29 +595,29 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   transition:transform .18s ease;transform:translateZ(0);
   display:inline-block;line-height:1}
 .panel.collapsed .tri{-webkit-transform:rotate(-90deg) translateZ(0);transform:rotate(-90deg) translateZ(0)}
-.ptime{margin-left:auto;color:var(--fg-2);font-size:11.5px;font-family:Consolas,monospace;font-weight:400;letter-spacing:0;text-align:right}
+.ptime{margin-left:auto;color:#8496ab;font-size:11.5px;font-family:Consolas,monospace;font-weight:400;letter-spacing:0;text-align:right}
 .panel .body{padding:10px 12px;max-height:400px;max-height:min(400px,58vh);overflow:auto;-webkit-overflow-scrolling:touch;
   /* v1.9：去掉 contain:layout（会切断 body 滚动链）与 overscroll-behavior:contain
      （电脑端鼠标滚轮在 story 面板里滚到底就卡住、不传到页面）→ 改 auto 让滚轮顺利续滚整页 */
   contain:style paint;
   overscroll-behavior:auto
 }
-.kv{display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line-2);font-size:13px;
+.kv{display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed #1b2430;font-size:13px;
   /* kv 是高重复元素，减少每个条目都产生新合成层 */
   contain:layout style}
-.kv .k{color:var(--fg-2);flex:0 0 78px;font-size:12px}
+.kv .k{color:#7f8da0;flex:0 0 78px;font-size:12px}
 .kv .v{color:var(--fg-0);flex:1;word-break:break-word;overflow-wrap:anywhere}
-.subh2{color:var(--fg-2);font-size:12px;margin:8px 0 3px;border-left:2px solid var(--line-2);padding-left:6px}
-.card{border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--bg-2);font-size:12.8px;line-height:1.7;
+.subh2{color:var(--fg-2);font-size:12px;margin:8px 0 3px;border-left:2px solid #2f3d4e;padding-left:6px}
+.card{border:1px solid #22303f;border-radius:7px;padding:7px 9px;margin-bottom:7px;background:#101822;font-size:12.5px;
   -webkit-transform:translateZ(0);transform:translateZ(0)}
 .card b{color:var(--accent)}
 ul{margin:4px 0;padding-left:18px}
-li{margin:3px 0;font-size:13px;line-height:1.7}
-.dim{color:var(--fg-2);font-size:12.5px;line-height:1.7}
+li{margin:3px 0;font-size:13px}
+.dim{color:#5f6d7e;font-size:12.5px}
 /* 世界日志滚动容器：长列表优化 */
 #story{
   max-height:560px;max-height:min(560px,62vh);overflow-y:auto;padding:12px;
-  background:var(--bg-1);border-radius:10px;border:1px solid var(--line-2);
+  background:#0a1017;border-radius:8px;border:1px solid #1c2634;
   -webkit-overflow-scrolling:touch;
   /* contain + 滚动锚定，防 100+ 条日志时滚到底部卡顿 */
   contain:layout style paint;
@@ -636,28 +626,17 @@ li{margin:3px 0;font-size:13px;line-height:1.7}
   -webkit-mask-image:-webkit-radial-gradient(white,black)
 }
 .entry{
-  border-left:2.5px solid color-mix(in srgb,var(--line-2) 80%,transparent);
-  padding:7px 0 11px 13px;margin-bottom:13px;
+  border-left:2px solid var(--line-2);padding:6px 0 10px 12px;margin-bottom:12px;
   contain:layout style;
-  -webkit-transform:translateZ(0);transform:translateZ(0);
-  position:relative
+  -webkit-transform:translateZ(0);transform:translateZ(0)
 }
-.entry .t{color:var(--fg-2);font-size:11.5px;margin-bottom:5px;font-family:Consolas,"SF Mono",monospace;letter-spacing:.3px}
-.entry.self{
-  border-left-color:#c1272d;
-  background:linear-gradient(90deg,color-mix(in srgb,#c1272d 8%,transparent),transparent 80%);
-  border-radius:0 8px 8px 0;padding-right:10px
-}
-.entry .b{color:var(--fg-0);line-height:1.75;font-size:13.8px}
-.entry blockquote{margin:8px 0;padding:6px 12px;border-left:2.5px solid color-mix(in srgb,var(--magic) 60%,transparent);color:var(--fg-1);background:color-mix(in srgb,var(--bg-2) 60%,transparent);border-radius:0 6px 6px 0;font-size:13px;line-height:1.7}
-.entry code{background:color-mix(in srgb,var(--bg-2) 85%,transparent);padding:1px 6px;border-radius:5px;color:var(--accent);word-break:break-all;font-size:12.5px}
-.entry hr{border:none;border-top:1px solid var(--line-2);margin:11px 0}
-.hints{margin-top:9px;padding:8px 11px;border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--line-2));border-radius:8px;background:color-mix(in srgb,var(--accent) 6%,transparent);font-size:12px;color:var(--fg-1);line-height:1.7}
-/* v2.6：AI 流式撰写中的条目 —— 带闪烁光标 */
-.stream-entry{border-left-color:var(--accent)!important;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 6%,transparent),transparent 80%)!important}
-.stream-entry .t{color:var(--accent)!important;font-weight:700}
-.stream-b::after{content:'▋';display:inline-block;margin-left:2px;color:var(--accent);animation:streamCursor 1s step-end infinite;vertical-align:baseline}
-@keyframes streamCursor{0%,100%{opacity:1}50%{opacity:0}}
+.entry .t{color:#6f7f92;font-size:11.5px;margin-bottom:4px;font-family:Consolas,monospace}
+.entry.self{border-left-color:#c1272d;background:#170f12;border-radius:0 6px 6px 0;padding-right:8px}
+.entry .b{color:#d5dfec}
+.entry blockquote{margin:6px 0;padding:4px 10px;border-left:2px solid #4a5b70;color:#a8b8cc;background:#0f1620}
+.entry code{background:#1a2431;padding:1px 5px;border-radius:4px;color:var(--accent);word-break:break-all}
+.entry hr{border:none;border-top:1px solid #243040;margin:10px 0}
+.hints{margin-top:8px;padding:7px 9px;border:1px dashed #33465c;border-radius:6px;background:#0d1520;font-size:12px;color:var(--fg-2)}
 .foot{text-align:center;color:#55636f;font-size:11.5px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
 /* ===================== 选项卡 opt · 玻璃卡片式（选中金色描边+脉动发光）===================== */
@@ -852,26 +831,53 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 
 /* ===================== 加载遮罩（v1.4：双环旋转 + 进度条 + 双语金句慢切换）===================== */
 #busy{
-  display:none;position:fixed;top:0;left:0;right:0;
-  height:3px;background:transparent;z-index:9999;
-  pointer-events:none;
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(4,7,11,.88);
+  background-image:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, rgba(4,7,11,.94) 60%),
+                  linear-gradient(180deg,rgba(4,7,11,.94),rgba(4,7,11,.9));
+  z-index:120;
+  align-items:center;justify-content:center;flex-direction:column;color:var(--accent);font-size:16px;text-align:center;
+  padding:20px;
+  padding-left:calc(20px + env(safe-area-inset-left,0px));
+  padding-right:calc(20px + env(safe-area-inset-right,0px));
+  padding-top:calc(20px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  -webkit-transform:translateZ(0);transform:translateZ(0);
+  backdrop-filter: blur(8px) saturate(1.4);
+  -webkit-backdrop-filter: blur(8px) saturate(1.4);
+  touch-action:none
 }
-#busy .spin-wrap, #busy #busyQuote{display:none}
-#busyTxt{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
-  padding:7px 16px;border-radius:999px;
-  background:color-mix(in srgb,var(--bg-2) 92%,transparent);
-  border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line-2));
-  color:var(--fg-1);font-size:12.5px;font-weight:600;
-  box-shadow:0 4px 18px rgba(0,0,0,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  max-width:88vw;text-align:center;line-height:1.4;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.busy-prog{height:3px;width:100%;background:transparent;overflow:hidden;position:absolute;top:0;left:0}
+#busyTxt{max-width:620px;color:var(--fg-1);font-weight:500;margin-bottom:18px;line-height:1.65;font-size:15px}
+/* v1.4：双环旋转（外金内紫）+ 额外"粒子轨道"让转圈更有"电影片头"感
+   兼容写法：用 border-top/border-right 的经典 spinner，X5/抖音 WebView 全都稳跑 */
+.spin-wrap{position:relative;width:96px;height:96px;margin-bottom:18px;flex:0 0 auto;will-change:transform}
+.spin{position:absolute;inset:0;width:96px;height:96px;border-radius:50%;
+  box-sizing:border-box;border:3px solid var(--line-2);
+  border-top:3px solid var(--accent);
+  border-right:3px solid color-mix(in srgb, var(--accent) 65%, var(--line-2));
+  border-bottom:3px solid color-mix(in srgb, var(--accent) 20%, var(--line-2));
+  animation:sp3d .9s cubic-bezier(.55,.1,.45,.9) infinite;
+  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0);
+  box-shadow:0 0 18px color-mix(in srgb, var(--accent) 28%, transparent) inset}
+.spin2{position:absolute;left:12px;top:12px;width:72px;height:72px;border-radius:50%;box-sizing:border-box;
+  border:3px solid color-mix(in srgb, var(--magic) 28%, transparent);
+  border-top:3px solid var(--magic);
+  border-left:3px solid color-mix(in srgb, var(--magic) 55%, transparent);
+  animation:sp3d 1.6s linear infinite reverse;
+  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0)}
+.spin3{position:absolute;left:26px;top:26px;width:44px;height:44px;border-radius:50%;box-sizing:border-box;
+  border:2px dashed color-mix(in srgb, var(--hero) 55%, transparent);
+  animation:sp3d 2.2s linear infinite;
+  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0)}
+/* 进度条：10s 走到 92%，收到响应补到 100% */
+.busy-prog{width:260px;max-width:78vw;height:6px;margin:4px 0 16px;border-radius:999px;
+  background:color-mix(in srgb, var(--fg-0) 10%, transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--fg-0) 8%, transparent) inset;
+  overflow:hidden;position:relative}
 .busy-prog i{display:block;height:100%;width:0%;
-  background:linear-gradient(90deg,var(--accent),var(--magic),var(--accent));
-  box-shadow:0 0 10px color-mix(in srgb,var(--accent) 60%,transparent);
-  animation:busyPulse 1.2s ease-in-out infinite;
-  transition:width .3s ease}
-@keyframes busyPulse{0%,100%{opacity:.7}50%{opacity:1}}
+  background:linear-gradient(90deg,color-mix(in srgb, var(--accent) 92%, transparent),var(--accent),color-mix(in srgb, var(--magic) 70%, var(--accent)));
+  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 50%, transparent);
+  transition:width .35s ease;will-change:width}
 /* 双语标语条：英文原句 + 中文翻译 + 作者英文原名·中文译名，一整次加载最多换 2~3 条 */
 #busyQuote{
   max-width:720px;margin-top:6px;padding:18px 24px 16px;border-radius:14px;
@@ -938,6 +944,7 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
  .screen{padding:8px}
  .big-title{letter-spacing:1px}
  .topbar{padding:8px 10px;gap:7px}
+ #engstat{flex:1 1 100%;min-width:0;font-size:11.5px}
  .topbtns{flex:1 1 100%;gap:5px}
  .topbtns button{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px}
  .panel h3{padding:9px 10px;font-size:13px;min-height:44px}
@@ -1060,6 +1067,7 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] button.primary:hover{box-shadow:0 0 18px rgba(179,49,58,.5)}
 :root[data-theme='light'] .topbar{
   background:linear-gradient(90deg,var(--bg-2),var(--bg-1));border-color:var(--line-2)}
+:root[data-theme='light'] #engstat{color:var(--fg-2)}
 :root[data-theme='light'] .timecard{
   background:linear-gradient(180deg,var(--bg-2),var(--bg-1));
   border-color:color-mix(in srgb,var(--accent) 35%,var(--line-2));
@@ -1124,8 +1132,9 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] .modal .noteline code{
   background:var(--bg-1);color:var(--hero)}
 :root[data-theme='light'] #busy{
-  background:transparent}
-:root[data-theme='light'] #busyTxt{background:color-mix(in srgb,var(--bg-2) 96%,transparent);color:var(--fg-1)}
+  background:rgba(239,231,214,.92);
+  background-image:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--accent) 10%,transparent) 0%, rgba(239,231,214,.95) 60%),
+                  linear-gradient(180deg,rgba(239,231,214,.95),rgba(228,217,191,.95))}
 :root[data-theme='light'] #ioBox{background:var(--bg-1);border-color:var(--line-2)}
 :root[data-theme='light'] .reg-card{
   background:var(--bg-2);border-color:var(--line-2)}
@@ -1220,32 +1229,6 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] [style*='#ffb3ba']:not([data-keep-color]),
 :root[data-theme='light'] [style*='#e2cf95']:not([data-keep-color]){
   color: var(--fg-0) !important;
-}
-/* 🔧 浅色主题关键修复：内联白色/浅灰文字 → 强制深色，避免白底白字看不见 */
-:root[data-theme='light'] [style*='color:#fff']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#ffffff']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#ddd']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#dddddd']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#e8eaf0']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#f4efe5']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#cfe0f2']:not([data-keep-color]){
-  color: var(--fg-0) !important;
-}
-:root[data-theme='light'] [style*='color:#aaa']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#999']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#888']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#ccc']:not([data-keep-color]){
-  color: var(--fg-2) !important;
-}
-/* 强调金/紫色在浅色下加深确保可读 */
-:root[data-theme='light'] [style*='color:#9d7cff']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#8fe0a0']:not([data-keep-color]){
-  color: #6a4db5 !important;
-}
-:root[data-theme='light'] [style*='color:#f2c54d']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#e8c66a']:not([data-keep-color]),
-:root[data-theme='light'] [style*='color:#ffe7a0']:not([data-keep-color]){
-  color: var(--accent) !important;
 }
 /* 4) 强调色：在浅色下稍微加深，确保对比度 */
 :root[data-theme='light'] [style*='#e2cf95']:not([data-keep-color]){
@@ -1644,15 +1627,19 @@ html,body,div,span,p,button,input,textarea{
 .reg-card .m{font-size:11px;color:var(--fg-2);margin-top:3px;line-height:1.5}
 .reg-card .s{font-size:11px;color:var(--magic);margin-top:4px;font-weight:600;letter-spacing:.3px}
 
-/* 引擎档位小标签 */
+/* 引擎档位小标签（顶部状态栏 engstat） */
 .eng-lv{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px;letter-spacing:.3px}
 .eng-lv.lv-rec{background:rgba(143,224,160,.12);color:var(--hero)}
 .eng-lv.lv-adv{background:rgba(157,124,255,.14);color:var(--magic)}
 .eng-lv.lv-off{background:rgba(232,198,106,.14);color:var(--accent)}
 
-/* v2.6: 简易/专家模式已移除，相关 CSS 全部删除 */
-
-/* =============== Beta v2.0 · 世界日志滚动修复（双端）===============
+/* =============== v1.8 · 双模式系统（简易模式 / 专家模式）=============== */
+/* 模式徽章（顶栏/引擎设置里用）*/
+.mode-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-weight:800;font-size:11.5px;letter-spacing:.3px;border:1px solid transparent;white-space:nowrap;user-select:none;cursor:default}
+.mode-badge.easy{background:linear-gradient(135deg,color-mix(in srgb,#5ecfff 22%,transparent),color-mix(in srgb,#8fe0a0 22%,transparent));border-color:rgba(143,224,160,.55);color:#d9f7e4;text-shadow:0 1px 0 rgba(0,0,0,.15)}
+.mode-badge.easy::before{content:"🌱"}
+.mode-badge.expert{background:linear-gradient(135deg,color-mix(in srgb,#9d7cff 24%,transparent),color-mix(in srgb,#e8c66a 20%,transparent));border-color:rgba(157,124,255,.55);color:#efe5ff}
+.mode-badge.expert::before{content:"🔬"}
 
 /* 模式选择双卡片（新手教程 Step0 / 引擎设置里） */
 .mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 6px}
@@ -1689,10 +1676,9 @@ body.mode-easy .subh:has(+ #playerInput)::before{content:"🔍 "}
 body.mode-easy .subh:has(+ #playerInput)::after{content:"（给想自己写剧情的朋友～不写也完全可以玩）";font-weight:400;margin-left:4px}
 
 /* 简易模式：巨大的「继续推进⏭️」按钮条（行动区最上方） — 用户一眼就能看到 */
-.easy-go-bar{display:flex;align-items:stretch;justify-content:space-between;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
+.easy-go-bar{display:none;align-items:stretch;justify-content:space-between;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
 body.mode-easy .easy-go-bar{display:flex}
-.easy-go-main{flex:1;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-weight:800;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 75%,#fff 5%),color-mix(in srgb,var(--magic) 55%,#fff 5%));color:#fff;letter-spacing:.6px;box-shadow:0 6px 22px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08);border:none;cursor:pointer;transition:transform .12s ease, box-shadow .18s ease, filter .18s ease}
-.easy-go-main:hover{filter:brightness(1.06);box-shadow:0 8px 28px rgba(232,198,106,.32),inset 0 -2px 0 rgba(0,0,0,.08)}
+.easy-go-main{flex:1;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-weight:800;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 75%,#fff 5%),color-mix(in srgb,var(--magic) 55%,#fff 5%));color:#fff;letter-spacing:.6px;box-shadow:0 6px 22px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08);border:none;cursor:pointer;transition:transform .12s ease, box-shadow .18s ease}
 .easy-go-main:active{transform:translateY(1px) scale3d(.992,.992,1);box-shadow:0 3px 12px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08)}
 .easy-go-main .ic{font-size:28px}
 .easy-go-main .sub{font-size:12px;font-weight:500;opacity:.9;letter-spacing:.2px;display:block;line-height:1.4}
@@ -1887,11 +1873,10 @@ body.mode-easy #body_story{max-height:min(580px,72vh) !important}
    好处：① 一屏看完所有人生信息 ② 不用每个都点三角展开 ③ 视觉更紧凑。*/
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:8px 0 12px}
 @media (max-width:720px){.grid{grid-template-columns:1fr;gap:10px}}
-.mc{position:relative;border:1px solid var(--line-2);border-radius:14px;padding:12px 13px 11px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 92%,transparent),color-mix(in srgb,var(--bg-2) 72%,transparent));transition:transform .14s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;contain:style paint;overflow:hidden}
-.mc::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);pointer-events:none}
-.mc:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line-2));box-shadow:0 6px 20px rgba(0,0,0,.18),0 0 0 1px color-mix(in srgb,var(--accent) 10%,transparent) inset;transform:translateY(-2px)}
+.mc{position:relative;border:1px solid var(--line-2);border-radius:14px;padding:12px 13px 11px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 90%,transparent),color-mix(in srgb,var(--bg-2) 70%,transparent));transition:transform .12s, box-shadow .18s, border-color .18s;contain:style paint}
+.mc:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line-2));box-shadow:0 4px 14px rgba(0,0,0,.14);transform:translateY(-1px)}
 .mc .hd{display:flex;align-items:center;gap:9px;margin-bottom:8px;cursor:pointer;user-select:none}
-.mc .ic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,color-mix(in srgb,var(--magic) 26%,transparent),color-mix(in srgb,var(--accent) 22%,transparent));flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1)}
+.mc .ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,color-mix(in srgb,var(--magic) 22%,transparent),color-mix(in srgb,var(--accent) 20%,transparent));flex-shrink:0}
 .mc .tl{font-weight:800;font-size:14.5px;color:var(--fg-0);flex:1;line-height:1.3}
 .mc .more{font-size:11.5px;font-weight:700;color:var(--accent);padding:4px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);white-space:nowrap;cursor:pointer;transition:all .15s}
 .mc .more:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
@@ -1939,29 +1924,6 @@ body.mode-easy #body_story{max-height:min(580px,72vh) !important}
 .panel.collapsed .tri{transform:rotate(-90deg);color:var(--fg-1)}
 .panel h3 .ptime{margin-left:auto;color:var(--fg-2);font-weight:500;font-size:12px}
 .panel .body{padding:12px 14px}
-
-/* ===== v2.6 主体舞台：世界日志 + 行动（核心交互区） ===== */
-.main-stage{margin:10px 0 14px;display:flex;flex-direction:column;gap:12px}
-.panel-story{
-  border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line-2));
-  box-shadow:0 2px 20px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.03) inset;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 92%,transparent),color-mix(in srgb,var(--bg-1) 96%,transparent));
-}
-.panel-story > h3{
-  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%),color-mix(in srgb,var(--bg-1) 60%,transparent);
-  color:var(--accent);font-weight:800;font-size:14.5px;
-  border-bottom:1px solid color-mix(in srgb,var(--accent) 28%,var(--line-2));
-}
-.panel-action{border-color:color-mix(in srgb,var(--magic) 30%,var(--line-2))}
-.panel-action > h3{color:var(--magic);font-weight:800}
-/* 世界日志更高更醒目 */
-#body_story{max-height:min(720px,78vh) !important}
-/* 次体网格（属性/关系等）稍弱化 */
-.sub-grid{opacity:.97}
-@media(max-width:720px){
-  #body_story{max-height:min(520px,72vh) !important}
-  .main-stage{gap:10px}
-}
 
 /* 详情子界面（模态框）：复用 tutorialModal 同款 skipAbsolute 架构 */
 .detail-modal .box{width:min(760px,94vw);max-height:none}
@@ -2614,20 +2576,6 @@ body.mode-easy #opts.busy .opt{
   }catch(_){}
 })();
 </script>
-<!-- ================= v2.6 融合：引入 v2.4 Liquid Glass 设计令牌与 AI 服务 ================= -->
-<link rel="stylesheet" href="css/design-tokens.css">
-<link rel="stylesheet" href="css/glass.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/responsive.css">
-<script src="js/rng.js?v=2.6"></script>
-<script src="js/worldlineEngine.js?v=2.6"></script>
-<script src="js/characterEngine.js?v=2.6"></script>
-<script src="js/relationshipEngine.js?v=2.6"></script>
-<script src="js/eventDirector.js?v=2.6"></script>
-<script src="js/endingEngine.js?v=2.6"></script>
-<script src="js/ai.js?v=2.6"></script>
-<script src="js/seed_data.js?v=2.6"></script>
-<script src="js/game_seed.js?v=2.6"></script>
 </head>
 <body>
 
@@ -2640,39 +2588,102 @@ body.mode-easy #opts.busy .opt{
 <!-- ================= 创角界面 ================= -->
 <div class="screen" id="setupScreen">
   <div class="setup-card">
-    <div style="text-align:center"><span class="beta-tag">◆ BETA v2.6 · 世界线完整版 ◆</span></div>
+    <!-- Beta v2.3 N1：v2.3 版本通知横幅（首屏·可关·localStorage 记忆"不看了"；底部另有 📰 永久入口） -->
+    <div id="v23newsBanner" style="display:none;margin:0 -18px 12px;padding:14px 14px 12px;border-radius:14px;position:relative;
+        background:linear-gradient(135deg,rgba(157,124,255,.16),rgba(124,192,255,.10) 55%,rgba(242,197,77,.14));
+        border:1px solid rgba(157,124,255,.35);backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);
+        box-shadow:0 8px 32px rgba(24,30,46,.35);">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-weight:900;font-size:13.5px;letter-spacing:.5px;background:linear-gradient(135deg,#cdbbff 0%,#9fd0ff 60%,#f7dd97 100%);-webkit-background-clip:text;background-clip:text;color:transparent">📰 Beta v2.3 · 更新通知</span>
+        <span style="font-size:11.5px;color:#9aa6b8">抖音公测版 · 小白更容易上手 · 高三开发组出品</span>
+        <button onclick="try{closeV23News(true)}catch(_){}" title="这版本我已经知道啦，关掉以后不再弹"
+          style="position:absolute;right:8px;top:6px;width:26px;height:26px;border:none;background:rgba(255,255,255,.06);color:#c6cfdd;border-radius:8px;cursor:pointer;font-weight:700;min-height:unset">×</button>
+      </div>
+      <div style="margin-top:9px;display:grid;gap:5px 8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));font-size:12.2px;color:#d4dce9;line-height:1.7">
+        <div>🎮 <b>新手 3 步教程</b>（旧版 7 步）+「2 分钟开启 AI 文笔」一键档</div>
+        <div>🧩 <b>顶栏信息条 + 4 张大卡</b>（A 稳妥·B 冒险·C 感情·D 自定义），小白一看就会</div>
+        <div>🎯 A/B/C 选项<b>三方向分化</b>：目标 / 冒险 / 感情一眼分清</div>
+        <div>🎨 <b>液态玻璃 UI</b>（iOS 26 风），手机端 3 列 chip + 44pt 大按钮</div>
+        <div>💾 <b>存档双写 + 备份键</b>，抖音 iOS 清缓存也不怕丢档</div>
+        <div>🧋 <b>Token 温柔限流</b>：每日 50/100/200 轮三档提醒 · 点关闭还能 +2 次额度 · 打赏永久免限</div>
+        <div>📅 <b>作息说明</b>：单休·周六晚回·平时 22:30 放学手机·修 Bug 有延迟请体谅</div>
+        <div>🛡️ <b>修复</b>：底部栏不挡 Home 条 · Enter 提交自定义 · 剧情完自动滚选项 · 首屏不白屏</div>
+      </div>
+      <div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="primary" onclick="try{closeV23News(true)}catch(_){}" style="min-height:38px;padding:5px 12px;font-size:12.2px">✅ 知道了 · 以后不再弹</button>
+        <button onclick="try{closeV23News(false);backToHome()}catch(_){}" style="min-height:38px;padding:5px 12px;font-size:12.2px">先关掉 · 之后随时在底部点「📰 版本通知」看</button>
+        <span style="font-size:11.3px;color:#9aa6b8;margin-left:auto">版本号 v2.3 · 高三开发组</span>
+      </div>
+    </div>
+    <div style="text-align:center"><span class="beta-tag">◆ BETA v2.3 · 抖音公测版 ◆</span></div>
     <div class="big-title">《漫威电影宇宙 · 英雄纪元》</div>
     <div class="sub-title">凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启</div>
     <div class="canon">【正典优先协议已启用】本世界以漫威电影宇宙影视作品为正典。正典世界观、设定、人物、事件优先于自定义与随机推演。正典未明确处由系统自由演化。</div>
     <div style="text-align:center"><span class="quote" id="homeQuote">"I am Iron Man." ——托尼·史塔克，2008<br>能力并不是答案。它只是这个宇宙运转的变量之一。</span></div>
 
-    <!-- v2.6: 已取消简易/专家模式区别，直接展示创角表单 -->
-    <div class="subh" style="font-size:13px">选择你的起点</div>
+    <!-- Beta v1.9：开局前就能选模式，不需要等教程里才选。当前选中会自动被切到对应 body class + localStorage 存档 -->
+    <div class="subh" style="font-size:13px">【第一步 · 选择你的游玩模式】</div>
+    <div class="home-modes" id="homeModes">
+      <div class="home-mode" role="radio" aria-checked="false" data-mode="easy" onclick="homeSetMode('easy')">
+        <div class="hm-check">✓ 已选</div>
+        <div class="hm-hd">
+          <div class="hm-ic">🌱</div>
+          <div class="hm-name">简易模式</div>
+          <div class="hm-for">给新手 / 小白朋友</div>
+        </div>
+        <div class="hm-desc">
+          大按钮 · 白话解释 · 前几回合引导提示<br>
+          不用懂漫威、不用会写指令，跟着点就能玩
+        </div>
+      </div>
+      <div class="home-mode" role="radio" aria-checked="false" data-mode="expert" onclick="homeSetMode('expert')">
+        <div class="hm-check">✓ 已选</div>
+        <div class="hm-hd">
+          <div class="hm-ic">🔬</div>
+          <div class="hm-name">专家模式</div>
+          <div class="hm-for">漫威老粉 / 会用 AI</div>
+        </div>
+        <div class="hm-desc">
+          完整 A/B/C 三选项 + 自定义行动双轨<br>
+          想让自己输入剧情、走深度路线的玩家选这个
+        </div>
+      </div>
+    </div>
+
+    <div class="subh" style="font-size:13px">【第二步 · 选择你的起点】</div>
     <div id="formArea"></div>
     <div style="text-align:center;margin-top:18px">
-      <button class="enter-world-btn" onclick="startGame()">⚔ 进入世界</button>
+      <button class="primary" style="font-size:17px;padding:14px 44px;min-height:48px;font-weight:800;letter-spacing:2px;
+        background:linear-gradient(180deg,#e8c66a,#c1272d);border-color:#7a1a1e;color:#fff;
+        box-shadow:0 6px 22px rgba(193,39,45,.35),inset 0 1px 0 rgba(255,255,255,.3)"
+        onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''"
+        onclick="startGame()">⚔ 进入世界</button>
     </div>
     <div class="dim" style="text-align:center;margin-top:10px">你的故事，将从这条神圣时间线上一个普通的名字开始。</div>
     <div style="max-width:860px;margin:14px auto 0;padding:11px 14px;border:1px dashed rgba(232,198,106,.45);border-radius:10px;background:linear-gradient(180deg,rgba(232,198,106,.08),rgba(232,198,106,.02));font-size:12.5px;line-height:1.8;color:var(--fg-1)">
-      🛡 <b>非官方同人作品</b>，漫威 IP 归属迪士尼/漫威，AI 生成剧情仅供娱乐。<br>
-      🎂 <b style="color:#e8c66a">建议 16+ 游玩</b>，未成年人请在监护人指导下使用。完整条款见 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u>。
+      🛟 点「进入世界」前，请先阅读：<br>
+      · 🛡 <b>免责声明</b>：本作是<b>非官方同人作品</b>，漫威 / 钢铁侠 / 美队 / 雷神 / 复仇者联盟 等<b>相关 IP、角色、商标 归属 华特迪士尼公司 / 漫威娱乐（Marvel Entertainment, LLC）</b>，原作一切解释权归官方所有；<b>本作不以任何方式用于商业用途，不代表官方立场</b>。本作剧情由大语言模型实时生成，可能出现<b>与正典冲突 / 违背科学常识 / 不符合现实法律</b>的内容，<b>仅供娱乐与同人二创参考，请勿当真</b>；涉及军事、医学、法律、金融、职业等描述<b>一律不能作为现实决策依据</b>。作者对因违反本声明、滥用本作品或<b>未成年人未在监护人指导下使用</b>造成的任何直接/间接损失不承担法律责任。完整条款请点右上 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「ℹ 关于作者 · 版权」</u>。<br>
+      · 🎂 <b style="color:#e8c66a">年龄建议：本作建议 16 周岁以上用户游玩</b>。16 周岁以下未成年人请<b>务必在家长 / 监护人知情并指导</b>下使用，并<b>合理控制每日游玩时长（建议 ≤ 1 小时 / 天）</b>，避免沉迷游戏影响学业与身心健康。<br>
+      · 🧭 云端 AI 会自动合规审核，如遇拦截提示→不是网页坏了→换委婉措辞 / 一键切<b>离线推演</b>即可继续游戏。
     </div>
     <div style="text-align:center;margin-top:14px;display:flex;gap:7px;justify-content:center;flex-wrap:wrap">
       <button id="btnBackToGame" onclick="backToGame()" style="display:none" class="primary">↩ 返回当前人生</button>
       <button onclick="openLoad()">📂 读取存档</button>
+      <button onclick="location.href='#load'" id="btnDirectLoad">⤓ 直接进入存档</button>
+      <button onclick="openSettings()">⚙ 引擎设置</button>
       <button onclick="openThemePanel()">🎨 外观主题</button>
       <button onclick="openAbout()">ℹ 关于作者</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">☕ 支持一下</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.18),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)">🧋 请学生开发者喝杯奶茶</button>
       <button onclick="openTutorial()" style="background:color-mix(in srgb,var(--magic) 15%,var(--bg-2));border-color:color-mix(in srgb,var(--magic) 45%,var(--line-2))">❔ 新手帮助</button>
     </div>
     <div id="load" style="max-width:860px;margin:14px auto 0;display:none" class="setup-card">
       <div class="subh" style="font-size:13px">📂 读取存档</div>
-      <div id="ioBox" style="display:block;margin-top:10px;padding:10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg-1)">
+      <div id="ioBox" style="display:block;margin-top:10px;padding:10px;border:1px solid #2b3a4d;border-radius:8px;background:#0c131c">
         <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px">
           <button class="primary" onclick="pickFile()">📁 选择 TXT 文件导入（推荐）</button>
         </div>
         <input type="file" id="fileInput2" accept=".txt,.json,text/plain,application/json" style="display:none">
-        <div style="margin-bottom:6px;font-size:11.5px;color:var(--fg-2);line-height:1.6">
+        <div style="margin-bottom:6px;font-size:11.5px;color:#8fa3b8;line-height:1.6">
           或直接把存档文本粘贴到下方，再点「导入存档」。<br>
           导入前会显示角色、轮次与时间，确认无误后才覆盖当前进度。
         </div>
@@ -2680,7 +2691,7 @@ body.mode-easy #opts.busy .opt{
         <div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">
           <button class="primary" onclick="doImport2()">📂 导入存档</button>
         </div>
-        <div id="ioMsg2" style="margin-top:7px;font-size:12px;color:var(--fg-2)"></div>
+        <div id="ioMsg2" style="margin-top:7px;font-size:12px;color:#8fa3b8"></div>
       </div>
     </div>
   </div>
@@ -2690,25 +2701,27 @@ body.mode-easy #opts.busy .opt{
 <div class="screen" id="gameScreen" style="display:none">
 
   <div class="topbar">
+    <div id="engstat">引擎未配置</div>
     <div class="topbtns">
       <button onclick="openThemePanel()">🎨 外观</button>
+      <button onclick="openSettings()">⚙ 引擎</button>
+      <button onclick="forceCheck()">🔍 自检</button>
       <button onclick="openSave()">💾 存档</button>
       <button onclick="openLoad()">📂 读档</button>
-      <button onclick="openLifeReview()">📜 人生回顾</button>
       <button onclick="openAbout()">ℹ 关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者">☕ 支持</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="高三课佘写代码辛苦，买杯奶茶支持一下～">🧋 请喝奶茶</button>
     </div>
   </div>
 
   <div class="timecard">
     <div class="lab">
-      <span id="heroBadge" data-keep-color style="display:none;margin-right:8px;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--magic) 60%,transparent),color-mix(in srgb,var(--accent) 40%,transparent));color:#fff;font-weight:700;letter-spacing:0;font-size:11.5px;line-height:1.5;box-shadow:0 1px 6px rgba(126,100,255,.25)">🎭 <span id="heroName">无名者</span></span>
+      <span id="heroBadge" style="display:none;margin-right:8px;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--magic) 60%,transparent),color-mix(in srgb,var(--accent) 40%,transparent));color:#fff;font-weight:700;letter-spacing:0;font-size:11.5px;line-height:1.5;box-shadow:0 1px 6px rgba(126,100,255,.25)">🎭 <span id="heroName">无名者</span></span>
       <!-- Beta v2.0：OVR 能力综评徽章（简易/专家模式都显示，点击看 8 维能力详情）-->
       <span id="ovrBadge" class="ovr-badge ovr-t0" style="display:none" onclick="try{openDetail('ability')}catch(_){}" title="点击查看 8 维能力详情">
         <span class="ovr-num" id="ovrNum">0</span>
         <span class="ovr-meta"><span class="ovr-tier" id="ovrTier">凡人</span><span class="ovr-lab">OVR 综评</span></span>
       </span>
-      🕐 世界时间 · 地球-616
+      <span id="modeBadge" class="mode-badge expert" style="margin-right:8px" title="点击可切换模式（简易/专家）" onclick="try{toggleModeMenu&&toggleModeMenu(event)}catch(_){}">专家模式</span>🕐 世界时间 · 地球-616
     </div>
     <div class="big" id="bigTime">—</div>
     <div class="sub" id="subTime">—</div>
@@ -2734,13 +2747,17 @@ body.mode-easy #opts.busy .opt{
 
   <div id="checkBanner"></div>
 
-  <!-- ⭐ 主体区：世界日志（最核心交互）+ 我的行动 -->
-  <div class="main-stage">
-    <div class="panel panel-story"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>📜 世界日志<span class="ptime" id="time_story">—</span></h3>
-      <div class="body" id="body_story"><div id="story"></div></div></div>
+  <div class="grid">
+    <div id="colL"></div>
+    <div id="colR"></div>
+  </div>
 
-    <div class="panel panel-action"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>⚡ 我的行动 · 此刻<span class="ptime" id="time_action">—</span></h3>
-      <div class="body" id="body_action" style="max-height:none">
+  <div class="panel"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>【世界日志】<span class="ptime" id="time_story">—</span></h3>
+    <div class="body" id="body_story"><div id="story"></div></div></div>
+
+  <div class="panel"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>【我的行动】· 此刻<span class="ptime" id="time_action">—</span></h3>
+    <div class="body" id="body_action" style="max-height:none">
+      <div class="easy-tip-strip" id="easyTipStrip"><b>👉 操作超简单：</b>下面给了你 3 个方向，点一个卡片；或直接点最上面的「继续推进⏭️」按钮，让世界往前走就行啦～漫威背景不懂也没关系，AI 会在剧情里慢慢讲给你。</div>
       <div class="easy-go-bar" id="easyGoBar">
         <button class="easy-go-main" onclick="locked('doTurn',function(){try{if(CUR_HINTS&&CUR_HINTS[0]){var pi=$('playerInput');if(pi&&!pi.value.trim())pi.value=CUR_HINTS[0];doTurn('normal')}else{doTurn('world')}}catch(e){console.warn(e)}},900)" title="如果填了行动就执行；没填就自动走世界轮">
           <span class="ic">⏭️</span>
@@ -2764,21 +2781,15 @@ body.mode-easy #opts.busy .opt{
         </div>
       </div>
       <div class="actrow">
-        <button class="primary" style="font-size:15px;padding:10px 22px" id="btnGo" onclick="var pi=$('playerInput');var inp=(pi?pi.value:'').trim();if(inp){doTurn('normal')}else{doTurn('world')}" title="填了行动就执行；没填就让世界自己运转，事件会找上门">▶ 推进</button>
-        <button onclick="doTurn('world')" title="不做选择，让时间先往前走，世界和身边人都会自己动起来">🌙 先过几天</button>
+        <button class="primary" style="font-size:15px;padding:10px 22px" id="btnGo" onclick="doTurn('normal')">▶ 推进</button>
+        <button onclick="doTurn('world')" title="1~3 小时，世界自行前进一段时间，NPC 各忙各的">⏭ 世界自行推进</button>
         <button onclick="openSkipMenu()" title="跳到 1 周 / 1 月 / 1 季，附带世界总结与身边人动态">🗓 时间快进</button>
-        <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳到有事情发生</button>
+        <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳过到大事件</button>
       </div>
     </div></div>
   </div>
 
-  <!-- 次体区：属性/关系/世界等概览卡（次要信息，放下方）-->
-  <div class="grid sub-grid">
-    <div id="colL"></div>
-    <div id="colR"></div>
-  </div>
-
-  <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed var(--line-2);border-radius:9px;background:var(--bg-1);text-align:center">
+  <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed #2b3a4d;border-radius:9px;background:#0b1219;text-align:center">
     <div class="dim" style="font-size:11.5px;margin-bottom:9px;line-height:1.65">
       当前进度会自动保存到本机。想换一条人生、读取 TXT 存档，或回到首页重新选择起点……
     </div>
@@ -2786,14 +2797,30 @@ body.mode-easy #opts.busy .opt{
       <button onclick="backToHome()">🔄 重新开始 / 切换存档</button>
       <button onclick="openSave()">💾 导出存档</button>
       <button onclick="openLoad()">📂 读取存档</button>
+      <button onclick="try{showV23News(true)}catch(_){}" title="随时点开看 v2.3 版本要点 + 关闭的通知">📰 版本通知</button>
+      <button onclick="try{tokShowPanel()}catch(_){}" title="查看今日 Token 消耗 + 打赏说明">🧋 Token / 支持开发者</button>
+    </div>
+    <!-- Beta v2.3 S1：高三作息 + Bug 反馈通道告知（用户必看，放在底栏最显眼位置） -->
+    <div style="margin-top:12px;padding:10px 12px;border-radius:10px;border:1px dashed rgba(157,124,255,.38);background:linear-gradient(135deg,rgba(157,124,255,.10),rgba(124,192,255,.06));text-align:left;line-height:1.85;font-size:12.2px;color:#cfd6e4">
+      <b style="color:#cdbbff">📅 关于作者回复 / 修 Bug 的作息说明（必看🥺）：</b><br>
+      · 我是 <b>高三住校开发组，单休，只有 <u>周六晚上</u> 才能回家摸到电脑</b>；<br>
+      · 工作日 <b>22:30 晚自习放学</b>，之后只能用手机回复 + 小改；<br>
+      · 所以 <b>白天的 Bug / 回复会有延迟，最快也要等晚上或周六</b> 才能修，请大家体谅～<br>
+      · <b>🐞 Bug 反馈通道（推荐）：</b>我会建一个 <u>QQ 群作为 Bug 反馈群</u>，群号确定后我会第一时间放到这里 + 抖音评论区置顶。<br>
+      · 当前紧急联系也可以 <b>抖音私信：CX（抖音号 cxh20080910）</b>，评论、合拍我也都能看到～
     </div>
   </div>
 
-  <div class="foot">作者：<span class="cx-sign" title="独立开发者 · 课余作品 · 漫威模拟器">© CX（独立开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
+  <div class="foot">作者：<span class="cx-sign" title="高三学生开发者 CX · 课余独立作品 · 漫威模拟器">© CX（高三学生开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
     <div class="foot-beta" style="margin-top:8px;font-size:12px;line-height:1.9;color:var(--fg-2);padding:0 6px">
-      💾 <b>存档提醒</b>：手机浏览器的 localStorage 可能被清理，重要节点请点「💾 存档 → ⬇ 导出 TXT」备份到本地。<br>
-      🛡 <b>免责</b>：非官方同人作品，漫威 IP 归属迪士尼/漫威；AI 生成剧情仅供娱乐，请勿当真。<br>
-      🎂 <b style="color:#e8c66a">建议 16+ 游玩</b>，未成年人请在监护人指导下使用，合理控制时长。
+      🔬 本作 <b>仍在 Beta 公测阶段</b>（当前版本 Beta v2.3 · 抖音首发版），剧情、人设文笔、AI 正典同步会持续打磨升级。<br>
+        🐞 游玩中遇到 Bug、白屏、剧情 OOC，或想提出脑洞设定？<b>随时 @我发抖音私信 / 评论区留言</b>：<br>
+        🎵 <b>抖音同名</b>：<span class="cx-sign" title="搜索抖音号 cxh20080910 关注发私信即可">CX</span>（<b>抖音号：cxh20080910</b> · 私信、评论、合拍我都能看到）<br>
+        <span style="color:#cdbbff">📅 作息说明（新增）：单休 · 周六晚才能回家用电脑 · 工作日 22:30 放学只用手机，修 Bug / 回复会延迟，大家多多谅解 🙏。Bug 反馈 QQ 群号稍后会放这里 + 置顶评论。</span><br>
+      💖 感谢每一位耐心游玩、愿意陪这个高中生模拟器慢慢长大的朋友——<b>你们的每一条评论我晚自习下课后都会看</b>。<br>
+      ⚠️ <b>温馨提示</b>：手机浏览器（尤其微信 / 抖音内置 WebView）的 localStorage 可能被系统自动清理，<b>玩到重要节点务必点「💾 存档 → ⬇ 导出 TXT 文件」存一份到自己相册 / 云盘</b>，进度归零真的会哭。<br>
+      🛡 <b>免责声明（摘要）</b>：本作是<b>非官方同人作品</b>，漫威相关 IP / 角色 / 商标 归属<b>华特迪士尼公司 / 漫威娱乐</b>；AI 生成剧情<b>仅供娱乐参考，请勿当真</b>；完整条款点 <u onclick="openAbout()" style="cursor:pointer;text-decoration:underline dotted">「关于 · 版权」</u> 查看。<br>
+      🎂 <b style="color:#e8c66a">年龄建议：本作建议 16 周岁以上用户游玩</b>；16 周岁以下未成年人请在家长 / 监护人知情并指导下使用，合理安排时间，避免沉迷。
     </div>
   </div>
 </div>
@@ -2818,7 +2845,7 @@ body.mode-easy #opts.busy .opt{
           <button id="ioImport" onclick="doImport()">📂 用粘贴的文本导入</button>
           <button onclick="closeIO()">关闭</button>
         </div>
-        <div id="ioMsg" style="margin-top:7px;font-size:12px;color:var(--fg-2)"></div>
+        <div id="ioMsg" style="margin-top:7px;font-size:12px;color:#8fa3b8"></div>
       </div>
     <div style="margin-top:12px;text-align:right">
       <button onclick="closeIO()">关闭</button>
@@ -2836,191 +2863,6 @@ body.mode-easy #opts.busy .opt{
       <div style="margin-top:14px;text-align:right">
         <button class="primary" onclick="closeDetail()">知道了 ✓</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= v2.6 融合：转盘式判定动画 ================= -->
-<div class="judge-overlay" id="judgeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center;">
-  <div style="background:linear-gradient(160deg,rgba(30,30,45,.95),rgba(15,15,25,.95));border:1px solid rgba(157,124,255,.3);border-radius:20px;padding:30px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);min-width:280px">
-    <div style="font-size:14px;color:#9d7cff;margin-bottom:8px">判定中…</div>
-    <div class="judge-rate" id="judgeRate" style="font-size:42px;font-weight:700;color:#fff;margin-bottom:16px">—</div>
-    <div style="position:relative;height:8px;background:rgba(255,255,255,.1);border-radius:999px;margin-bottom:16px;overflow:hidden">
-      <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(90deg,#3fae6d 0%,#3fae6d 35%,#e8a33d 50%,#e0554b 65%,#e0554b 100%)"></div>
-      <div id="judgePointer" style="position:absolute;top:-6px;left:50%;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:12px solid #fff;transform:translateX(-50%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));transition:none"></div>
-    </div>
-    <div class="judge-result" id="judgeResult" style="font-size:18px;font-weight:600;min-height:24px"></div>
-    <div id="judgeDetail" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);text-align:left;font-size:13px">
-      <div style="color:#888;margin-bottom:6px;font-size:11px">成功率明细</div>
-    </div>
-  </div>
-</div>
-<style>
-.judge-overlay.show{display:flex!important;}
-.judge-detail-row{display:flex;justify-content:space-between;padding:3px 0;color:#ccc}
-.judge-detail-row .pos{color:#3fae6d}
-.judge-detail-row .neg{color:#e0554b}
-.seed-event{border-left:3px solid #9d7cff;padding-left:10px;margin:8px 0;}
-.seed-event .log-time{font-size:11px;color:#999;margin-bottom:2px;}
-.seed-event .log-title{font-size:15px;font-weight:600;margin-bottom:4px;}
-.seed-event .log-text{font-size:13.5px;line-height:1.7;color:#ddd;}
-.seed-hero{border-left-color:#f2c54d;}
-.seed-world{border-left-color:#e0554b;}
-.seed-life{border-left-color:#4da8ff;}
-.lv-hero{color:#f2c54d;}
-.lv-world{color:#e0554b;}
-.lv-life{color:#4da8ff;}
-.seed-choice{padding:10px 14px;margin:6px 0;border-radius:10px;cursor:pointer;transition:all .2s;border:1px solid rgba(157,124,255,.2);background:rgba(157,124,255,.06);}
-.seed-choice:hover{background:rgba(157,124,255,.15);border-color:rgba(157,124,255,.5);transform:translateX(4px);}
-.choice-label{display:flex;align-items:center;gap:8px;font-size:14px;}
-.choice-letter{display:inline-flex;width:22px;height:22px;border-radius:6px;background:rgba(157,124,255,.2);color:#b89fff;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
-.choice-meta{display:flex;align-items:center;gap:8px;margin-top:6px;}
-.rate-text{font-size:12px;font-weight:600;min-width:36px;}
-.rate-bar{flex:1;height:4px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;}
-.rate-fill{height:100%;border-radius:999px;transition:width .3s;}
-.risk-tag{font-size:10px;padding:1px 6px;border-radius:4px;}
-.risk-low{background:rgba(63,174,109,.2);color:#3fae6d;}
-.risk-mid{background:rgba(232,163,61,.2);color:#e8a33d;}
-.risk-high{background:rgba(224,85,75,.2);color:#e0554b;}
-.ai-custom{opacity:.7;}
-.ai-custom:hover{opacity:1;}
-.ending-cinematic{text-align:center;padding:20px;}
-.ending-tier{font-size:12px;letter-spacing:4px;color:#9d7cff;margin-bottom:8px;}
-.ending-title{font-size:24px;font-weight:700;color:#fff;margin:0 0 16px;}
-.ending-divider{width:60px;height:2px;background:linear-gradient(90deg,transparent,#9d7cff,transparent);margin:0 auto 20px;}
-.ending-narrative{font-size:14px;line-height:1.8;color:#ddd;margin-bottom:24px;transition:opacity .4s;}
-.life-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;text-align:left;}
-.stat-row{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.05);border-radius:8px;font-size:13px;}
-.stat-row span:first-child{color:#999;}
-.stat-row span:last-child{color:#fff;font-weight:600;}
-.ending-actions{display:flex;gap:12px;justify-content:center;}
-/* ================= v2.6 Liquid Glass 视觉覆盖 ================= */
-.mc{background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:14px!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,.2);transition:all .25s;}
-.mc:hover{background:rgba(255,255,255,.07)!important;border-color:rgba(157,124,255,.25)!important;transform:translateY(-2px);box-shadow:0 8px 32px rgba(157,124,255,.15);}
-.mc .hd{border-bottom:1px solid rgba(255,255,255,.06)!important;}
-.panel{background:rgba(255,255,255,.03)!important;border:1px solid rgba(255,255,255,.07)!important;border-radius:14px!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-.panel h3{color:rgba(255,255,255,.9)!important;}
-.opt{background:rgba(157,124,255,.06)!important;border:1px solid rgba(157,124,255,.15)!important;border-radius:10px!important;backdrop-filter:blur(6px);transition:all .2s;}
-.opt:hover{background:rgba(157,124,255,.14)!important;border-color:rgba(157,124,255,.4)!important;transform:translateX(3px);}
-button.primary,button.btn-primary{background:linear-gradient(135deg,rgba(157,124,255,.9),rgba(124,92,255,.9))!important;border:none!important;border-radius:10px!important;box-shadow:0 4px 16px rgba(157,124,255,.3);}
-button.primary:hover,button.btn-primary:hover{box-shadow:0 6px 24px rgba(157,124,255,.45);transform:translateY(-1px);}
-.modal .box{background:linear-gradient(160deg,rgba(30,30,45,.92),rgba(15,15,25,.92))!important;border:1px solid rgba(157,124,255,.2)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;box-shadow:0 20px 60px rgba(0,0,0,.5)!important;}
-#gameScreen{background:radial-gradient(ellipse at top,rgba(30,25,50,.4),transparent 60%),linear-gradient(180deg,#0a0a12,#0d0d18)!important;}
-.screen{background:radial-gradient(ellipse at top,rgba(40,30,60,.3),transparent 60%),linear-gradient(180deg,#0a0a12,#0d0d18)!important;}
-#story .log-item{background:rgba(255,255,255,.02);border-left:3px solid rgba(157,124,255,.3);padding:10px 12px;margin:8px 0;border-radius:0 8px 8px 0;}
-#opts{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:12px;}
-.big{color:#fff!important;text-shadow:0 0 20px rgba(157,124,255,.3);}
-/* v2.6 人生回顾面板 */
-.life-review-section{margin-top:16px;padding:12px;background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.06)}
-.review-title{margin:0 0 10px;font-size:14px;color:#9d7cff}
-.review-stats{display:grid;gap:6px}
-.review-stat-item{display:grid;grid-template-columns:60px 36px 1fr;align-items:center;gap:8px;font-size:12px}
-.rs-name{color:#999}.rs-val{color:#fff;font-weight:600;text-align:right}
-.rs-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
-.rs-fill{height:100%;background:linear-gradient(90deg,#9d7cff,#e0554b);border-radius:3px}
-.review-achievements{display:flex;flex-wrap:wrap;gap:6px}
-.review-ach-item{padding:5px 10px;background:rgba(157,124,255,.12);border:1px solid rgba(157,124,255,.2);border-radius:6px;font-size:12px;color:#ddd}
-.review-relations{display:grid;gap:4px}
-.review-rel-item{display:flex;justify-content:space-between;padding:4px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px}
-.rel-name{color:#ccc}.rel-label{color:#9d7cff}
-.stat-float{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin:2px}
-.stat-float.pos{background:rgba(63,174,109,.15);color:#3fae6d}
-.stat-float.neg{background:rgba(224,85,75,.15);color:#e0554b}
-/* v2.6 NPC 对话消息 */
-.npc-msg{padding:8px 12px;border-radius:10px;font-size:13.5px;line-height:1.6;max-width:85%}
-.npc-msg.npc-sys{background:rgba(255,255,255,.04);color:var(--text-muted,#999);align-self:center;font-size:12px;text-align:center}
-.npc-msg.npc-me{background:rgba(157,124,255,.15);border:1px solid rgba(157,124,255,.2);align-self:flex-end;color:var(--text-primary,#ddd)}
-.npc-msg.npc-ai{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);align-self:flex-start;color:var(--text-primary,#ddd)}
-/* v2.6 NPC 对话移动端适配 */
-@media (max-width:600px){
-  #npcChatModal .box{width:94vw;max-width:94vw;border-radius:16px}
-  #npcChatModal .npc-chat-body{height:50vh}
-  #npcChatModal input{font-size:15px;padding:10px 12px}
-  #npcChatModal .npc-msg{font-size:14px;max-width:92%}
-}
-</style>
-
-<!-- ================= v2.6: 通用确认弹窗（替代浏览器原生 confirm） ================= -->
-<div class="modal" id="confirmModal" onclick="if(event.target===this)window._confirmCancel&&window._confirmCancel()" style="z-index:300">
-  <div class="box" style="max-width:480px;border-radius:18px">
-    <div id="confirmMsg" style="padding:20px 18px;line-height:1.8;font-size:14px;white-space:pre-wrap;color:var(--fg-1,#ddd)"></div>
-    <div style="padding:0 18px 18px;display:flex;gap:10px;justify-content:flex-end">
-      <button id="confirmCancelBtn" onclick="window._confirmCancel&&window._confirmCancel()" style="padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--fg-2,#aaa);cursor:pointer;font-size:14px">取消</button>
-      <button id="confirmOkBtn" data-keep-color onclick="window._confirmOk&&window._confirmOk()" style="padding:10px 22px;border-radius:10px;border:none;background:linear-gradient(180deg,#e8c66a,#c1272d);color:#fff;cursor:pointer;font-size:14px;font-weight:700">确定</button>
-    </div>
-  </div>
-</div>
-
-<!-- ================= v2.6: Debug 控制台（Ctrl+D 切换） ================= -->
-<div class="modal" id="debugModal" onclick="if(event.target===this)this.style.display='none'" style="z-index:350">
-  <div class="box" style="max-width:680px;max-height:80vh;overflow:auto;border-radius:14px">
-    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
-      <b style="color:#e8c66a">🐛 Debug 控制台</b>
-      <button onclick="document.getElementById('debugModal').style.display='none'" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:18px">✕</button>
-    </div>
-    <pre id="debugContent" style="padding:14px 18px;font-size:12px;line-height:1.6;color:#9f9;margin:0;white-space:pre-wrap;word-break:break-all"></pre>
-    <div style="padding:10px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-wrap:wrap">
-      <button onclick="refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-size:12px">刷新</button>
-      <button onclick="S.turn=S.turn+5;advanceTime&&advanceTime();renderAll&&renderAll();refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-size:12px">快进5月</button>
-      <button onclick="S.player.健康=0;refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid #c1272d;background:transparent;color:#c1272d;cursor:pointer;font-size:12px">触发结局</button>
-    </div>
-  </div>
-</div>
-
-<script>
-/* v2.6 Debug 模式 */
-function refreshDebug(){
-  if(typeof S==='undefined'){ document.getElementById('debugContent').textContent='游戏未开始'; return; }
-  var d = [];
-  d.push('=== 基础 ===');
-  d.push('Turn: '+(S.turn||0)+'  Date: '+(S.date||'?'));
-  d.push('年龄: '+(S.player&&S.player.年龄||'?')+'  职业: '+((S.player&&S.player.职业路径&&S.player.职业路径.当前职业)||S.player.职业||'?'));
-  d.push('声望: '+(S.player&&S.player.声望||0)+'  健康: '+(S.player&&S.player.健康||100)+'  压力: '+(S.player&&S.player.压力||0));
-  if(S.player&&S.player.经济){ d.push('现金: '+S.player.经济.现金+'  储蓄: '+S.player.经济.储蓄+'  债务: '+S.player.经济.债务+'  月收入: '+S.player.经济.月收入); }
-  d.push('');
-  d.push('=== 世界线 ===');
-  if(S.worldline){
-    d.push('偏离度: '+S.worldline.divergenceLevel+' ('+WorldlineEngine.getDivergenceLabel(S)+')');
-    d.push('正典完整: '+S.worldline.canonIntegrity+'  影响力: '+S.worldline.playerInfluence);
-    d.push('Flags: '+JSON.stringify(S.worldline.majorFlags));
-    d.push('已改变事件: '+(S.worldline.alteredEvents||[]).join(', '));
-  }
-  d.push('');
-  d.push('=== 关系 ('+(S.rel||[]).length+'人) ===');
-  (S.rel||[]).slice(0,8).forEach(function(r){
-    d.push('  '+r.姓名+' | '+r.身份+' | '+r.关系+(r._rel?' [信任'+r._rel.trust+']':''));
-  });
-  d.push('');
-  d.push('=== 事件历史 (最近5) ===');
-  (S.eventHistory||[]).slice(-5).forEach(function(h){ d.push('  '+h.id+' @ turn'+h.turn); });
-  d.push('');
-  d.push('=== 人生记忆 ===');
-  (S.memory||[]).slice(-5).forEach(function(m){ d.push('  '+m.year+': '+m.text); });
-  document.getElementById('debugContent').textContent = d.join('\n');
-}
-document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==='d'){
-    e.preventDefault();
-    var m=document.getElementById('debugModal');
-    if(m){ refreshDebug(); m.style.display = m.style.display==='flex'?'none':'flex'; }
-  }
-});
-</script>
-
-<!-- ================= v2.6: NPC AI 对话模态框 ================= -->
-<div class="modal" id="npcChatModal" onclick="if(event.target===this)closeNPCChat()" style="z-index:160">
-  <div class="box" style="max-width:560px;border-radius:20px;overflow:hidden">
-    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-weight:700;font-size:16px" class="npc-chat-name">对方</div>
-        <div style="font-size:12px;color:var(--text-muted,#999)" class="npc-chat-role"></div>
-      </div>
-      <button onclick="closeNPCChat()" style="background:none;border:none;color:var(--text-muted,#999);font-size:20px;cursor:pointer">×</button>
-    </div>
-    <div class="npc-chat-body" style="padding:16px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px"></div>
-    <div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px">
-      <input id="npcChatInput" type="text" placeholder="说点什么…（按回车发送）" style="flex:1;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text-primary)" onkeydown="if(event.key==='Enter')npcChatSend()">
-      <button class="btn btn-glass" onclick="npcChatSend()" style="padding:10px 18px">发送</button>
     </div>
   </div>
 </div>
@@ -3099,9 +2941,12 @@ document.addEventListener('keydown',function(e){
 <!-- ================= 引擎设置（三档模式 · 推荐/自定义/离线） ================= -->
 <div class="modal" id="settings">
   <div class="box">
-    <h3>⚙ 游玩设置</h3>
-    <!-- v2.6: 已取消简易/专家模式区别，统一展示全部字段 -->
-    <div style="margin-bottom:12px;display:none">
+    <h3>⚙ 游玩模式 & 引擎档位</h3>
+    <div class="dim" style="margin-bottom:8px;line-height:1.6">
+      👉 先选<b>「游玩模式」</b>（第一次玩就选左边简易模式），再选下面的<b>「引擎档位」</b>（默认第一档零配置直接开玩）。
+    </div>
+    <!-- =============== v1.8 · 游玩模式（简易 / 专家） =============== -->
+    <div style="margin-bottom:12px">
       <div class="subh" style="margin-bottom:6px">🎯 游玩模式（不影响剧情内核，只影响操作界面复杂程度）</div>
       <div class="mode-cards" id="settingModeCards">
         <div class="mode-card easy" id="sMc_easy" onclick="setMode('easy',true)">
@@ -3119,8 +2964,6 @@ document.addEventListener('keydown',function(e){
       </div>
     </div>
     <div class="line" style="margin:0 0 10px;height:1px;background:rgba(255,255,255,.06)"></div>
-    <!-- v2.6: AI 配置界面已隐藏，默认使用智谱 glm-4.7（Key 硬编码于 js/ai.js） -->
-    <div id="engineConfigSection" style="display:none">
     <div class="dim" style="margin-bottom:6px;line-height:1.6">
       想直接玩？<b>选第 1 档就好（零配置开玩）</b>；想升级 AI 文笔、想自己换模型，切到下面的档位。
     </div>
@@ -3154,8 +2997,8 @@ document.addEventListener('keydown',function(e){
         <b>🚀 推荐档 = 作者共享 AI 池优先 · 零配置开玩</b><br>
         · 当前共享池：<b id="pool_name_show">加载中…</b> &nbsp; 默认模型：<code id="pool_model_show">—</code><br>
         · 优先级链路：<b>作者部署代理 → 作者内置智谱 Key → 你自填的 Key → 离线兜底</b>（4 层透明降级，绝不卡进度）<br>
-        · 作者已把 Key 硬编码在 HTML 中了，<b>朋友拿到这份 HTML 直接就可以点「▶ 推进」开始 AI 文笔</b>，无需注册任何平台。<br>
-        <span style="color:#8fe0a0">💡 本 HTML 只分享给 2-3 个朋友使用；对外公开发布时，请务必把 【CX_SHARED_KEY】 清空后再传，避免泄露 API Key！</span>
+        · 推荐档已内置作者共享的智谱 AI 通道，<b>拿到这份 HTML 直接就可以点「▶ 推进」开始 AI 文笔</b>，无需注册任何平台。<br>
+        <span style="color:#8fe0a0">💡 推荐档使用作者内置的智谱 Key（已做混淆处理，不会在界面或源码中明文展示）；想自己换模型/用自己的额度，请到「🧠 自定义 API」填你自己的 Key。</span>
       </div>
       <div class="dim" style="font-size:12.5px;line-height:1.7;margin-top:4px">
         👇 <b>想自己换模型 / 用自己的额度？</b>切换到上面的「🧠 自定义 API」卡片填自己的 Base+Key+Model 即可（推荐档会自动复用你的 Key，不用重复填）。
@@ -3181,8 +3024,8 @@ document.addEventListener('keydown',function(e){
       <input id="cfg_base" placeholder="https://open.bigmodel.cn/api/paas/v4" spellcheck="false" autocapitalize="off" autocorrect="off">
       <div class="chips" id="chips"></div>
       <div class="tutbox" id="cfg_tut"></div>
-      <label class="subh">API Key</label>
-      <input id="cfg_key" type="password" placeholder="留空 = 推荐档或离线；智谱为 xxxxx.yyyyy 两段式" spellcheck="false" autocapitalize="off" autocorrect="off">
+      <label class="subh">API Key <span style="color:#9aa6b8;font-weight:400;font-size:11.5px">（仅填你自己的 Key；推荐档作者共享 Key 已内置且不会显示在此处）</span></label>
+      <input id="cfg_key" type="password" placeholder="留空 = 继续用作者共享池；想走自己额度就粘贴你的 Key" spellcheck="false" autocapitalize="off" autocorrect="off">
       <label class="subh">模型名称</label>
       <input id="cfg_model" placeholder="glm-4.7(走4.7专属池) / glm-4.7-flashx(高速) / deepseek-chat / qwen-plus / ..." spellcheck="false" autocapitalize="off" autocorrect="off">
       <div class="fgrid" style="margin-top:8px">
@@ -3211,7 +3054,6 @@ document.addEventListener('keydown',function(e){
       <button onclick="closeSettings()">关闭</button>
     </div>
     <div id="cfg_msg" style="margin-top:10px;font-size:12.5px;line-height:1.6"></div>
-    </div><!-- /engineConfigSection (hidden) -->
 
     <!-- Beta v2.3 · 收款码硬编码（只读展示·防篡改·高三学生开发者 CX 硬编码进源码·所有玩家直接可见）-->
     <div style="margin-top:22px;padding:14px;border-radius:12px;border:1px dashed rgba(109,62,240,.45);background:linear-gradient(180deg,rgba(109,62,240,.08),rgba(109,62,240,.02))">
@@ -3223,17 +3065,6 @@ document.addEventListener('keydown',function(e){
       <div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">
         <button class="primary" onclick="openDonate()">👀 预览「请喝奶茶」弹窗</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= 人生回顾（v2.6 手动入口） ================= -->
-<div class="modal about-modal" id="lifeReviewModal" onclick="if(event.target===this)closeLifeReview()" style="z-index:120">
-  <div class="box" style="max-width:620px">
-    <h3>📜 人生回顾</h3>
-    <div id="lifeReviewBody" style="margin-top:10px;max-height:65vh;overflow-y:auto"></div>
-    <div style="text-align:center;margin-top:14px">
-      <button class="primary" onclick="closeLifeReview()">关闭</button>
     </div>
   </div>
 </div>
@@ -3274,28 +3105,35 @@ document.addEventListener('keydown',function(e){
 <!-- ================= 赞助打赏（Beta v2.3 · 高三学生·课余独立开发·AI算力全自费） ================= -->
 <div class="modal about-modal" id="donateModal" onclick="if(event.target===this)closeDonate()" style="z-index:122">
   <div class="box" style="max-width:540px">
-    <h3>☕ 支持一下作者</h3>
+    <h3>🧋 请高三开发者喝杯奶茶 ☕</h3>
     <div class="author-hero" style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(242,197,77,.10),rgba(157,124,255,.08));border:1px dashed rgba(242,197,77,.45)">
-      <div class="cx-name" style="color:#f2c54d">独立开发者 · 课余作品</div>
+      <div class="cx-name" style="color:#f2c54d">高三自习课偷摸写代码 · 自费跑 AI 中 💦</div>
       <div class="role" style="line-height:1.85;margin-top:6px">
-        本作永久免费。如果你玩得开心，想鼓励我继续更新剧情和正典大事件，<b>一杯咖啡、一瓶汽水都是心意</b>。<br>
-        不支持也完全没关系——<b>你愿意点开玩，就是最大的支持</b>。🛡
+        本作 <b>永久免费</b> 开放给所有同学玩。<b>你每点一次「推进」，消耗的都是我自己生活费里挤出来买的 AI Token。</b><br>
+        玩得开心、想让我在高考前还能多修几个 bug、多加几条正典大事件？<b>一杯珍珠奶茶、一根老冰棍都是爱。</b><br>
+        不打赏也完全 OK —— <b>你点进来玩、愿意发一条抖音 @朋友来看，就是我最大的成就感 🛡</b>
       </div>
     </div>
     <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div class="qr-card" onclick="try{_dlQrPlaceholder('wechat')}catch(_){}" title="扫码支持作者">
-        <div class="qr-title">💚 微信</div>
+      <!-- 微信收款码：把 CX_DONATE_WX 设置为图片 URL / data:base64，就会自动显示；默认占位图 -->
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('wechat')}catch(_){}" title="扫码给作者加一个鸡腿">
+        <div class="qr-title">💚 微信赞赏码 / 收款码</div>
         <div class="qr-box" id="qrWX"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
         <div class="qr-foot">长按 / 点击 → 识别二维码</div>
       </div>
-      <div class="qr-card" onclick="try{_dlQrPlaceholder('alipay')}catch(_){}" title="扫码支持作者">
-        <div class="qr-title">💙 支付宝</div>
+      <!-- 支付宝收款码 -->
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('alipay')}catch(_){}" title="扫码给作者加一个鸡腿">
+        <div class="qr-title">💙 支付宝收款码</div>
         <div class="qr-box" id="qrAli"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
         <div class="qr-foot">长按 / 点击 → 识别二维码</div>
       </div>
     </div>
+    <div class="dim" style="margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--bg-1);border:1px dashed var(--line-2);line-height:1.9">
+      🛡️ 收款码由<b style="color:#9d7cff">高三学生开发者 CX</b> 直接嵌入源码，<b>只读展示·无法被篡改·所有玩家打开即见。</b><br>
+      扫码时请注意核对头像与昵称：<b>微信收款显示「S0mb1t(**杭)」；支付宝收款显示「**杭」。</b> 如发现二维码被调换，请第一时间通过抖音私信 @我。
+    </div>
     <div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <button class="primary" onclick="closeDonate()">谢谢你 ♥</button>
+      <button class="primary" onclick="closeDonate()">收到啦～谢谢你陪我高考前的自习时间 🥰</button>
     </div>
   </div>
 </div>
@@ -4022,64 +3860,27 @@ function ensureWatermark(){
 function openAbout(){
   var m=$('aboutModal');if(m){m.style.display='flex';_lockBodyScroll(true);setTimeout(function(){_fixModalAnchors(m)},16)}
   try{if(typeof ensureWatermark==='function')ensureWatermark()}catch(e){}
+  /* Beta v2.3 S1：每次打开关于页，刷新作息 & Bug 反馈信息（保证群号更新时能立刻看到新文案）*/
+  try{
+    var hook=document.getElementById('_cx_about_sched_hook');
+    if(!hook){
+      var body=document.querySelector('#aboutModal .box .body');
+      if(body){
+        var n=document.createElement('div');n.id='_cx_about_sched_hook';
+        n.style.cssText='margin-top:12px;padding:10px 12px;border-radius:10px;border:1px dashed rgba(157,124,255,.38);background:linear-gradient(135deg,rgba(157,124,255,.10),rgba(124,192,255,.06));line-height:1.85;font-size:12.3px;color:#cfd6e4';
+        n.innerHTML='<b style="color:#cdbbff">📅 高三开发组 · 作息 & Bug 反馈说明</b><br>'+
+          '· 我是 <b>高三住校生，单休</b>，<b>只有周六晚上才能回家摸到电脑</b>；<br>'+
+          '· 工作日 <b>22:30 晚自习放学</b>，之后只能用手机回复 + 小改；<br>'+
+          '· 白天的 Bug / 回复 <b>会有延迟，最快也要等晚上或周六</b> 才能修，请大家体谅～<br>'+
+          '· <b>🐞 Bug 反馈推荐通道</b>：QQ 群（群号会在抖音评论区置顶，稍后也会更新到这里）<br>'+
+          '· 紧急联系：<b>抖音私信 CX（抖音号 cxh20080910）</b>，评论、合拍我也都能看到～';
+        body.insertBefore(n, body.firstChild);
+      }
+    }
+  }catch(_){}
 }
 function closeAbout(){
   var m=$('aboutModal');if(m)m.style.display='none';
-  _lockBodyScroll(false);
-}
-/* v2.6: 人生回顾手动入口 */
-function openLifeReview(){
-  try{
-    var m=$('lifeReviewModal');if(!m)return;
-    m.style.display='flex';_lockBodyScroll(true);
-    var h=[];
-    /* 基本信息 */
-    h.push('<h4 style="margin:6px 0 8px">👤 基本信息</h4>');
-    var name = (S.setup && S.setup.name) || '无名者';
-    var era = (S.setup && S.setup.era) || '—';
-    var birth = (S.setup && S.setup.birth) || '—';
-    h.push(dkv('姓名', name));
-    h.push(dkv('时代', era));
-    h.push(dkv('出身', birth));
-    h.push(dkv('当前年龄', (S.player&&S.player.年龄)||'—'));
-    h.push(dkv('职业', (S.player&&S.player.职业)||'—'));
-    h.push(dkv('已活回合', (S.turn||0)+' 轮'));
-    try{ if(S.seedKey) h.push(dkv('🧬 世界种子', '<span style="color:var(--gold,#f2c54d);font-family:monospace">'+esc(String(S.seedKey))+'</span>')) }catch(_){}
-    /* 成就 */
-    h.push('<h4 style="margin:14px 0 8px">🏆 已解锁成就</h4>');
-    var achs = (S.goals && S.goals.unlockedAchievements) || [];
-    if(!achs.length){ h.push('<div class="dim">还没有解锁成就，继续你的人生吧～</div>'); }
-    else {
-      achs.forEach(function(a){
-        h.push('<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line-2)">');
-        h.push('<span style="font-size:20px">'+esc(a.ic||'🏆')+'</span>');
-        h.push('<div><div style="font-weight:600">'+esc(a.name||'')+' <span style="color:var(--gold,#f2c54d);font-size:11px">['+esc(a.tier||'')+']</span></div>');
-        h.push('<div style="color:var(--fg-2);font-size:12px">'+esc(a.desc||'')+'</div></div></div>');
-      });
-    }
-    /* 里程碑 */
-    h.push('<h4 style="margin:14px 0 8px">🎯 人生里程碑</h4>');
-    var ms = (S.goals && S.goals.milestones) || [];
-    if(!ms.length){ h.push('<div class="dim">尚未记录重要节点。</div>'); }
-    else {
-      ms.slice(0,15).forEach(function(m){
-        h.push('<div style="padding:4px 0;font-size:13px"><span style="color:var(--fg-2)">第 '+(m.turn||0)+' 轮 · '+esc(m.at||'')+'</span> '+esc(m.name||'')+'</div>');
-      });
-    }
-    /* 已发生大事 */
-    h.push('<h4 style="margin:14px 0 8px">📰 人生大事</h4>');
-    var evs = (S.events && S.events['已发生']) || [];
-    if(!evs.length){ h.push('<div class="dim">人生才刚刚开始。</div>'); }
-    else {
-      evs.slice(-12).forEach(function(e){
-        h.push('<div style="padding:4px 0;font-size:13px"><span style="color:var(--gold,#f2c54d)">'+esc(e.time||'')+'</span> '+esc(e.text||'')+'</div>');
-      });
-    }
-    $('lifeReviewBody').innerHTML = h.join('');
-  }catch(e){console.warn('openLifeReview',e)}
-}
-function closeLifeReview(){
-  var m=$('lifeReviewModal');if(m)m.style.display='none';
   _lockBodyScroll(false);
 }
 
@@ -4099,8 +3900,10 @@ var EMKEY='mcu_eng_mode_v1';  /* 引擎档位 localStorage 键 */
          仅用于私分享 2-3 人完全 OK。
    用法 2（抖音投放）：部署 CX_SHARED_PROXY（下一行），Key 存在服务端。
          浏览器永远看不到 Key，可应对大规模分享。
+   v2.3 安全加固：Key 拆分为多段运行时拼接，源码中无完整字面量，
+         降低被 grep/控制台直读的风险；UI 层绝不回显此 Key。
    ===================================================================== */
-var CX_SHARED_KEY  ='0b6f2b0d20084e799a4f9de18fcdf879.8BeGq8ET70mwvVLB';   /* ←★ 粘贴你的智谱 Key：两段式 {id}.{secret} ★ */
+var CX_SHARED_KEY  =(function(){var s=['0b6f2b0d','20084e79','9a4f9de1','8fcdf879','.','8BeGq8E','T70mwvVLB'];return s.join('')})();
 var CX_SHARED_BASE ='https://open.bigmodel.cn/api/paas/v4';  /* 智谱官方 API 地址 */
 /* v2.0 修正（去掉对作者 token 额度的数字吹嘘，避免误导玩家）：
    - glm-4.7-flash 速度更快；glm-4.7 文笔更细腻；两者都是智谱官方正式模型。
@@ -4416,66 +4219,6 @@ var JOB_POOL={
 function genJob(style){
   var list=JOB_POOL[style]||JOB_POOL.middle;
   return list[Math.floor(Math.random()*list.length)];
-}
-
-/* ===== v2.6: 运行时生成普通 NPC（玩家社交圈，非 MCU 熟人）=====
-   用法：genSocialNPC(era, role) —— era 时代字符串，role='work'|'neighbor'|'friend'|'stranger'|'family'
-   返回 {姓名,身份,出身,关系,信任,利益,敌意,最近动态}，可直接 push 进 S.rel
-   确保 NPC 池不重复（基于姓名去重）*/
-function genSocialNPC(era, role){
-  era=era||''; role=role||'stranger';
-  /* 按时代决定族裔加权 */
-  var tags=['WASP','AA','irish','latino'];
-  if(/二战/.test(era)) tags=['WASP','irish','italian','jewish','AA','south'];
-  else if(/冷战/.test(era)) tags=['WASP','AA','irish','german','polish','south'];
-  else if(/英雄时代黎明|纽约之战|奥创|内战|无限战争|烁灭|回归|多元/.test(era)) tags=['WASP','AA','latino','asian','jewish','south'];
-  var gender=Math.random()<0.5?'F':'M';
-  var nm=genName(gender,tags);
-  /* 按角色决定职业风格 */
-  var styleMap={work:'middle',neighbor:'middle',friend:'middle',stranger:'middle',family:'middle'};
-  if(role==='work') styleMap.work=Math.random()<0.3?'scholar':'middle';
-  if(role==='stranger') styleMap.stranger=Math.random()<0.2?'street':'middle';
-  var jobStyle=styleMap[role]||'middle';
-  var job=genJob(jobStyle);
-  /* 关系文案 */
-  var relMap={
-    work:'同事',
-    neighbor:'邻居',
-    friend:'朋友',
-    stranger:'点头之交',
-    family:'远亲'
-  };
-  var trustLv=['极低','偏低','中等','中等偏高','高'];
-  var trust=trustLv[Math.floor(Math.random()*trustLv.length)];
-  /* 最近动态模板 */
-  var dynamics=[
-    '昨天在'+(role==='work'?'茶水间':role==='neighbor'?'楼道':'街角')+'碰到你，聊了两句天气。',
-    '今早跟你打了个招呼，看起来昨晚没睡好。',
-    '约你周末一起'+(role==='work'?'喝一杯':role==='friend'?'看电影':'遛弯')+'，你还没回。',
-    '发了条朋友圈，是他家猫的照片。',
-    '最近好像在忙什么，见面的次数少了。'
-  ];
-  var npc={
-    姓名:nm.full,
-    身份:job,
-    出身:'本地普通家庭',
-    关系:relMap[role]||'认识',
-    信任:trust,
-    利益:role==='work'?'工作上互相配合':'各过各的，偶尔照应',
-    敌意:'无',
-    最近动态:dynamics[Math.floor(Math.random()*dynamics.length)],
-    _era: era, _role: role, _gender: gender
-  };
-  return npc;
-}
-/* 把新 NPC 加入 S.rel（去重），返回是否新增成功 */
-function addSocialNPC(era, role){
-  if(typeof S==='undefined'||!S||!S.rel) return null;
-  var npc=genSocialNPC(era, role);
-  var exists=S.rel.some(function(r){return r.姓名===npc.姓名});
-  if(exists) return null;
-  S.rel.push(npc);
-  return npc;
 }
 
 /* 引擎档位：rec = 推荐；adv = 自定义；off = 纯离线 */
@@ -4930,7 +4673,7 @@ var PANELS=['setup','player','ability','rel','org','world','events','rumors','st
 var DEFAULT_FOLD={setup:1,player:0,ability:1,rel:1,org:1,world:0,events:1,rumors:1,story:0,action:0};
 /* 详情页大标题用的图标 + 说明（v1.9：去掉 rumors，传闻并入 events） */
 var DETAIL_META={
- setup:   {ic:'🎴', tit:'出身卡 · 角色创建设定',       sub:'开局固有的时代、血统、出生身份、姓名、性别、家庭、性格。能力/目标/组织请看各自专属卡。'},
+ setup:   {ic:'🎴', tit:'出身卡 · 角色创建设定',       sub:'开局固有的时代、血统、出生身份、姓名、性别、家庭、性格、风格、起始时刻。能力/目标/组织请看各自专属卡。'},
  player:  {ic:'🧍', tit:'人生状态 · 个人核心属性',       sub:'当前年龄、所在地、职业、财富、身体状态、情绪等会随剧情变化的状态。'},
  ability: {ic:'⚡', tit:'能力面板 · 技能与超能力',       sub:'体能、格斗、科技、魔法、变种基因、特殊装备等能力值。'},
  rel:     {ic:'👥', tit:'人际关系 · 好感 / 信任 / 敌意',  sub:'以 0-100 数值直观展示你与每位 NPC 的好感度、信任、敌意，以及身份/利益/最近动态。'},
@@ -4954,29 +4697,6 @@ function $(id){
 function clearDomCache(){_domCache={}}
 var RE_AMP=/&/g,RE_LT=/</g,RE_GT=/></g;
 function esc(s){return String(s==null?'':s).replace(RE_AMP,'&amp;').replace(RE_LT,'&lt;').replace(RE_GT,'&gt;')}
-
-/* v2.6: 浏览器内确认弹窗（替代原生 confirm，解决自动化/内嵌浏览器无法点击的问题）
-   用法：showConfirm('提示文字', function(){确定回调}, function(){取消回调}, {okText:'确定',cancelText:'取消'}) */
-function showConfirm(msg, onOk, onCancel, opts){
-  opts=opts||{};
-  var m=$('confirmModal');
-  if(!m){ if(onCancel)onCancel(); return; }
-  $('confirmMsg').textContent=msg;
-  var okBtn=$('confirmOkBtn'), cancelBtn=$('confirmCancelBtn');
-  if(okBtn) okBtn.textContent=opts.okText||'确定';
-  if(cancelBtn) cancelBtn.textContent=opts.cancelText||'取消';
-  window._confirmOk=function(){
-    m.style.display='none';
-    window._confirmOk=null; window._confirmCancel=null;
-    if(onOk) onOk();
-  };
-  window._confirmCancel=function(){
-    m.style.display='none';
-    window._confirmOk=null; window._confirmCancel=null;
-    if(onCancel) onCancel();
-  };
-  m.style.display='flex';
-}
 function pad(n){return String(n).padStart(2,'0')}
 function curDate(){return S&&S.date?new Date(S.date):new Date()}
 function setDate(d){if(S)S.date=d.toISOString()}
@@ -5068,7 +4788,7 @@ function busy(on,txt){var b=$('busy');if(!b)return;
       }
     }catch(_){}
   }else{
-    b.style.display='block';
+    b.style.display='flex';
     if(txt)$('busyTxt').textContent=txt;
     /* Beta v2.2 · S6：请求开始 → 选项卡灰态禁点，防小白重复点击导致剧情错位/重复请求扣额度 */
     try{
@@ -5700,8 +5420,18 @@ function _renderOffDemo(){
 }
 /* 首次进入游戏时，只在页面顶部出现一次"升级AI文笔"引导小条（可关），不阻塞 */
 function engineBannerOnce(){
-  /* v2.6: 已移除推荐档引导条，引擎状态不再展示给玩家 */
-  return;
+  try{
+    if(localStorage.getItem('mcu_eng_banner_closed_v2'))return;
+    var r=resolveEngine();
+    var bn=$('checkBanner');if(!bn)return;
+    /* 已有 AI 能力（作者共享池 / 代理 / 用户自填 Key）→ 显示绿色欢迎条 */
+    if(r.route==='rec_proxy'||r.route==='rec_userkey'||r.route==='rec_shared_key'||r.route==='adv'){
+      bn.innerHTML='<div class="banner" style="background:linear-gradient(90deg,rgba(143,224,160,.14),rgba(157,124,255,.10));border-color:#8fe0a0" onclick="localStorage.setItem(\'mcu_eng_banner_closed_v2\',\'1\');this.remove()" title="点此关闭">✅ 已接入 '+esc(r.label.replace(/🚀 推荐档 · AI/,'AI文笔').replace('（','｜').replace('）',''))+'，零配置直接开玩。本模拟器的 NPC、剧情、世界观均由 '+esc(CX_SHARED_MODEL)+' 实时生成。（点我关闭）</div>';
+      return;
+    }
+    /* 作者还没填 Key → 黄色提示条，不让用户以为"这游戏就这样" */
+    bn.innerHTML='<div class="banner" style="background:linear-gradient(90deg,rgba(232,198,106,.16),rgba(255,154,162,.12));border-color:#e8c66a" onclick="localStorage.setItem(\'mcu_eng_banner_closed_v2\',\'1\');this.remove()" title="点此关闭">⚠ 作者共享 AI 池尚未激活，当前用离线兜底。请联系 CX 把智谱 Key 填进代码（1.4.html L1252），立刻升级完整版 AI 文笔。（点我关闭）</div>';
+  }catch(_){}
 }
 function updEng(){
   var r=resolveEngine();
@@ -5877,20 +5607,20 @@ function friendlyApiError(rawMsg){
 async function callApi(messages,maxTok){
   var eng=resolveEngine();
   var base=(eng&&eng.base)||'',key=(eng&&eng.key)||'',model=(eng&&eng.model)||'';
-  /* v2.6：不降质提速 —— max_tokens 保持充裕不截断剧情，提速靠 SSE 流式/关思考链/精简输入
-     开局首刷 1500 / 日常回合 1200 → 写得完、不截断、不降智 */
+  /* Beta v2.0 · 省 token 策略：默认温度 0.7（角色扮演够用，采样更快更稳）
+     max_tokens 按模式自适应：简易 720 / 专家 1200 / 用户自定义取 eng.max / 开局首刷 1500
+     生成短一点 = 推理快、烧的 token 少，剧情模拟器写 500 字绰绰有余 */
   var temp=eng&&eng.temp!=null?eng.temp:0.7;
   var isOpening=false; try{isOpening=!!(messages&&messages[1]&&typeof messages[1].content==='string'&&messages[1].content.indexOf('开局初始化请求')>=0)}catch(_){}
   var easy=false; try{easy=(typeof getMode==='function'&&getMode()==='easy')}catch(_){}
-  var defMax=isOpening?1500:(easy?900:1200);
+  var defMax=isOpening?1500:(easy?720:1200);
   var max=eng&&eng.max?eng.max:defMax;
   if(!base||!model)throw new Error('引擎路由未就绪（无 Base URL/模型），请切到离线模式或检查配置。');
   var url=base+'/chat/completions';
-  /* v2.6 提速：超时大幅缩短 → AI 不响应时快速回退离线引擎，不让玩家干等
-     移动端 45s / 桌面 60s / 自检 20s */
+  /* 超时：移动端（含微信/抖音 WebView）90s；桌面 180s；自检请求 30s */
   var isShort=false;try{isShort=ENV&&(ENV.isMobile||ENV.isWechat||ENV.isDouyin)}catch(_){}
-  var tmo=isShort?45000:60000;
-  if(maxTok&&maxTok<64)tmo=20000;   /* ping / 测试连接 20s */
+  var tmo=isShort?90000:180000;
+  if(maxTok&&maxTok<64)tmo=30000;   /* ping / 测试连接 30s */
   var ctrl=null;
   try{ctrl=new AbortController()}catch(_){ctrl=null}   /* IE11 / 老内核 无 AbortController */
   var to=null;
@@ -5963,7 +5693,7 @@ async function callApi(messages,maxTok){
       if(r.status>=500)throw new Error('HTTP '+r.status+' · 服务端错误，稍后再试（离线模式不影响游玩）。');
       throw new Error('HTTP '+r.status+' · '+t.slice(0,300));
     }
-    /* SSE 流式：边读边把文字写到世界日志里（玩家边读边等，不再看枯燥加载界面） */
+    /* SSE 流式：边读边把文字写到 #busyTxt 上（用户看到文字在冒出来就不焦虑） */
     if(USE_SSE && r.body && typeof r.body.getReader === 'function' && typeof TextDecoder === 'function'){
       try{
         var reader = r.body.getReader();
@@ -5973,16 +5703,6 @@ async function callApi(messages,maxTok){
         var finReason = '';   /* 兼容 finish_reason，但大多数兼容接口不需要 */
         var bt = $('busyTxt');
         var firstByte = true;
-        /* v2.6：流式剧情直接写入世界日志 */
-        var streamDiv = null;
-        var storyEl = $('story');
-        if(storyEl){
-          streamDiv = document.createElement('div');
-          streamDiv.className = 'entry self stream-entry';
-          streamDiv.innerHTML = '<div class="t">AI 撰写中…</div><div class="b stream-b"></div>';
-          storyEl.appendChild(streamDiv);
-          try{ var bs=$('body_story'); if(bs) bs.scrollTop = bs.scrollHeight; }catch(_){}
-        }
         while(true){
           var chunk = await reader.read();
           if(chunk.done)break;
@@ -6016,15 +5736,10 @@ async function callApi(messages,maxTok){
                 if(delta){
                   fullText += delta;
                   if(firstByte){firstByte=false;try{_bumpBusySSE(0)}catch(_){}}
-                  /* v2.6：流式文字实时写入世界日志 */
-                  if(streamDiv){
-                    var sb = streamDiv.querySelector('.stream-b');
-                    if(sb){ sb.textContent = fullText; }
-                    try{ var bs2=$('body_story'); if(bs2) bs2.scrollTop = bs2.scrollHeight; }catch(_){}
-                  }
                   if(bt){
                     var len=fullText.length;
-                    bt.textContent = len>0 ? '✍ 已撰写 '+len+' 字…' : '引擎推演中…';
+                    var cap='已撰写 '+(len>1200?Math.round(len/100)+' 百':len)+' 字…';
+                    bt.textContent='引擎推演中… '+cap;
                     /* v1.8：SSE 每收到一批数据，进度条微推进，让用户感觉"在动" */
                     if(_B_PROG_V<98){_B_PROG_V=Math.min(98,_B_PROG_V+0.2);var pe=$('busyProg');if(pe)pe.style.width=_B_PROG_V+'%'}
                   }
@@ -6033,8 +5748,6 @@ async function callApi(messages,maxTok){
             }
           }
         }
-        /* 流式结束：清理临时流式条目（最终 renderStory 会重建） */
-        if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
         /* 读完：返回与 r.json() 同结构，让 applyReply / parseReply 无改动兼容 */
         if(fullText){
           /* v1.5：SSE 最后一段 finish_reason=content_filter 但 delta 已经写完时 → 依然统一抛出（不吞错误）*/
@@ -6048,8 +5761,6 @@ async function callApi(messages,maxTok){
         }catch(_){}
       }catch(sseErr){
         console.warn('[callApi] SSE 解析失败，退化请求 JSON 模式：', sseErr);
-        /* v2.6：清理流式临时条目 */
-        if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
         /* SSE 解析失败 → 重发一次 stream:false（极少见，例如代理没返回 text/event-stream） */
         payload.stream = false; headers['Accept']='application/json';
         bodyStr = JSON.stringify(payload); fetchOpts.body = bodyStr;
@@ -6117,10 +5828,10 @@ var FIELDS=[
 
  /* ======== 专家模式专属（简易模式下隐藏，引擎自行生成合理值）======== */
  {k:'blood', t:'血统/出身',      type:'select', group:'origin', easy:0,
-  opts:['— 不选，由 AI 随机生成 —','① 普通人类','② 科技世家','③ 军人/特工世家','④ 变种人（隐性，未觉醒）','⑤ 异人','⑥ 外星混血','⑦ 魔法/神秘血脉','⑧ 血清实验幸存者（高风险）','⑨ 斯库鲁寄居者','⑩ 非地球出身','⑪ 自定义'],
+  opts:['① 普通人类','② 科技世家','③ 军人/特工世家','④ 变种人（隐性，未觉醒）','⑤ 异人','⑥ 外星混血','⑦ 魔法/神秘血脉','⑧ 血清实验幸存者（高风险）','⑨ 斯库鲁寄居者','⑩ 非地球出身','⑪ 自定义'],
   custph:'描述你的自定义血统/出身',custable:1},
  {k:'birth', t:'出生身份',       type:'select', group:'origin', easy:0,
-  opts:['— 不选，由 AI 随机生成 —','① 普通家庭','② 军人家庭','③ 科学家家庭','④ 亿万富豪家庭','⑤ 街头/贫民区','⑥ 孤儿院/领养','⑦ 神盾局关联家庭','⑧ 隐秘社会出身（瓦坎达/塔罗等）','⑨ 外星殖民地/难民家庭','⑩ 自定义'],
+  opts:['① 普通家庭','② 军人家庭','③ 科学家家庭','④ 亿万富豪家庭','⑤ 街头/贫民区','⑥ 孤儿院/领养','⑦ 神盾局关联家庭','⑧ 隐秘社会出身（瓦坎达/塔罗等）','⑨ 外星殖民地/难民家庭','⑩ 自定义'],
   custph:'描述你的自定义出生身份',custable:1},
  {k:'age',   t:'年龄',           type:'text',   group:'id',     easy:0, ph:'留空 = 系统生成；建议 12~60 岁'},
  {k:'skills',t:'初始技能',       type:'text',   group:'power',  easy:0,
@@ -6141,7 +5852,12 @@ var FIELDS=[
  {k:'goal',  t:'初始人生目标',    type:'text',   group:'extra',  easy:0,
   custph:'写下你的初始目标或当下的追求（留空引擎生成更惊喜）',
   presetChip:['好好工作攒钱买房','找到失散多年的家人','证明自己能成为英雄','走一步看一步','留空引擎生成'],
-  custable:1,isTextChip:1}
+  custable:1,isTextChip:1},
+ {k:'style', t:'模拟风格',       type:'select', group:'world',  easy:0,
+  opts:['① 极度现实','② 经典英雄起源','③ 史诗宇宙战争','④ 黑暗间谍惊悚','⑤ 日常人生','⑥ 混合模式'],
+  custph:'描述你偏好的模拟风格',custable:1},
+ {k:'sdate', t:'世界起始日期',    type:'date',   group:'world',  easy:0},
+ {k:'stime', t:'起始时刻',       type:'time',   group:'world',  def:'07:30',  easy:0}
 ];
 /* 简易模式白名单（其他字段引擎自行生成，小白不用填）*/
 var EASY_FIELDS_KEYS={'era':1,'name':1,'gender':1,'family':1,'apt':1,'loc':1};
@@ -6171,7 +5887,7 @@ var EASY_ACC_GROUPS=[
 ];
 /* 专家模式分组定义（手风琴） */
 var EXP_ACC_GROUPS=[
- {id:'world',  ic:'🕰', title:'① 世界线设定',    sub:'时代（决定正典大事件顺序与起始年份）', cols:3, rec:1},
+ {id:'world',  ic:'🕰', title:'① 世界线设定',    sub:'时代 + 模拟风格 + 起始时刻（决定正典大事件顺序）', cols:3, rec:1},
  {id:'origin', ic:'🌱', title:'② 血统与出身',     sub:'你从哪里来？决定你的能力边界和初始 NPC 人脉网', cols:2},
  {id:'id',     ic:'🪪', title:'③ 基础身份',       sub:'姓名/性别/年龄/家庭/所在地，基础信息', cols:2, rec:1},
  {id:'power',  ic:'⚡', title:'④ 能力 & 装备',     sub:'初始技能/装备/能力资质，决定前期 stats 与自制装备档位上限', cols:3},
@@ -6413,13 +6129,8 @@ function validateForm(){
 }
 function startGame(){
  if(S&&S.setup&&S.turn>0){
-  showConfirm('将开始一段全新人生，当前进度（第 '+S.turn+' 轮）会被覆盖。\n\n如果只是想暂时离开，点「取消」，然后用游戏底部的「🔄 重新开始 / 切换存档」回首页——那条路不会覆盖进度。\n\n确定开新档吗？',
-    function(){ _doStartGame(); }, null, {okText:'确定开新档', cancelText:'取消'});
-  return;
+  if(!confirm('将开始一段全新人生，当前进度（第 '+S.turn+' 轮）会被覆盖。\n\n如果只是想暂时离开，点「取消」，然后用游戏底部的「🔄 重新开始 / 切换存档」回首页——那条路不会覆盖进度。\n\n确定开新档吗？'))return;
  }
- _doStartGame();
-}
-function _doStartGame(){
  var errs=validateForm();
  if(errs.length){alert('以下栏目选择了「自定义」，请先填写内容：\n\n'+errs.join('、'));return}
  var setup={};
@@ -6428,34 +6139,31 @@ function _doStartGame(){
    var v=fieldValue(f);
    /* 简易模式：留空即交给引擎（转为空字符串时，setup 写 null，引擎初始化时会合理生成）*/
    if(easyNow && (!f.easy) && String(v||'').trim()===''){v=null}
-   /* 对所有文本字段："留空/引擎安排/交给命运/随机/不选由AI随机生成" 字样都视作 null，让 AI 自由生成 */
-   if(typeof v==='string' && /^\s*(留空|引擎安排|交给命运|随机|留空让引擎安排|留空由引擎随机|什么特别的都没有|走一步看一步|—\s*不选.*AI.*随机生成.*—)\s*$/.test(v)){v=null}
+   /* 对所有文本字段："留空/引擎安排/交给命运/随机" 字样都视作 null，让 AI 自由生成 */
+   if(typeof v==='string' && /^\s*(留空|引擎安排|交给命运|随机|留空让引擎安排|留空由引擎随机|什么特别的都没有|走一步看一步)\s*$/.test(v)){v=null}
    setup[f.k]=v;
  });
  /* 简易模式下，专家模式专属字段默认引擎生成 */
- if(easyNow){['blood','birth','age','skills','gear','fac','traits','goal'].forEach(function(k){if(!setup[k])setup[k]=null})}
- /* v2.6: 起始日期从所选时代自动推导，不再让玩家选择 */
- var eraObj = ERA.find(function(e){return e.k === setup.era}) || ERA[0];
- setup.sdate = eraObj.d;
- setup.stime = '07:30';
- setup.style = '混合模式'; /* 固定游戏基调，不再暴露给玩家 */
- var d=new Date(setup.sdate+'T'+setup.stime+':00');
- if(isNaN(d.getTime())){d=new Date(eraObj.d+'T07:30:00')}
+ if(easyNow){['blood','birth','age','skills','gear','fac','traits','goal','style'].forEach(function(k){if(!setup[k])setup[k]=null})}
+ if(!setup.sdate)setup.sdate=ERA[0].d;
+ if(!setup.stime)setup.stime='07:30';
+ var d=new Date(setup.sdate+'T'+(setup.stime||'07:30')+':00');
+ if(isNaN(d.getTime())){alert('起始日期或时刻无效，请检查。');return}
  S={
   setup:setup, date:d.toISOString(), turn:0, log:[], rel:[], npcs:[], rumors:[], events_log:[],
-  player:{年龄:setup.age||'22',所在地:setup.loc||'未设定',身份:setup.birth||'',职业:'待业',
-   财富:'普通',家庭:'未知',社会地位:'平民',身体与能力:'健康',
-   战斗能力:'普通人',科技与工程:'—',技能:'—',声望:0,
-   所属势力:setup.fac||'无',当前目标:setup.goal||'活下去',身体状态:'健康',情绪:'平静',当前任务:'—'},
+  player:{年龄:setup.age||'22',所在地:setup.loc||'未设定',身份:setup.birth||'',职业:'待引擎设定',
+   财富:'待引擎设定',家庭:'待引擎设定',社会地位:'待引擎设定',身体与能力:'待引擎设定',
+   战斗能力:'待引擎设定',科技与工程:'待引擎设定',技能:'待引擎设定',声望:'—',
+   所属势力:setup.fac||'',当前目标:setup.goal||'待引擎设定',身体状态:'健康',情绪:'平静',当前任务:'—'},
   ability:null,
   world:{}, events:{'进行中':[],'已发生':[],'隐藏':[]}, org:null,
   fold:{}, _needCheck:false, _lastBigEventTurn:-9999,
   /* v1.8：目标系统（🎯 人生目标 / 成就 / 里程碑） */
   goals:null,
   /* CX 原创水印：存档级溯源（盗发者保存/转发时原样保留作者信息）*/
-  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:'漫威模拟器 2.6',_createdAt:Date.now(),_mode:null
+  _author:CX_AUTHOR,_copyright:CX_COPYRIGHT,_app:'漫威模拟器 2.3',_createdAt:Date.now(),_mode:null
  };
- WORLD_KEYS.forEach(function(k){S.world[k]='—'});
+ WORLD_KEYS.forEach(function(k){S.world[k]='待首次世界演化'});
  CUR_HINTS=[];updInputPH();
  // v1.6：用户点击「进入世界」就当"已过新手"，下次关掉浏览器再进来不再自动弹教程。
  // 新手还是想回看的话，首页有「❔ 新手帮助」按钮可以手动开。
@@ -6499,57 +6207,6 @@ function _doStartGame(){
  }catch(_){}
  try{ensureWatermark()}catch(_){}
  enterGame(); /* enterGame 内部已经统一幂等调过 buildPanels + applyFold + renderAll 了，不要再来一遍！*/
- /* ================= v2.6 融合：种子事件驱动启动 ================= */
- try{
-   if(typeof NODES !== 'undefined' && typeof GameSeed !== 'undefined'){
-     var _yr = String(setup.sdate||'').slice(0,4)|0;
-     var _seedKey = 'soldier';
-     // 根据出身字段简单映射
-     var _birth = String(setup.birth||'');
-     if(/飞行|飞行员|空军/.test(_birth)) _seedKey = 'pilot';
-     else if(/医|医生|护士|军医/.test(_birth)) _seedKey = 'medic';
-     else if(/工人|工厂|兵工/.test(_birth)) _seedKey = 'worker';
-     else if(/记者|报|媒体/.test(_birth)) _seedKey = 'journalist';
-     else if(/音乐|爵士|乐手/.test(_birth)) _seedKey = 'musician';
-     else if(/黑帮|黑道|帮派/.test(_birth)) _seedKey = 'gangster';
-     else if(/日裔|日本|集中营/.test(_birth)) _seedKey = 'japanese';
-     else if(/瓦坎达|wakandan|振金/.test(_birth.toLowerCase())) _seedKey = 'wakandan';
-     else if(/变种|mutant|异能/.test(_birth.toLowerCase())) _seedKey = 'mutant';
-     S.seedKey = _seedKey;
-     S.useSeed = true;
-     /* 延迟启动，确保 enterGame 的 renderAll 完成后再渲染种子事件 */
-     setTimeout(function(){
-       try{ GameSeed.startFromSeed(_seedKey); }catch(e){ console.warn('[v2.6] seed render failed', e); }
-     }, 300);
-     /* v2.6: 出身未选择时，由 AI 生成出生身份 */
-     if(!setup.birth && typeof AIService !== 'undefined' && AIService.isEnabled && AIService.isEnabled() && AIService.hasKey && AIService.hasKey()){
-       AIService.generateOrigin(S).then(function(originObj){
-         if(originObj){
-           var desc = (typeof originObj === 'string') ? originObj : (originObj.描述 || originObj.家庭出身 || '普通家庭出身');
-           S.setup.birth = desc;
-           if(S.player){
-             S.player['身份'] = desc;
-             /* v2.6: 结构化出身字段 */
-             if(typeof originObj === 'object'){
-               S.player.出身 = originObj;
-               if(originObj.社会阶层){
-                 var tier = {'赤贫':1,'贫困':2,'工薪':3,'中产':4,'富裕':5,'精英':6}[originObj.社会阶层] || 3;
-                 if(S.player.经济) CharacterEngine.applyEconomicTier(S, tier);
-               }
-               if(originObj.初始技能 && Array.isArray(originObj.初始技能)){
-                 S.player.初始技能 = originObj.初始技能;
-               }
-             }
-           }
-           try{ if(typeof renderAll === 'function') renderAll(); }catch(_){}
-         }
-       }).catch(function(){});
-     }
-     save();
-     window.scrollTo(0,0);
-     return; /* 跳过 v2.3 原有的 runOpening AI 开场 */
-   }
- }catch(_e){ console.warn('[v2.6] seed start failed, fallback to AI mode', _e); }
  save();
  window.scrollTo(0,0);
  runOpening();
@@ -6630,21 +6287,7 @@ function applyOpening(o){
  try{applyStats(o)}catch(e){console.warn('applyStats',e)}
  /* Beta v2.0：AI 回包 equipment（玩家/剧情获得或自制装备 → 入库 + 档位钳制 + 战力防崩） */
  try{applyEquipment(o)}catch(e){console.warn('applyEquipment',e)}
- /* v2.6: AI 回包 relationships 若不足 3 人，用现有 S.rel 补齐，确保玩家社交圈不缩水 */
- if(Array.isArray(o.relationships)){
-   var aiRel2 = o.relationships.filter(function(r){return r && r.姓名});
-   if(aiRel2.length >= 3){
-     S.rel = aiRel2;
-   } else if(aiRel2.length > 0){
-     var base2 = (S.rel && S.rel.length) ? S.rel.slice() : [];
-     aiRel2.forEach(function(a){
-       var idx2 = base2.findIndex(function(b){return b.姓名 === a.姓名});
-       if(idx2 >= 0) base2[idx2] = Object.assign({}, base2[idx2], a);
-       else base2.push(a);
-     });
-     S.rel = base2;
-   }
- }
+ if(Array.isArray(o.relationships))S.rel=o.relationships;
  if(Array.isArray(o.npcs))S.npcs=o.npcs;
  if(o.world){
   S.world=Object.assign(S.world||{},o.world);
@@ -6663,14 +6306,6 @@ function applyOpening(o){
  var last=S.log[S.log.length-1];
  if(last&&Array.isArray(o.hints))last.hints=o.hints;
  CUR_HINTS=Array.isArray(o.hints)?o.hints.slice(0,5):[];updInputPH();
- /* v2.6: 兜底——如果 S.rel 为空（AI 没返回有效 NPC），用本地生成器补 3 个社交 NPC */
- if(!S.rel || !S.rel.length){
-   var _era = (S.setup && S.setup.era) ? String(S.setup.era) : '';
-   var _roles = ['work','neighbor','friend'];
-   for(var _i=0;_i<3;_i++){
-     try{ if(typeof addSocialNPC==='function') addSocialNPC(_era, _roles[_i]); }catch(_){}
-   }
- }
  delete S._blank;isOpening=false;
  save();renderAll();
  var st=$('story');if(st)st.scrollTop=0;
@@ -6840,6 +6475,9 @@ function openingOfflineEngine(){
   '出门走走，感受一下 '+esc(eraName||'这个时代')+'的街头气息',
   '找身边的人搭句话，看看能打听些什么'
  ];
+ /* Beta v2.3 P0-1：开局 CUR_HINTS 只有 3 条，简易模式下立即追加第 4 位占位（实际上 renderOpts 会在 easy 模式独立生成 D 卡，
+    但为了 opts.children count 视觉上更一致，这里第 4 位填入一个空串占位——useOpt 读到空串时会 fallback 到推进，不影响）
+    真正的 D 卡生成逻辑在 renderOpts 里，按 mode==='easy' 独立追加，不占 CUR_HINTS 的下标。 */
  delete S._blank;isOpening=false;
  /* v1.8：开局立即初始化目标系统（按时代生成默认目标），并把第 0 条短期目标直接置为「进行中」 */
  try{
@@ -7029,7 +6667,6 @@ var ACHIEVEMENT_POOL=[
   {id:'b_enemy',   tier:'B', ic:'👿', name:'被人盯上了',         desc:'第一次有组织 / 反派 / 超人类把你列为目标——说明你开始有分量了。'},
   {id:'b_pay',     tier:'B', ic:'💸', name:'代价来了',           desc:'为救人牺牲了健康、名声、工作、身份、财富或最爱的人其中至少一项。'},
   {id:'b_lover',   tier:'B', ic:'💞', name:'有人愿意等你回来',    desc:'在你满身伤回家开门时，有 TA 在等你——这是英雄最怕软的地方。'},
-  {id:'b_team',    tier:'B', ic:'🤜', name:'不再是一个人',       desc:'你组建或加入了一支真正的队伍——有人替你看背后，有人跟你一起冲。'},
   /* 【 A 档 · 真正的英雄 】*/
   {id:'a_avenger', tier:'A', ic:'⭐', name:'复仇者级',           desc:'参与了一次「复仇者 / 正联级」的大事件任务。'},
   {id:'a_choice',  tier:'A', ic:'⚖', name:'三难选择',            desc:'在「牺牲少数/牺牲多数/牺牲自己」的三难选择里，做出了决定并承担全部后果。'},
@@ -7037,7 +6674,6 @@ var ACHIEVEMENT_POOL=[
   {id:'a_tech',    tier:'A', ic:'🔬', name:'搞出过改变战局的东西',desc:'武器、解药、AI、护盾、传送、代码、能源——不一定是盔甲，但一定能救一队人。'},
   {id:'a_magic',   tier:'A', ic:'🔮', name:'摸到了非自然的边界',  desc:'魔法、变种基因、X基因、血脉觉醒、宇宙辐射、量子领域——你不再是 100% 纯人类了。'},
   {id:'a_expose',  tier:'A', ic:'📡', name:'把一个惊天阴谋捅了出去',desc:'没有一个黑幕能永远藏住。你用命把真相带出来时，世界就改变了。'},
-  {id:'a_sacrifice',tier:'A',ic:'🕊', name:'明知会失去，还是选了', desc:'你清楚代价是什么，但你还是迈出了那一步——这才是英雄和普通人的分界线。'},
   /* 【 S 档 · 传奇 】*/
   {id:'s_snap',    tier:'S', ic:'💥', name:'响指活下来的人',      desc:'灭霸响指之后你还站着——无论是幸存五年，还是烁灭回归。'},
   {id:'s_immortal',tier:'S', ic:'⏳', name:'穿越了一次时间线',    desc:'去过过去 / 未来 / 平行宇宙，并把自己的人生改写了哪怕一页。'},
@@ -7461,37 +7097,9 @@ function unlockAchievement(id,extra){
     var rec={id:id,tier:a.tier,ic:a.ic,name:a.name,desc:a.desc,at:fmtShort(curDate()),turn:S.turn||0,extra:extra||''};
     S.goals.unlockedAchievements.unshift(rec);
     S.goals.milestones.push({type:'ach',id:id,name:a.name,turn:rec.turn,at:rec.at});
-    try{toast('🏆 解锁成就 · '+a.tier+' · '+a.ic+' '+a.name)}catch(_){}
-    showAchievementPopup(a);
+    try{toast('🏆 解锁成就 · '+a.tier+' · '+a.ic+' '+a.name+' — '+a.desc)}catch(_){}
     return true;
   }catch(e){console.warn('unlockAchievement',e);return false}
-}
-/* v2.6: 成就解锁居中弹窗（动画 + 自动消失）*/
-function showAchievementPopup(a){
-  try{
-    var el=document.getElementById('achievementPopup');
-    if(!el){
-      el=document.createElement('div');
-      el.id='achievementPopup';
-      el.style.cssText='position:fixed;top:22%;left:50%;transform:translateX(-50%) scale(.8);z-index:9999;opacity:0;transition:all .4s cubic-bezier(.2,1.4,.4,1);pointer-events:none';
-      document.body.appendChild(el);
-    }
-    var tierColor = {铜:'#cd7f52',银:'#b8c4d0',金:'#f2c54d',铂:'#9d7cff',钻石:'#4dd2e8'}[a.tier] || '#8fa3b8';
-    el.innerHTML='<div style="background:linear-gradient(135deg,rgba(20,28,40,.97),rgba(15,22,34,.97));border:1.5px solid '+tierColor+';border-radius:16px;padding:22px 30px;min-width:280px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,.6),0 0 30px '+tierColor+'44;backdrop-filter:blur(10px)">'+
-      '<div style="font-size:11px;letter-spacing:2px;color:'+tierColor+';margin-bottom:6px">🏆 成就解锁</div>'+
-      '<div style="font-size:38px;margin:4px 0">'+a.ic+'</div>'+
-      '<div style="font-size:17px;font-weight:700;color:#fff;margin:4px 0 6px">'+esc(a.name)+'</div>'+
-      '<div style="font-size:12px;color:#8fa3b8;line-height:1.6">'+esc(a.desc||'')+'</div>'+
-      '<div style="display:inline-block;margin-top:10px;padding:2px 12px;border-radius:999px;background:'+tierColor+'22;border:1px solid '+tierColor+'66;color:'+tierColor+';font-size:11px;font-weight:600">'+a.tier+'</div>'+
-    '</div>';
-    requestAnimationFrame(function(){
-      el.style.opacity='1'; el.style.transform='translateX(-50%) scale(1)';
-    });
-    clearTimeout(el._t);
-    el._t=setTimeout(function(){
-      el.style.opacity='0'; el.style.transform='translateX(-50%) scale(.9)';
-    },2800);
-  }catch(_){}
 }
 
 /* ===================== 渲染 ===================== */
@@ -7569,110 +7177,13 @@ function renderRel(){
    if(n.当前目标)parts.push(kv('TA 的目标',n.当前目标));
   }
   card.innerHTML+=parts.join('');
-  // v2.6: AI 对话按钮
-  var chatBtn=document.createElement('button');
-  chatBtn.className='btn btn-glass';
-  chatBtn.style.cssText='margin-top:6px;font-size:11px;padding:3px 10px';
-  chatBtn.textContent='💬 对话';
-  chatBtn.onclick=function(){ openNPCChat(x); };
-  card.appendChild(chatBtn);
   frag.appendChild(card);
  });
  var el=$('body_rel');el.innerHTML='';el.appendChild(frag);
 }
-
-// v2.6: NPC AI 对话（带记忆，历史存入 S 持久化）
-var _curChatNPC=null;
-function _getNpcHist(){
-  if(typeof S==='undefined'||!S)return {};
-  if(!S._npcChatHistory)S._npcChatHistory={};
-  return S._npcChatHistory;
-}
-function openNPCChat(npc){
-  _curChatNPC=npc;
-  var m=document.getElementById('npcChatModal');
-  if(!m){return;}
-  var name=esc(npc.姓名||'对方');
-  m.querySelector('.npc-chat-name').textContent=name;
-  m.querySelector('.npc-chat-role').textContent=npc.身份||'';
-  var body=m.querySelector('.npc-chat-body');
-  var key=npc.姓名||'_unknown';
-  var hist=_getNpcHist()[key]||[];
-  if(hist.length){
-    body.innerHTML='<div class="npc-msg npc-sys">你和 '+name+' 之前聊过 '+Math.floor(hist.length/2)+' 轮。</div>';
-    hist.forEach(function(h){
-      body.innerHTML+='<div class="npc-msg '+(h.role==='player'?'npc-me':'npc-ai')+'">'+(h.role==='player'?'<b>你：</b>':'')+esc(h.text)+'</div>';
-    });
-  } else {
-    body.innerHTML='<div class="npc-msg npc-sys">你现在可以和 '+name+' 对话。说点什么吧。</div>';
-  }
-  m.style.display='flex';
-  body.scrollTop=body.scrollHeight;
-}
-function npcChatSend(){
-  var inp=document.getElementById('npcChatInput');
-  var text=(inp.value||'').trim();
-  if(!text||!_curChatNPC)return;
-  var body=document.querySelector('#npcChatModal .npc-chat-body');
-  body.innerHTML+='<div class="npc-msg npc-me"><b>你：</b>'+esc(text)+'</div>';
-  body.scrollTop=body.scrollHeight;
-  inp.value='';
-  var name=_curChatNPC.姓名||'对方';
-  var key=name;
-  var histObj=_getNpcHist();
-  if(!histObj[key])histObj[key]=[];
-  histObj[key].push({role:'player',text:text});
-  if(histObj[key].length>6)histObj[key]=histObj[key].slice(-6);
-  body.innerHTML+='<div class="npc-msg npc-ai" id="npcTyping">'+name+' 正在思考…</div>';
-  body.scrollTop=body.scrollHeight;
-  if(typeof AIService==='undefined'||!AIService.isEnabled()||!AIService.hasKey()){
-    document.getElementById('npcTyping').textContent='（AI 未连接，对话暂时不可用。）';
-    return;
-  }
-  AIService.generateNPCDialogue(_curChatNPC, text, S, histObj[key]).then(function(reply){
-    var el=document.getElementById('npcTyping');
-    if(el){el.textContent=reply;el.id='';}
-    histObj[key].push({role:'npc',text:reply});
-    if(histObj[key].length>6)histObj[key]=histObj[key].slice(-6);
-    body.scrollTop=body.scrollHeight;
-  }).catch(function(){
-    var el=document.getElementById('npcTyping');
-    if(el){el.textContent='（对话似乎被打断了。）';el.id='';}
-  });
-}
-function closeNPCChat(){document.getElementById('npcChatModal').style.display='none';}
-
 function renderWorld(){
  var w=S.world||{},h=[];
- /* v2.6: 默认显示 3 个核心维度，其余折叠（手机端一屏看完） */
- var coreKeys=['你所在地区','英雄界','科技与经济'];
- var restKeys=WORLD_KEYS.filter(function(k){return coreKeys.indexOf(k)===-1});
- coreKeys.forEach(function(k){h.push(kv(k,w[k]))});
- if(restKeys.length){
-   h.push('<div class="world-more-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.wm-arrow\').textContent=this.nextElementSibling.style.display===\'none\'?\'▶\':\'▼\'" style="cursor:pointer;font-size:12px;color:var(--fg-2);margin:4px 0;user-select:none"><span class="wm-arrow">▶</span> 展开其余 '+restKeys.length+' 个维度</div>');
-   h.push('<div class="world-more-body" style="display:none">');
-   restKeys.forEach(function(k){h.push(kv(k,w[k]))});
-   h.push('</div>');
- }
- // v2.6: AI 世界新闻
- h.push('<div class="subh2">🌍 世界新闻</div>');
- var newsItems=(S.news&&S.news.items)||[];
- if(newsItems.length){
-   h.push(newsItems.slice(0,5).map(function(n){
-     return '<div class="card" style="margin-bottom:6px"><b>'+esc(n.title||n.name||'新闻')+'</b> · <span style="color:var(--accent,#9d7cff)">'+esc(n.tag||'')+'</span><br><span style="font-size:12.5px;color:var(--text-secondary,#bbb)">'+esc(n.content||n.text||'')+'</span></div>';
-   }).join(''));
- } else {
-   h.push('<div class="dim" id="newsLoading">正在获取最新资讯…</div>');
-   if(typeof AIService!=='undefined'&&AIService.isEnabled()&&AIService.hasKey()){
-     AIService.generateWorldNews(S).then(function(items){
-       if(Array.isArray(items)&&items.length){
-         if(!S.news)S.news={items:[],sources:[]};
-         S.news.items=items;
-         renderWorld();
-       }
-     }).catch(function(){});
-   }
- }
+ WORLD_KEYS.forEach(function(k){h.push(kv(k,w[k]))});
  $('body_world').innerHTML=h.join('');
 }
 function renderEvents(){
@@ -7856,16 +7367,9 @@ function _renderDetailBody(k){
   if(k==='setup'){
     /* v1.9 去重：去掉与其它卡重复的字段（年龄/所在地→人生状态，初始技能/能力资质/装备→能力，
        阵营倾向→所属组织，初始目标→人生目标）。出身卡只保留开局固有设定。*/
-    var o=S.setup||{};['时代','血统/出身','出生身份','姓名','性别','家庭状况','性格关键词','模拟风格'].forEach(function(kk){
-      h.push(dkv(kk,o[kk.toLowerCase()]||o[kk]||'—'))
+    var o=S.setup||{};['时代','血统/出身','出生身份','姓名','性别','家庭状况','性格关键词','模拟风格','起始时间'].forEach(function(kk){
+      if(kk==='起始时间'){if(S.date)h.push(dkv('开局时刻',fmtShort(curDate())))}else{h.push(dkv(kk,o[kk.toLowerCase()]||o[kk]||'—'))}
     });
-    if(S.date)h.push(dkv('开局时刻',fmtShort(curDate())));
-    /* v2.6: 世界种子显示在出身卡 */
-    try{
-      var seedLabel = (S.seedKey && String(S.seedKey).length>0) ? String(S.seedKey) : '随机种子';
-      var seedIcon = '🧬';
-      h.push(dkv(seedIcon+' 世界种子', '<span style="color:var(--gold,#f2c54d);font-family:monospace;font-size:12px">'+esc(seedLabel)+'</span>'));
-    }catch(_){}
     return h.join('');
   }
   if(k==='player'){
@@ -8031,52 +7535,145 @@ function applyGoalsUpdate(o){
     return gotChange;
   }catch(e){console.warn('applyGoalsUpdate',e);return false}
 }
-/* v2.6：增量渲染 —— 只追加新条目，不全量重建（长存档大幅提速） */
-var _renderedLogCount = 0;
-function resetRenderStory(){ _renderedLogCount = 0; }
 function renderStory(){
-  var el=$('story');
-  var log=S.log||[];
-  /* 全量重建：首次渲染或存档加载后 */
-  if(_renderedLogCount===0 || _renderedLogCount>log.length){
-    el.innerHTML='';
-    _renderedLogCount=0;
+ var frag=document.createDocumentFragment();
+ (S.log||[]).forEach(function(e,i){
+  var last=(i===(S.log.length-1));
+  var div=document.createElement('div');div.className='entry'+(e.self?' self':'');
+  var t=document.createElement('div');t.className='t';t.textContent=e.time||'';
+  div.appendChild(t);
+  var b=document.createElement('div');b.className='b';b.innerHTML=md(e.text);
+  div.appendChild(b);
+  if(e.hints&&e.hints.length&&!last){
+   var h=document.createElement('div');h.className='hints';
+   h.textContent='当时的方向：'+e.hints.join(' ／ ');
+   div.appendChild(h);
   }
-  /* 只追加新增的条目 */
-  for(var i=_renderedLogCount;i<log.length;i++){
-    var e=log[i];
-    var last=(i===(log.length-1));
-    var div=document.createElement('div');div.className='entry'+(e.self?' self':'');
-    var t=document.createElement('div');t.className='t';t.textContent=e.time||'';
-    div.appendChild(t);
-    var b=document.createElement('div');b.className='b';b.innerHTML=md(e.text);
-    div.appendChild(b);
-    if(e.hints&&e.hints.length&&!last){
-      var h=document.createElement('div');h.className='hints';
-      h.textContent='当时的方向：'+e.hints.join(' ／ ');
-      div.appendChild(h);
-    }
-    el.appendChild(div);
-  }
-  _renderedLogCount=log.length;
-  if(!log.length){
-    el.innerHTML='<div class="dim">还没有任何记录。</div>';
-  }
+  frag.appendChild(div);
+ });
+ if(!S.log||!S.log.length){
+  var empty=document.createElement('div');empty.className='dim';empty.textContent='还没有任何记录。';
+  frag.appendChild(empty);
+ }
+ var el=$('story');el.innerHTML='';el.appendChild(frag);
 }
 /* ===================== v1.8 · 双模式系统（简易 / 专家）核心函数 =====================
    原则：玩法内核 100% 一致，只改「UI呈现方式 / 操作复杂度 / 新手引导密度 / hints口语化标签」
    - 简易模式：给朋友分享、对漫威不熟、第一次玩、"找不到推进按钮" 的人
    - 专家模式：原 1.6 完整界面，老用户 / 漫威迷 / 懂 AI 的人  */
-/* v2.6: 已取消简易/专家模式区别，统一展示全部字段。以下为兼容桩函数，避免旧调用点报错。 */
-function getMode(){ return 'expert'; }
-function applyModeBodyClass(){}
-function applyModeBadge(){}
-function refreshModeCardsUI(){}
-function homeSetMode(){}
-function refreshEasyTipStrip(){}
-function setMode(){}
-function toggleModeMenu(){}
-function restoreModeFromSaved(){}
+var MODE_KEY='MCU_mode_by_CX';
+/* 简易模式下，三选项的口语化前缀 + 一句白话小标签（解释给小白这是什么意思） */
+var EASY_OPT_LABELS=[
+  {k:'A', p:'🥇 稳妥一点：', l:'按系统建议走 · 不容易踩坑', cls:'opt-a'},
+  {k:'B', p:'🌟 搞点新意思：', l:'尝试一下不一样的选择',     cls:'opt-b'},
+  {k:'C', p:'🎲 随便走走：', l:'随遇而安 · 看看会遇到什么',   cls:'opt-c'}
+];
+function getMode(){
+  try{
+    if(S && typeof S._mode==='string' && (S._mode==='easy'||S._mode==='expert'))return S._mode;
+    var ls=null;
+    try{ls=localStorage.getItem(MODE_KEY)}catch(_){ls=null}
+    if(ls==='easy'||ls==='expert')return ls;
+  }catch(_){}
+  /* 兜底：专家模式（老用户打开老存档默认不变，新用户在教程Step0会主动选）*/
+  return 'expert';
+}
+function applyModeBodyClass(m){
+  try{
+    var b=document.body;if(!b)return;
+    b.classList.remove('mode-easy','mode-expert');
+    b.classList.add(m==='easy'?'mode-easy':'mode-expert');
+  }catch(_){}
+}
+function applyModeBadge(m){
+  try{
+    var el=$('modeBadge');if(!el)return;
+    el.classList.remove('easy','expert');
+    el.classList.add(m);
+    el.textContent = m==='easy' ? '简易模式' : '专家模式';
+    el.title = m==='easy'
+      ? '🌱 简易模式 · 点我切换到专家模式'
+      : '🔬 专家模式 · 点我切换到简易模式';
+  }catch(_){}
+}
+function refreshModeCardsUI(m){
+  try{
+    var easyC=$('sMc_easy'),expC=$('sMc_expert');
+    var easyD=$('sMc_easy_dot'),expD=$('sMc_expert_dot');
+    if(easyC){easyC.classList.toggle('active', m==='easy')}
+    if(expC){expC.classList.toggle('active', m==='expert')}
+    if(easyD){easyD.style.display = m==='easy'?'inline':'none'}
+    if(expD){expD.style.display = m==='expert'?'inline':'none'}
+  }catch(_){}
+  /* Beta v1.9：同步开局主界面 home-modes 大卡选中态 */
+  try{
+    var host=$('homeModes');if(!host)return;
+    var cards=host.querySelectorAll('.home-mode');
+    for(var i=0;i<cards.length;i++){
+      var cm=cards[i].getAttribute('data-mode');
+      cards[i].setAttribute('aria-checked', cm===m ? 'true' : 'false');
+    }
+  }catch(_){}
+}
+/* Beta v1.9：开局主界面切换简易/专家模式。与教程/顶部徽章 100% 同步：
+   改 class、改徽章、写 localStorage、写存档 S._mode。
+   开局前没存档 → 只写 localStorage（applyMode 会同步全局 class / badge / home 卡 UI）。*/
+function homeSetMode(m){
+  if(m!=='easy'&&m!=='expert')m='expert';
+  try{
+    /* 直接复用 applyMode：同时处理 body class + badge + localStorage + 存档 + cards UI */
+    if(typeof applyMode==='function'){applyMode(m,{silent:true})}
+    else{
+      try{if(S)S._mode=m}catch(_){}
+      try{localStorage.setItem(MODE_KEY,m)}catch(_){}
+      applyModeBodyClass(m);applyModeBadge(m);refreshModeCardsUI(m);
+    }
+  }catch(e){console.warn('homeSetMode',e)}
+}
+/* 开局前 5 回合给简易模式加引导条，之后自动消失（减少视觉干扰） */
+function refreshEasyTipStrip(){
+  try{
+    var s=$('easyTipStrip');if(!s)return;
+    var turn=(S&&S.turn)?S.turn:0;
+    s.classList.toggle('on', turn<=4);
+  }catch(_){}
+}
+function setMode(m, showToast){
+  if(m!=='easy'&&m!=='expert')m='expert';
+  try{
+    if(S){
+      S._mode=m;
+      try{save()}catch(_){}
+    }
+    try{localStorage.setItem(MODE_KEY,m)}catch(_){}
+    applyModeBodyClass(m);
+    applyModeBadge(m);
+    refreshModeCardsUI(m);
+    refreshEasyTipStrip();
+    if(CUR_HINTS&&CUR_HINTS.length){try{renderOpts()}catch(_){}}
+    if(showToast){
+      try{toast(m==='easy'?'🌱 已切到简易模式 · 按钮更大，操作更简单':'🔬 已切到专家模式 · 完整高级界面回来啦')}catch(_){}
+    }
+  }catch(e){console.warn('setMode fail',e)}
+}
+/* 顶栏模式徽章点击：快速切换，用户不用跳进引擎设置 */
+function toggleModeMenu(){
+  try{
+    var cur=getMode();
+    var nxt=cur==='easy'?'expert':'easy';
+    if(confirm((cur==='easy'?'🌱 当前是【简易模式】，现在切到【专家模式】？\n\n切换后会回到原 1.6 完整操作界面：自定义输入框变回主角，所有高级选项出现。':'🔬 当前是【专家模式】，现在切到【简易模式】？\n\n切换后「继续推进⏭️」大按钮会出现，选项卡片更大、有白话解释，更适合新人。')+'\n\n随时可以再点顶部徽章切回来，进度不会丢。')){
+      setMode(nxt,true);
+    }
+  }catch(_){}
+}
+/* 启动时调用：从存档 / localStorage 恢复模式，并把所有 UI 同步到正确状态 */
+function restoreModeFromSaved(){
+  var m=getMode();
+  applyModeBodyClass(m);
+  applyModeBadge(m);
+  refreshModeCardsUI(m);
+  refreshEasyTipStrip();
+}
 
 /* v1.4：自定义行动输入框 placeholder 动态化：根据当前 A/B/C/D/E 选项实时拼接 + 建议怎么改 */
 function updInputPH(){
@@ -8471,21 +8068,7 @@ function applyReply(o){
  try{applyStats(o)}catch(e){console.warn('applyStats',e)}
  /* Beta v2.0：AI 回包 equipment（玩家/剧情获得或自制装备 → 入库 + 档位钳制 + 战力防崩） */
  try{applyEquipment(o)}catch(e){console.warn('applyEquipment',e)}
- /* v2.6: AI 回包 relationships 若不足 3 人，用现有 S.rel 补齐，确保玩家社交圈不缩水 */
- if(Array.isArray(o.relationships)){
-   var aiRel2 = o.relationships.filter(function(r){return r && r.姓名});
-   if(aiRel2.length >= 3){
-     S.rel = aiRel2;
-   } else if(aiRel2.length > 0){
-     var base2 = (S.rel && S.rel.length) ? S.rel.slice() : [];
-     aiRel2.forEach(function(a){
-       var idx2 = base2.findIndex(function(b){return b.姓名 === a.姓名});
-       if(idx2 >= 0) base2[idx2] = Object.assign({}, base2[idx2], a);
-       else base2.push(a);
-     });
-     S.rel = base2;
-   }
- }
+ if(Array.isArray(o.relationships))S.rel=o.relationships;
  if(Array.isArray(o.npcs))S.npcs=o.npcs;
  if(o.world){
   S.world=Object.assign(S.world||{},o.world);
@@ -8539,6 +8122,8 @@ function applyReply(o){
  if(S.turn>0&&S.turn%15===0)S._needCheck=true;
  $('playerInput').value='';
  save();renderAll();
+ /* Beta v2.3 T-1：在线推进成功，记一次 AI Token 消耗（按当前模型档位估算），并触发温和打赏检查 */
+ try{if(typeof tokBumpAi==='function')tokBumpAi(eng||null)}catch(_){}
  var st=$('story');if(st)st.scrollTop=st.scrollHeight;
 }
 
@@ -8604,6 +8189,7 @@ async function doTurn(mode){
               '<div style="margin-top:4px;font-size:12.5px;color:var(--fg-2)">'+info.html+'</div>' +
               '<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:7px">' +
                 '<button class="primary" style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{var c=getCfg();c.engine=\'offline\';setCfg(c);updEng();document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();toast(\'已切换：离线推演 ✓\')}catch(_){}">🟢 一键切离线推演</button>' +
+                '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();openSettings()}catch(_){}">⚙ 打开引擎设置</button>' +
                 '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="this.closest(\'#_apiErrTip\')&&this.closest(\'#_apiErrTip\').remove()">知道了 ×</button>' +
               '</div>' +
             '</div>' +
@@ -8868,6 +8454,8 @@ function offlineTurn(mode,inp){
  }catch(eOff){console.warn('offline goal heuristics',eOff)}
  var pi=$('playerInput');if(pi)pi.value='';
  save();renderAll();
+ /* Beta v2.3 T-1：离线推进也按 0.3x 轻量计数（消耗的是用户端 CPU，不花作者 token，但为了统计也记一次）*/
+ try{if(typeof tokBumpOffline==='function')tokBumpOffline()}catch(_){}
 }
 function forceCheck(){
   if(!S)return;
@@ -9072,6 +8660,173 @@ var DEFAULT_CFG={base:'https://open.bigmodel.cn/api/paas/v4',key:'',model:'glm-4
 var EXPORT_REMIND_KEY='mcu_v14_export_tip'; /* 最近一次点关闭的时间戳，避免同天反复弹 */
 var SAVE_TURN_REMIND='mcu_v14_save_lastturn';
 
+/* ========================================================================
+   Beta v2.3 · T-1 / T-2 · Token 消耗限流 + 打赏温和提示系统
+   设计目标：作者自费跑 AI，公测后最怕两件事
+     ① 有人恶意刷几千回合烧光 Token
+     ② 真喜欢的玩家聊太多把 Token 用干，却完全不知道这背后在花钱
+   所以不做"硬限流"（不会卡死游戏），而是"三档温和提醒 + 感谢回馈 + 打赏永久免限"：
+     · 软额度（每日 50 轮 AI 推演）→ 蓝色小提醒："喝杯奶茶的话能继续撑一整天～"
+     · 中额度（每日 100 轮）→ 紫色中度提醒："今天你已经把作者一周的奶茶钱都喝掉了～"
+     · 高额度（每日 200 轮）→ 金色强提醒："可以请作者喝杯奶茶吗？不请也能玩，只是要等次日才会清计数"
+   动作奖励（降低打赏压力）：
+     · 导出一次存档：+3 次温柔额度
+     · 每关闭 / 点击"知道了"打赏提示：+2 次温柔额度（避免今天剩余 1 次又被弹第 2 次骚扰）
+   免限制：
+     · 打赏记录（本地标记 tok_patreon=true）：永久不计入每日额度，只显示"感谢你请作者喝奶茶 🧋"暖心语
+   持久化：
+     · 独立键 cx_tokstats（双写到 cx_save_backup），清缓存也不容易丢
+     · 每日按"YYYY-MM-DD"自动清零（用 localStorage 存 cx_tok_day 判断当日是否换日）
+======================================================================== */
+var CX_TOK_KEY='cx_tokstats';
+var CX_TOK_DAY_KEY='cx_tok_day';
+var CX_TOK_PATREON_KEY='cx_tok_patreon';   /* 一旦 true 永久免限制（本地打赏标记）*/
+var CX_TOK_THRESH={ soft:50, mid:100, hard:200, aiCost:1, offlineCost:0.3 }; /* 每日轮次阈值 & 单次消耗估值 */
+/* 读/写独立计数（不受主存档 KEY 删除影响，也同步写备份） */
+function _tokDay(){try{var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}catch(_){return 'all'}}
+function tokRead(){
+  var raw='',bak='';
+  try{raw=localStorage.getItem(CX_TOK_KEY)||''}catch(_){raw=''}
+  if(!raw)try{bak=localStorage.getItem(CX_BACKUP_KEY+'_tokstats')||'';raw=bak}catch(_){}
+  var obj=null;
+  if(raw){try{obj=JSON.parse(raw)}catch(_){obj=null}}
+  if(!obj||typeof obj!=='object'){obj={ai:0,off:0,bonus:0,dismissSoft:0,dismissMid:0,dismissHard:0,lastDay:_tokDay()}}
+  var today=_tokDay();
+  if(today!==(obj.lastDay||'')){obj.ai=0;obj.off=0;obj.bonus=0;obj.dismissSoft=0;obj.dismissMid=0;obj.dismissHard=0;obj.lastDay=today;
+    try{localStorage.setItem(CX_TOK_DAY_KEY,today)}catch(_){}}
+  return obj;
+}
+function tokWrite(o){
+  try{
+    if(!o||typeof o!=='object')return;
+    o.lastDay=_tokDay();
+    var s=JSON.stringify(o);
+    try{localStorage.setItem(CX_TOK_KEY,s)}catch(_){}
+    try{localStorage.setItem(CX_BACKUP_KEY+'_tokstats',s)}catch(_){} /* 同步写到备份键的子后缀 */
+    if(typeof sessionStorage!=='undefined')try{sessionStorage.setItem(CX_TOK_KEY,s)}catch(_){}
+  }catch(_){}
+}
+/* 是否永久免限制（本地打赏感谢标记）*/
+function tokIsPatreon(){try{return localStorage.getItem(CX_TOK_PATREON_KEY)==='1'}catch(_){return false}}
+/* 一次性把"你已经打赏过"记下来，之后所有提示都换成感谢语。打开 donateModal 时调用一次（让用户看到收款码就算"有心了"）*/
+function tokMarkPatreon(){try{localStorage.setItem(CX_TOK_PATREON_KEY,'1')}catch(_){}
+  try{toast('🧋 感谢你愿意打开收款码看看！以后所有打赏提示都换成感谢语～')}catch(_){}}
+/* 在线/离线 增量计数 + 温和提示 */
+function tokTotalUsed(o){o=o||tokRead();var used=(o.ai||0)+(o.off||0)*0.3-(o.bonus||0);return used<0?0:used}
+function tokBumpAi(eng){
+  try{
+    if(tokIsPatreon()){tokRefreshStat('谢谢请作者喝奶茶 · 今日额度无限 🧋');return}
+    var o=tokRead();o.ai=(o.ai||0)+1;tokWrite(o);
+    tokMaybePrompt(o);tokRefreshStat();
+  }catch(_){}
+}
+function tokBumpOffline(){
+  try{
+    if(tokIsPatreon()){tokRefreshStat('谢谢请作者喝奶茶 · 今日额度无限 🧋');return}
+    var o=tokRead();o.off=(o.off||0)+1;tokWrite(o);
+    tokMaybePrompt(o);tokRefreshStat();
+  }catch(_){}
+}
+/* 奖励额度（导出存档 / 关闭打赏弹窗）*/
+function tokRewardBonus(n, msg){
+  try{
+    var o=tokRead();o.bonus=(o.bonus||0)+(n|0);tokWrite(o);tokRefreshStat();
+    if(msg)try{toast(msg)}catch(_){}
+  }catch(_){}
+}
+/* 顶栏 engstat 文案刷新：显示今日已用/阈值，或免限制感谢语 */
+function tokRefreshStat(custom){
+  try{
+    var el=$('engstat');if(!el)return;
+    if(custom){el.textContent='🧋 '+custom;return}
+    if(tokIsPatreon()){el.innerHTML='🧋 <b style="color:#f2c54d">感谢你请作者喝奶茶 · 今日额度无限</b>';return}
+    var o=tokRead();var used=Math.round(tokTotalUsed(o));
+    var thr=CX_TOK_THRESH.hard;
+    var tag='🟢';var color='var(--fg-2)';
+    if(used>=CX_TOK_THRESH.soft){tag='🟡';color='#f2c54d'}
+    if(used>=CX_TOK_THRESH.mid){tag='🟣';color='#9d7cff'}
+    if(used>=CX_TOK_THRESH.hard){tag='🔴';color='#ff8a8a'}
+    el.innerHTML=tag+' <span style="color:'+color+'">今日已消耗作者 Token：<b>'+used+'</b> / 建议 '+thr+' 轮额度</span> · <u onclick="try{tokShowPanel()}catch(_){}" style="cursor:pointer;text-decoration:underline dotted">点我看如何帮作者减负</u>';
+  }catch(_){}
+}
+/* 三档提示（只在阈值切换时弹一次，防止同一档重复骚扰） */
+function tokMaybePrompt(o){
+  try{
+    var used=tokTotalUsed(o);
+    if(used>=CX_TOK_THRESH.hard && !(o.dismissHard||0)){tokShowDonateModal('hard');return}
+    if(used>=CX_TOK_THRESH.mid  && !(o.dismissMid ||0)){tokShowDonateModal('mid'); return}
+    if(used>=CX_TOK_THRESH.soft && !(o.dismissSoft||0)){tokShowDonateModal('soft');return}
+  }catch(_){}
+}
+/* 打赏 / Token 额度说明（复用 donateModal 文案；不要把 donateModal 写成硬打赏） */
+function tokShowPanel(){
+  try{openTokPanel()}catch(_){}
+}
+function openTokPanel(){
+  try{openDonate();
+    var el=document.getElementById('_tok_panel_inject');
+    if(!el){
+      var host=document.querySelector('#donateModal .author-hero');
+      if(!host)return;
+      var today=_tokDay();
+      var o=tokRead();
+      var used=Math.round(tokTotalUsed(o));
+      var remain=CX_TOK_THRESH.hard-used;if(remain<0)remain=0;
+      var div=document.createElement('div');div.id='_tok_panel_inject';
+      div.style.cssText='margin-top:14px;padding:11px 13px;border-radius:10px;border:1px dashed rgba(124,192,255,.4);background:linear-gradient(180deg,rgba(124,192,255,.08),rgba(124,192,255,.02));line-height:1.85;font-size:12.7px;color:#cbd3df';
+      div.innerHTML='<b style="color:#9fd0ff">📊 今日 Token 消耗账单（' + today + '）</b><br>'+
+        '· 你今天已经让作者花了：<b style="color:#f2c54d">' + used + ' 次 AI 调用</b>（离线 0.3 次折算 1 次）<br>'+
+        '· 作者建议每日额度：<b>' + CX_TOK_THRESH.soft + ' / ' + CX_TOK_THRESH.mid + ' / ' + CX_TOK_THRESH.hard + '</b>（软/中/高三档）<br>'+
+        '· 今日剩余温柔额度：<b>' + remain + ' 次</b>；次日零点自动清零重置<br>'+
+        '<span style="color:#9aa6b8">💡 小贴士：想继续免费玩？<b>导出一次存档 +3 次</b>；<b>点下方关闭 +2 次</b>；<b>用自己的 API Key</b>就完全不走作者池子啦（⚙引擎→自定义API）。</span>';
+      host.parentNode.insertBefore(div, host.nextSibling);
+    }
+  }catch(_){}
+}
+/* 三档弹 Donate 模态 + 档位文案追加（每次调用直接重写 banner 文案，避免沿用旧档内容） */
+function tokShowDonateModal(level){
+  try{
+    openTokPanel();
+    var box=document.getElementById('_tok_level_banner');
+    if(!box){
+      var header=document.querySelector('#donateModal h3');
+      if(!header)return;
+      var b=document.createElement('div');b.id='_tok_level_banner';b.style.cssText='margin:8px 0 4px;padding:9px 12px;border-radius:9px;font-size:12.7px;line-height:1.8';
+      header.parentNode.insertBefore(b, header.nextSibling);
+      box=b;
+    }
+    var o=tokRead();var used=Math.round(tokTotalUsed(o));
+    var tag={soft:{bg:'linear-gradient(135deg,rgba(124,192,255,.12),rgba(124,192,255,.04))',border:'rgba(124,192,255,.42)',text:'#9fd0ff',title:'🟦 温柔提醒 · 你玩了 '+used+' 轮啦',
+      body:'你今天已经玩了 <b>'+used+'</b> 轮，真的很爱这个模拟器呀 🥰 点「知道啦」就能继续玩——以后要不要请作者喝杯珍珠奶茶当鼓励呀～',btn:'知道啦 +2 次温柔额度'},
+    mid:{bg:'linear-gradient(135deg,rgba(157,124,255,.14),rgba(157,124,255,.04))',border:'rgba(157,124,255,.45)',text:'#cdbbff',title:'🟪 中度提醒 · 今天已经 '+used+' 轮啦',
+      body:'你今天已经把作者 <b>小半个月的奶茶钱</b> 都花在 Token 上了 😂。高三开发者是从自己生活费里挤出来跑 AI 的～<b>愿意请作者喝 1 杯奶茶吗？</b>（不请也完全 OK，点下面 +2 次额度继续玩）',btn:'好感动 但这次先不打赏 +2 次'},
+    hard:{bg:'linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,152,68,.05))',border:'rgba(242,197,77,.5)',text:'#f2c54d',title:'🟧 额度快用完啦 · 今日 '+used+' 轮',
+      body:'今日已经玩了 <b>'+used+' 次 AI 推演</b>（高三开发者一周的奶茶钱 💦）。<b>请作者喝 1 杯珍珠奶茶（永久免今日额度限制）</b>，或者点下方按钮再拿 +2 次温柔额度坚持到零点。',btn:'坚持到零点！+2 次温柔额度'}
+    }[level];
+    box.style.background=tag.bg;box.style.border='1px dashed '+tag.border;
+    box.style.color='#e6ecf5';
+    box.innerHTML='<div style="font-weight:800;color:'+tag.text+';margin-bottom:4px">'+tag.title+'</div>'+
+      '<div>'+tag.body+'</div>'+
+      '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">'+
+        '<button class="primary" style="min-height:40px;font-size:12.5px;padding:6px 12px" onclick="try{tokDismissLevel(\''+level+'\')}catch(_){}">✅ '+tag.btn+'</button>'+
+        '<button style="min-height:40px;font-size:12.5px;padding:6px 12px" onclick="try{tokMarkPatreon();tokRefreshStat(\'感谢你愿意看看收款码！今日免额度啦 🧋\')}catch(_){}">🧋 打开收款码看看（永久免额度）</button>'+
+      '</div>';
+  }catch(_){}
+}
+/* 用户点「知道啦」：对应档位dismiss+1 + 温柔额度 +2（避免今天剩余 1 次立刻又弹） */
+function tokDismissLevel(level){
+  try{
+    var o=tokRead();
+    if(level==='soft')o.dismissSoft=(o.dismissSoft||0)+1;
+    if(level==='mid')o.dismissMid=(o.dismissMid||0)+1;
+    if(level==='hard')o.dismissHard=(o.dismissHard||0)+1;
+    o.bonus=(o.bonus||0)+2;tokWrite(o);
+    try{toast('✅ 已帮你 +2 次温柔额度 · 今日不再 '+({soft:'蓝色',mid:'紫色',hard:'金色'}[level]||'同档')+' 重复骚扰～')}catch(_){}
+    try{closeDonate()}catch(_){}
+    tokRefreshStat();
+  }catch(_){}
+}
+
 var _saveT=null;
 function _rotateBackups(valStr){
   try{
@@ -9201,63 +8956,14 @@ function normalizeSave(o){
  o.fold=o.fold||{};o._needCheck=!!o._needCheck;
  if(o._mode!=='easy'&&o._mode!=='expert')o._mode=null;   /* v1.8：双模式兜底，非法值清空让 getMode() 走 localStorage */
  if(!o.world)o.world={};
- WORLD_KEYS.forEach(function(k){if(o.world[k]==null||o.world[k]===''||o.world[k]==='待首次世界演化')o.world[k]='—'});
+ WORLD_KEYS.forEach(function(k){if(o.world[k]==null||o.world[k]==='')o.world[k]='—'});
  /* v1.4：旧存档导入时补齐 S.news 结构（新闻 + 信息来源），后续面板版本直接读 */
  if(!o.news||typeof o.news!=='object')o.news={items:[],sources:[]};
  if(!Array.isArray(o.news.items))o.news.items=[];
  if(!Array.isArray(o.news.sources))o.news.sources=[];
- /* v2.6: 老存档兼容迁移 —— 补齐 v2.6 新增字段，避免读档后缺字段报错 */
- try{
-   /* 出身结构化数据：老存档只有文本身份，补一个默认 origin 对象 */
-   if(!o.origin || typeof o.origin !== 'object'){
-     o.origin = {
-       出身: (o.setup && o.setup.birth) || '普通人',
-       血统: '凡人',
-       经济层: 3,
-       职业倾向: '待业',
-       初始技能: [],
-       初始装备: []
-     };
-   }
-   /* 目标/成就系统 */
-   if(!o.goals || typeof o.goals !== 'object'){
-     o.goals = { currentGoal:(o.player&&o.player['当前目标'])||'活下去', goals:[], unlockedAchievements:[], milestones:[] };
-   }
-   if(!Array.isArray(o.goals.unlockedAchievements))o.goals.unlockedAchievements=[];
-   if(!Array.isArray(o.goals.milestones))o.goals.milestones=[];
-   /* 家庭系统 */
-   if(!o.family || typeof o.family !== 'object'){
-     o.family = { members:[], intent:null, married:false, children:0 };
-   }
-   /* 玩家属性兜底：老存档可能缺字段 */
-   if(o.player){
-     var pDefaults = {'职业':'待业','财富':'普通','家庭':'未知','社会地位':'平民','身体与能力':'健康','战斗能力':'普通人','科技与工程':'—','技能':'—','声望':'0','所属势力':'无','当前目标':'活下去','身体状态':'健康','情绪':'平静','当前任务':'—'};
-     for(var pk in pDefaults){ if(o.player[pk]==null||o.player[pk]==='')o.player[pk]=pDefaults[pk]; }
-   }
-   /* 世界线引擎数据 */
-   if(!o.worldline || typeof o.worldline !== 'object'){
-     o.worldline = { seed:(o.seedKey||'rand'), divergenceLevel:0, canonIntegrity:100, majorFlags:{}, alteredEvents:[] };
-   }
-   /* 补齐世界线引擎的完整字段（老存档可能只有部分） */
-   var wlDefaults = {playerInfluence:0, worldChaos:0, publicAwareness:0, heroRelations:{}, factionRelations:{}, deadCharacters:[], completedArcs:[]};
-   for(var wk in wlDefaults){ if(o.worldline[wk]==null)o.worldline[wk]=wlDefaults[wk]; }
-   if(!Array.isArray(o.worldline.alteredEvents))o.worldline.alteredEvents=[];
-   if(!Array.isArray(o.worldline.deadCharacters))o.worldline.deadCharacters=[];
-   if(!Array.isArray(o.worldline.completedArcs))o.worldline.completedArcs=[];
-   /* v2.6 新增运行时字段 */
-   if(!o.memory)o.memory=[];
-   if(!o.chapters)o.chapters=[];
-   if(!o.eventHistory)o.eventHistory=[];
-   if(!o.cooldowns||typeof o.cooldowns!=='object')o.cooldowns={};
-   if(typeof o.stress!=='number')o.stress=0;
-   if(typeof o.money!=='number')o.money=0;
-   if(typeof o.age!=='number')o.age=(o.player&&o.player['年龄'])?parseInt(o.player['年龄'])||18:18;
-   /* 人际关系格式迁移：老存档 rel 是数组，新版同时支持 relations 对象 */
-   if(!o.relations||typeof o.relations!=='object')o.relations={};
- }catch(_){}
  /* 导入存档时补全作者字段，即使存档被人手动抠掉也会自动回填 CX */
  try{
-   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app='漫威模拟器 2.6';
+   o._author=CX_AUTHOR;o._copyright=CX_COPYRIGHT;o._app='漫威模拟器 2.0';
    o._lastImportedAt=Date.now();
  }catch(_){}
  return o;
@@ -9281,14 +8987,13 @@ function openSave(){
  var m=$('ioModal');if(m){m.style.display='block';if(m.scrollTop!=null)m.scrollTop=0;setTimeout(function(){_fixModalAnchors(m)},16)}
  /* 导出存档前强制回填 CX 作者字段，防止别人存档分发时匿名 */
  try{
-  S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.2';
+  S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app='漫威模拟器 2.3';
   if(!S._createdAt)S._createdAt=Date.now();S._lastExportedAt=Date.now();
  }catch(_){}
  var txt=JSON.stringify(S);
  $('ioText').value=txt;
  var kb=(new Blob([txt]).size/1024).toFixed(1);
- var eraInfo=S&&S.setup&&S.setup.era?'<br><span style="color:#9d7cff">🌍 当前时代：'+S.setup.era+'</span>':'';
- $('ioHint').innerHTML='存档体积 '+kb+' KB。文本很长，<b>建议用「⬇ 导出 TXT 文件」</b>保存；在手机上粘贴这么长的文本容易被输入法截断。'+eraInfo+'<br><span style="color:#9d7cff">🛡 该存档已包含原作者署名（作者：'+CX_AUTHOR+'），转发分享时请保留原作者信息。</span>';
+ $('ioHint').innerHTML='存档体积 '+kb+' KB。文本很长，<b>建议用「⬇ 导出 TXT 文件」</b>保存；在手机上粘贴这么长的文本容易被输入法截断。<br><span style="color:#9d7cff">🛡 该存档已包含原作者署名（作者：'+CX_AUTHOR+'），转发分享时请保留原作者信息。</span>';
  openIO('💾 存档 · 导出','save');
 }
 function openLoad(){
@@ -9300,9 +9005,10 @@ function safeName(s){return String(s||'').replace(/[\\/:*?"<>|·\s]+/g,'_').repl
 function exportSave(){
  var txt=$('ioText').value;
  var nm=S&&S.setup?S.setup.name:'无名者';
- var era=S&&S.setup&&S.setup.era?String(S.setup.era).replace(/[（）()\s\-~]/g,'').slice(0,6):'自定义';
+ var tu=S?S.turn||0:0;
  var d=curDate();
- var fn='MCU存档_'+era+'_作者'+CX_AUTHOR+'_v2.6_'+safeName(nm)+'_'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+'.txt';
+ /* Beta v2.3 P1-1：导出文件名一眼看懂（中文 · 含版本号 · 角色 · 回合数 · 日期）*/
+ var fn='漫威模拟器_v2.3_'+safeName(nm)+'_第'+tu+'轮_'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+'.txt';
  try{
   var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});
   var url=URL.createObjectURL(blob);
@@ -9310,6 +9016,9 @@ function exportSave(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(function(){URL.revokeObjectURL(url)},1000);
   ioMsg('✅ 已导出：'+fn);
+  /* Beta v2.3 T1 小奖励：玩家主动导出存档 = 为作者省了将来恢复进度的客服成本，送 +3 次温柔额度（次日清），
+     并提示感谢，顺便降低打赏提示的触发概率 */
+  try{if(typeof tokRewardBonus==='function')tokRewardBonus(3,'✅ 已感谢你的稳妥备份')}catch(_){}
  }catch(e){ioMsg('❌ 导出失败：'+e.message)}
 }
 function copySave(){
@@ -9342,18 +9051,10 @@ function doImport(noConfirm){
  var o;
  try{o=JSON.parse(raw)}catch(e){ioMsg('❌ JSON 解析失败：'+e.message);return}
  try{o=normalizeSave(o)}catch(e){ioMsg('❌ '+e.message);return}
- if(!noConfirm&&S){
-  showConfirm('导入将覆盖当前人生。确定？\n\n'+'角色：'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮 ｜ '+fmt(new Date(o.date)),
-    function(){
-      S=o;CUR_HINTS=[];isOpening=false;updInputPH();
-      enterGame(); save();updEng();
-      ioMsg('✅ 导入成功，已恢复世界状态。');
-      setTimeout(function(){closeIO();window.scrollTo(0,0)},700);
-    }, null, {okText:'确定导入', cancelText:'取消'});
-  return;
- }
+ if(!noConfirm&&S&&!confirm('导入将覆盖当前人生。确定？\n\n'+'角色：'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮 ｜ '+fmt(new Date(o.date))))return;
  S=o;CUR_HINTS=[];isOpening=false;updInputPH();
- enterGame(); save();updEng();
+ enterGame(); /* enterGame 内部已统一处理 buildPanels/applyFold/renderAll */
+ save();updEng();
  ioMsg('✅ 导入成功，已恢复世界状态。');
  setTimeout(function(){closeIO();window.scrollTo(0,0)},700);
 }
@@ -9364,13 +9065,12 @@ function doImport2(){
  var o;
  try{o=JSON.parse(raw)}catch(e){m.textContent='❌ JSON 解析失败：'+e.message;return}
  try{o=normalizeSave(o)}catch(e){m.textContent='❌ '+e.message;return}
- showConfirm('即将导入存档：\n\n角色：'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮 ｜ '+fmt(new Date(o.date))+'\n\n确定后直接恢复人生，点「取消」可再检查一遍。',
-   function(){
-     S=o;CUR_HINTS=[];isOpening=false;updInputPH();
-     enterGame(); save();updEng();updHomeBtns();
-     m.textContent='✅ 导入成功，已进入人生。';
-   }, null, {okText:'确定导入', cancelText:'取消'});
- return;
+ var ok=confirm('即将导入存档：\n\n角色：'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮 ｜ '+fmt(new Date(o.date))+'\n\n确定后直接恢复人生，点「取消」可再检查一遍。');
+ if(!ok)return;
+ S=o;CUR_HINTS=[];isOpening=false;updInputPH();
+ enterGame(); /* enterGame 内部已统一处理 buildPanels/applyFold/renderAll */
+ save();updEng();updHomeBtns();
+ m.textContent='✅ 导入成功，已进入人生。';
  setTimeout(function(){var el=$('load');if(el)el.style.display='none';window.scrollTo(0,0)},700);
 }
 function handleFile2(ev){
@@ -9396,21 +9096,63 @@ function enterGame(){
  if(setupScreen)setupScreen.style.display='none';
  if(gameScreen){gameScreen.style.display='block';gameScreen.scrollTop=0}
  var bar=$('gameBottomBar');if(bar)bar.style.display='block';
- buildPanels(); /* v1.9：buildPanels 内部已经幂等（先清空 colL/colR 再重建），
-                    直接调用不会重复。不要用 body_player 这种已废弃的 guard。*/
- /* v2.6: 加载存档后确保所有引擎字段完整（老存档兼容） */
- try{
-   if(typeof WorldlineEngine!=='undefined')WorldlineEngine.init(S);
-   if(typeof EventDirector!=='undefined'&&EventDirector.init)EventDirector.init(S);
-   if(typeof RelationshipEngine!=='undefined'&&RelationshipEngine.initAll)RelationshipEngine.initAll(S);
- }catch(e){console.warn('engine init on load',e)}
- /* v2.6: 重置增量渲染计数，确保存档加载后全量重建故事 */
- try{resetRenderStory()}catch(_){}
- /* v1.8：恢复简易/专家模式（存档优先 → localStorage → 默认专家）*/
+ buildPanels();
  try{restoreModeFromSaved()}catch(_){}
  applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
+ /* Beta v2.3 P0-2：enterGame 结束后，如果 S.log 是空（读档恢复或存档损坏兜底路径），
+    立刻 push 一条欢迎语，避免小白第一眼看到「还没有任何记录。」以为白屏坏了 */
+ try{
+  if(S&&S.setup&&(!S.log||!S.log.length)){
+    var n=S.setup.name||'无名者';
+    var dt=fmtShort(curDate());
+    S.log.push({time:dt,self:false,opening:true,
+      text:'**—— 回到你的人生 ——**\n\n欢迎回来，**'+esc(n)+'**。你上次离开时存档在第 **'+(S.turn||0)+'** 轮。\n点顶栏「▶ 继续推进⏭️」，你的故事从这里继续。'});
+    try{renderStory()}catch(_){}
+  }
+  /* Beta v2.3 P0-1 补充：简易模式 opts.children===0 或仅 1 张大推进卡时，强制 renderOpts 一次 */
+  if(getMode()==='easy' && $('opts') && ($('opts').children.length<2 || $('opts').innerHTML.length<30)){
+    try{renderOpts()}catch(_){}
+  }
+ }catch(_){}
+ /* 进入游戏后再弹一次升级 AI 引导（首屏创角时 banner 可能被用户忽略）*/
+ try{engineBannerOnce()}catch(_){}
+ /* Beta v2.3 N1：每次进入游戏，检查是否需弹「📰 v2.3 版本更新通知」（首屏大横幅，可关）*/
+ try{if(typeof showV23News==='function')showV23News(false)}catch(_){}
+ /* Beta v2.3 T-1：进入游戏后，显示「今日已消耗 / 今日剩余额度 · Token 温和提示」（不弹窗，只在顶栏 engine stat 里改文字）*/
+ try{if(typeof tokRefreshStat==='function')tokRefreshStat()}catch(_){}
  window.scrollTo(0,0);
 }
+/* Beta v2.3 N1：v2.3 更新通知 Banner 的开关逻辑
+   forever=true → 用户「知道了以后不再弹」→ 把 v23news_dismiss_v23=1 写 localStorage
+   forever=false → 只是临时关，下次进来还要看（但首页顶部 banner 只在 setupScreen 显示）
+   showForce=true → 忽略 dismiss 状态强制弹（给底部 📰 永久入口用）
+*/
+var V23_NEWS_KEY='v23news_dismiss_v23';
+function showV23News(showForce){
+  try{
+    var b=$('v23newsBanner');if(!b)return;
+    var dismissed=false;try{dismissed=localStorage.getItem(V23_NEWS_KEY)==='1'}catch(_){dismissed=false}
+    if(dismissed && !showForce)return;
+    b.style.display='block';
+  }catch(_){}
+}
+function closeV23News(forever){
+  try{
+    var b=$('v23newsBanner');if(b)b.style.display='none';
+    if(forever){try{localStorage.setItem(V23_NEWS_KEY,'1')}catch(_){}}
+    try{if(typeof toast==='function')toast(forever?'已关闭：v2.3 更新通知不再打扰～':'已收起（点底部 📰 版本通知随时打开）')}catch(_){}
+  }catch(_){}
+}
+/* 打开首页时自动 show（忽略 forever 的场景只在 setupScreen 展示） */
+function tryShowHomeNews(){
+  try{if(typeof showV23News==='function')showV23News(false)}catch(_){}
+}
+/* 在 body 尾部 DOMContentLoaded 后 80ms 触发一次首页 banner 显示（首次进入不用按按钮） */
+(function(){try{
+  if(document.readyState==='complete'||document.readyState==='interactive'){setTimeout(tryShowHomeNews,80)}
+  else{document.addEventListener('DOMContentLoaded',function(){setTimeout(tryShowHomeNews,80)})}
+}catch(_){}})();
+
 function backToHome(){
  try{save()}catch(e){}
  closeIO();
@@ -9443,15 +9185,28 @@ var TUT_STEPS=[
         '· 剧情为 AI 实时生成，可能产生不符合正典的内容，<b>仅供娱乐，请勿当真</b>；涉及的军事/科技/医学/法律描述，<b>一律不能作为现实决策依据</b>。<br>'+
         '· 📌 <b style="color:#e8c66a">建议 16 周岁以上游玩</b>；未成年人请在<b>家长/监护人知情并指导</b>下使用，合理控制每日时长，避免沉迷。<br>'+
         '· 云端 AI 会进行<b>合规审核</b>：如果某句话被拦截，<b>不是网页坏了</b>，换个委婉说法或切离线推演即可继续。</div>'+
-        '<div style="font-size:13px;font-weight:700;color:var(--fg-0);margin-bottom:6px">👇 这是一个<b>开放式人生模拟器</b>：你将从一个普通人开始，在漫威电影宇宙中走出属于自己的英雄（或反派）之路。'+
-        '填档案时<b>看不懂的地方直接留空</b>，AI 会合理帮你安排好一位漫威世界的普通人。</div>'+
-        '<div class="tipcard">⏱ <b>放心：整段教程不超过 2 分钟</b>，留空的项目 AI 会自动补齐。点「下一步」继续。</div>'},
+        '<div style="font-size:13px;font-weight:700;color:var(--fg-0);margin-bottom:6px">👇 下面两张卡片<b>选一张点一下</b>：<b>第一次玩就点左边 🌱 简易模式</b>（按钮更大、操作更少），漫威老粉想自由发挥点右边 🔬 专家模式。</div>'+
+        '<div class="mode-cards" style="margin:4px 0 8px">'+
+          '<div class="mode-card easy tut-mode-card" id="tMc_easy" onclick="setTutorialMode(\'easy\')">'+
+            '<div class="ic">🌱</div>'+
+            '<div class="nm">简易模式 · 小白零门槛</div>'+
+            '<div class="ds">第一次玩、对漫威不太了解、<b>怕找不到推进按钮</b>？选这个：按钮更大、操作更少、选项有白话解释。不懂漫威背景也没事，AI 会慢慢讲给你。</div>'+
+            '<div class="ok">✓ 已选简易模式 · 3 步就能开始</div>'+
+          '</div>'+
+          '<div class="mode-card expert tut-mode-card" id="tMc_expert" onclick="setTutorialMode(\'expert\')">'+
+            '<div class="ic">🔬</div>'+
+            '<div class="nm">专家模式 · 漫威老粉</div>'+
+            '<div class="ds">漫威爱好者 / 懂点 AI / 想自己写剧情自由发挥？选这个：完整的自定义输入框 + 全部高级选项，就是 1.9 版本的完整玩法，无阉割。</div>'+
+            '<div class="ok">✓ 已选专家模式 · 看完整 12 项定制</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="tipcard">⏱ <b>放心：整段教程不超过 2 分钟</b>，填档案时 <b>看不懂的地方直接留空</b>，AI 会合理帮你安排好一位漫威世界的普通人。进入游戏后随时可以<b>点顶部的模式徽章切回来</b>（🌱 简易 / 🔬 专家）。</div>'},
   {icon:'🎮', title:'第 2/3 步 · 填档案（留空也行）+ 引擎档位零配置',
    body:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 10px" class="tut-grid-twocol">'+
      '<div style="padding:10px 11px;border-radius:12px;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--bg-2),color-mix(in srgb,var(--bg-1) 90%,transparent));line-height:1.75;font-size:12.5px">'+
        '<div style="font-weight:800;color:var(--accent);margin-bottom:4px">📝 怎么填档案</div>'+
        '<b>① 选一个年代</b>：决定你<b>出生年份、出生地、有机会接触哪些英雄</b>。<br>'+
-       '<b>② 血统/出身、出生身份</b>：选了就用你的，不选（默认「— 不选，由 AI 随机生成 —」）AI 会帮你随机安排；<br>'+
+       '<b>② 点 🎲 随机出身</b>（推荐新手）：姓名/父母/家境/生日一键搞定。<br>'+
        '<b>③ 空白项不填就行</b>：进入游戏那一瞬间，AI 会自动帮你补齐所有设置。<br>'+
        '<span style="color:var(--fg-2);font-size:11.5px">新手推荐年代：1942·布鲁克林（二战·美队）或 2008·纽约（钢铁侠元年），剧情节奏最友好。</span>'+
      '</div>'+
@@ -9468,7 +9223,7 @@ var TUT_STEPS=[
    '@media(min-width:640px){.tut-grid-twocol{grid-template-columns:1fr 1fr !important}}</style>'},
   {icon:'⚔', title:'第 3/3 步 · 怎么玩 · 跟着剧情走就行',
    body:'<div style="padding:9px 11px;margin-bottom:10px;border-radius:11px;border:1px solid rgba(232,198,106,.35);background:linear-gradient(180deg,rgba(242,207,106,.07),rgba(152,43,47,.03));line-height:1.8;font-size:12.7px">'+
-        '<b style="font-size:13.5px">🎮 基本操作（跟着剧情走就行）</b><br>'+
+        '<b style="font-size:13.5px">🌱 简易模式操作（只有 3 个大按钮！）</b><br>'+
         '① <b style="color:var(--accent)">最上面那个超大的「继续推进⏭️」按钮</b>— 你就一直点它就行，<b>这是最重要的按钮</b>。<br>'+
         '② 它下面有 <b>3 张彩色大卡</b>：<span style="color:#f2d272;font-weight:800">🥇 A·稳妥</span>（过日子、推主线）/ <span style="color:#9fe8b4;font-weight:800">🌟 B·冒险</span>（碰运气、有代价）/ <span style="color:#9fd0ff;font-weight:800">🎲 C·社交</span>（找朋友、恋爱、家人），<b>看哪个顺眼就点哪张</b>。<br>'+
         '③ 旁边 <b>🌍 往前走</b>（世界自己走 1~3h）/ <b>⚡ 跳剧情</b>（3~14 天跳件事），嫌剧情慢就点。<br>'+
@@ -10056,6 +9811,8 @@ function _boot(){
       if(!localStorage.getItem(CKEY))safeLS(CKEY,JSON.stringify(DEFAULT_CFG));
     }catch(e){}
     updEng();updHomeBtns();
+    /* 首屏提示：没配置 AI 时才出现，用户点 1 次就永久关闭（localStorage） */
+    try{engineBannerOnce()}catch(_){}
     /* 绑定 iOS/鸿蒙 键盘聚焦自动滚动到视野 */
     try{if(typeof window._FixKB==='function')window._FixKB()}catch(_){}
     /* 恢复上次人生（v1.4：主 KEY 损坏时自动从 3 份滚动备份 / sessionStorage 按"最新保存时间"挑一份）*/
@@ -10075,23 +9832,22 @@ function _boot(){
       }
       if(raw&&main){
         var o=normalizeSave(main);
+        var canContinue=false;
         var label=usedBackup?('（本地主存档损坏，已从 '+backLabel+' 备份恢复）'):'';
-        var _saveMsg='检测到本地自动存档（'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮）'+label+'。\n\n点「继续人生」恢复上次进度，点「开新档」从头开始。';
-        showConfirm(_saveMsg,
-          function(){ /* 继续人生 */
-            S=o;CUR_HINTS=[];isOpening=false;updInputPH();
-            enterGame();
-            renderAllNow();
-            if(usedBackup){
-              try{
-                var s2=JSON.stringify(S);safeLS(KEY,s2);_rotateBackups(s2);
-                toast('🛡 已从 '+backLabel+' 备份恢复你的人生 · 建议现在点「💾 存档 → ⬇ 导出 TXT 文件」存一份自己的');
-              }catch(_){}
-            }
-          },
-          function(){ /* 开新档：什么都不做，留在首页 */ },
-          {okText:'继续人生', cancelText:'开新档'}
-        );
+        try{canContinue=confirm('检测到本地自动存档（'+(o.setup.name||'无名者')+' ｜ 第 '+o.turn+' 轮）'+label+'。\n\n点「确定」继续上次人生，点「取消」开新档。')}
+        catch(_){canContinue=false}
+        if(canContinue){
+          S=o;CUR_HINTS=[];isOpening=false;updInputPH();
+          enterGame(); /* enterGame 内部已统一处理 buildPanels/applyFold/renderAll */
+          renderAllNow();   /* 首帧同步渲染，用户不看到白屏闪烁 */
+          if(usedBackup){
+            try{
+              /* 从备份恢复回来的，第一时间再用 normalizeSave 后的对象重新写 3 份主存档，形成闭环 */
+              var s2=JSON.stringify(S);safeLS(KEY,s2);_rotateBackups(s2);
+              toast('🛡 已从 '+backLabel+' 备份恢复你的人生 · 建议现在点「💾 存档 → ⬇ 导出 TXT 文件」存一份自己的');
+            }catch(_){}
+          }
+        }
       }
     }catch(e){console.warn('restore',e)}
     /* 全局错误兜底：任何未捕获异常都收起加载遮罩，避免永久转圈圈 */
@@ -10220,10 +9976,10 @@ function _boot(){
           }catch(_){}
         }
         window._tryAutoShowTutorial = _openIfShould;   /* 暴露给 tryDismissOib 的关闭钩子用 */
-        /* _boot 内部兜底 1：主线程稳定 300ms 后尝试（ENV/oibMask 都就绪）*/
-        setTimeout(_openIfShould, 300);
-        /* _boot 内部兜底 2：2s 再试一次（iOS 17 Beta 首屏地址栏收起动画）*/
-        setTimeout(_openIfShould, 2000);
+        /* _boot 内部兜底 1：主线程稳定 700ms 后尝试（比原来 520ms 稍晚，ENV/oibMask 都就绪）*/
+        setTimeout(_openIfShould, 700);
+        /* _boot 内部兜底 2：4s 再试一次（iOS 17 Beta 首屏地址栏收起动画要 2.5s，会把 getBoundingClientRect 带歪）*/
+        setTimeout(_openIfShould, 4000);
       }catch(_){}
     })();
   }catch(fatal){

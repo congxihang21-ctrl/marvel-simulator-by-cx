@@ -1,0 +1,165 @@
+/* ============================================================
+   MCU v2.4 · Design Tokens
+   所有颜色/圆角/模糊/阴影均通过 Token 控制
+   Dark = MCU Cinematic  ·  Light = visionOS Premium
+   ============================================================ */
+
+:root {
+  /* ===== 圆角 ===== */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --radius-pill: 999px;
+
+  /* ===== 模糊 ===== */
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 28px;
+  --blur-xl: 48px;
+
+  /* ===== 阴影 ===== */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.08);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.12);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.18);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.28);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,.4);
+  --shadow-glow: 0 0 24px var(--accent-glow);
+
+  /* ===== 过渡 ===== */
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --dur-fast: .18s;
+  --dur-base: .32s;
+  --dur-slow: .6s;
+
+  /* ===== 间距 (4px grid) ===== */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px;  --sp-10: 40px;
+  --sp-12: 48px;--sp-16: 64px;--sp-20: 80px;
+
+  /* ===== 字体 ===== */
+  --font-display: "SF Pro Display","PingFang SC","Helvetica Neue",system-ui,sans-serif;
+  --font-body: "SF Pro Text","PingFang SC","Helvetica Neue",system-ui,sans-serif;
+  --font-mono: "SF Mono","JetBrains Mono",ui-monospace,monospace;
+}
+
+/* ============ DARK THEME (MCU Cinematic) ============ */
+[data-theme="dark"] {
+  /* 背景层 */
+  --bg-0: #04060a;            /* 宇宙深空 */
+  --bg-1: #080c14;            /* 页面环境 */
+  --bg-2: #0e131c;            /* 次级背景 */
+  --bg-3: #151b27;            /* 卡片底色 */
+
+  /* 玻璃层 - 6 层 */
+  --glass-1: rgba(20,26,38,.38);   /* 大型容器 */
+  --glass-2: rgba(28,36,52,.52);   /* 功能模块 */
+  --glass-3: rgba(38,48,68,.64);   /* 交互控件 */
+  --glass-4: rgba(52,64,88,.72);   /* 状态徽章 */
+  --glass-5: rgba(70,86,116,.82);  /* 高亮/激活 */
+  --glass-special: rgba(212,175,55,.10); /* 重大事件 */
+
+  /* 边框 */
+  --border-1: rgba(255,255,255,.06);
+  --border-2: rgba(255,255,255,.10);
+  --border-3: rgba(255,255,255,.16);
+  --border-active: rgba(212,175,55,.55);
+
+  /* 文字 */
+  --text-1: rgba(248,250,252,.96);
+  --text-2: rgba(226,232,240,.78);
+  --text-3: rgba(148,163,184,.62);
+  --text-4: rgba(100,116,139,.45);
+
+  /* 强调色 - MCU 金 */
+  --accent: #d4af37;
+  --accent-2: #f0d98c;
+  --accent-soft: rgba(212,175,55,.14);
+  --accent-glow: rgba(212,175,55,.35);
+
+  /* 状态色 */
+  --success: #10b981;
+  --success-soft: rgba(16,185,129,.14);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245,158,11,.14);
+  --danger: #ef4444;
+  --danger-soft: rgba(239,68,68,.14);
+  --info: #3b82f6;
+  --info-soft: rgba(59,130,246,.14);
+
+  /* 高光 */
+  --highlight: rgba(255,255,255,.08);
+  --shine: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,0) 60%);
+
+  /* === 旧变量别名（兼容 JS 内联样式） === */
+  --fg-0: var(--text-1);
+  --fg-1: var(--text-1);
+  --fg-2: var(--text-2);
+  --fg-3: var(--text-3);
+  --bg-0: var(--bg-0);
+  --bg-1: var(--bg-1);
+  --bg-2: var(--bg-2);
+  --bg-3: var(--bg-3);
+  --stroke-1: var(--border-2);
+  --magic: #a855f7;
+  --primary: var(--accent);
+}
+
+/* ============ LIGHT THEME (visionOS Premium) ============ */
+[data-theme="light"] {
+  --bg-0: #eef1f6;
+  --bg-1: #f4f6fa;
+  --bg-2: #f8fafc;
+  --bg-3: #ffffff;
+
+  --glass-1: rgba(255,255,255,.55);
+  --glass-2: rgba(255,255,255,.68);
+  --glass-3: rgba(255,255,255,.78);
+  --glass-4: rgba(255,255,255,.86);
+  --glass-5: rgba(255,255,255,.94);
+  --glass-special: rgba(212,175,55,.08);
+
+  --border-1: rgba(15,23,42,.06);
+  --border-2: rgba(15,23,42,.10);
+  --border-3: rgba(15,23,42,.16);
+  --border-active: rgba(212,175,55,.6);
+
+  --text-1: rgba(15,23,42,.92);
+  --text-2: rgba(30,41,59,.74);
+  --text-3: rgba(71,85,105,.58);
+  --text-4: rgba(100,116,139,.42);
+
+  --accent: #b8860b;
+  --accent-2: #d4af37;
+  --accent-soft: rgba(184,134,11,.10);
+  --accent-glow: rgba(184,134,11,.25);
+
+  --success: #059669;
+  --success-soft: rgba(5,150,105,.12);
+  --warning: #d97706;
+  --warning-soft: rgba(217,119,6,.12);
+  --danger: #dc2626;
+  --danger-soft: rgba(220,38,38,.12);
+  --info: #2563eb;
+  --info-soft: rgba(37,99,235,.12);
+
+  --highlight: rgba(255,255,255,.6);
+  --shine: linear-gradient(135deg, rgba(255,255,255,.8), rgba(255,255,255,0) 60%);
+
+  /* === 旧变量别名 === */
+  --fg-0: var(--text-1);
+  --fg-1: var(--text-1);
+  --fg-2: var(--text-2);
+  --fg-3: var(--text-3);
+  --bg-0: var(--bg-0);
+  --bg-1: var(--bg-1);
+  --bg-2: var(--bg-2);
+  --bg-3: var(--bg-3);
+  --stroke-1: var(--border-2);
+  --magic: #7c3aed;
+  --primary: var(--accent);
+}
