@@ -642,6 +642,11 @@ li{margin:3px 0;font-size:13px;line-height:1.7}
 .entry code{background:color-mix(in srgb,var(--bg-2) 85%,transparent);padding:1px 6px;border-radius:5px;color:var(--accent);word-break:break-all;font-size:12.5px}
 .entry hr{border:none;border-top:1px solid var(--line-2);margin:11px 0}
 .hints{margin-top:9px;padding:8px 11px;border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--line-2));border-radius:8px;background:color-mix(in srgb,var(--accent) 6%,transparent);font-size:12px;color:var(--fg-1);line-height:1.7}
+/* v2.6：AI 流式撰写中的条目 —— 带闪烁光标 */
+.stream-entry{border-left-color:var(--accent)!important;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 6%,transparent),transparent 80%)!important}
+.stream-entry .t{color:var(--accent)!important;font-weight:700}
+.stream-b::after{content:'▋';display:inline-block;margin-left:2px;color:var(--accent);animation:streamCursor 1s step-end infinite;vertical-align:baseline}
+@keyframes streamCursor{0%,100%{opacity:1}50%{opacity:0}}
 .foot{text-align:center;color:#55636f;font-size:11.5px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
 /* ===================== 选项卡 opt · 玻璃卡片式（选中金色描边+脉动发光）===================== */
@@ -836,53 +841,26 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 
 /* ===================== 加载遮罩（v1.4：双环旋转 + 进度条 + 双语金句慢切换）===================== */
 #busy{
-  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(4,7,11,.88);
-  background-image:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, rgba(4,7,11,.94) 60%),
-                  linear-gradient(180deg,rgba(4,7,11,.94),rgba(4,7,11,.9));
-  z-index:120;
-  align-items:center;justify-content:center;flex-direction:column;color:var(--accent);font-size:16px;text-align:center;
-  padding:20px;
-  padding-left:calc(20px + env(safe-area-inset-left,0px));
-  padding-right:calc(20px + env(safe-area-inset-right,0px));
-  padding-top:calc(20px + env(safe-area-inset-top,0px));
-  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
-  -webkit-transform:translateZ(0);transform:translateZ(0);
-  backdrop-filter: blur(8px) saturate(1.4);
-  -webkit-backdrop-filter: blur(8px) saturate(1.4);
-  touch-action:none
+  display:none;position:fixed;top:0;left:0;right:0;
+  height:3px;background:transparent;z-index:9999;
+  pointer-events:none;
 }
-#busyTxt{max-width:620px;color:var(--fg-1);font-weight:500;margin-bottom:18px;line-height:1.65;font-size:15px}
-/* v1.4：双环旋转（外金内紫）+ 额外"粒子轨道"让转圈更有"电影片头"感
-   兼容写法：用 border-top/border-right 的经典 spinner，X5/抖音 WebView 全都稳跑 */
-.spin-wrap{position:relative;width:96px;height:96px;margin-bottom:18px;flex:0 0 auto;will-change:transform}
-.spin{position:absolute;inset:0;width:96px;height:96px;border-radius:50%;
-  box-sizing:border-box;border:3px solid var(--line-2);
-  border-top:3px solid var(--accent);
-  border-right:3px solid color-mix(in srgb, var(--accent) 65%, var(--line-2));
-  border-bottom:3px solid color-mix(in srgb, var(--accent) 20%, var(--line-2));
-  animation:sp3d .9s cubic-bezier(.55,.1,.45,.9) infinite;
-  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0);
-  box-shadow:0 0 18px color-mix(in srgb, var(--accent) 28%, transparent) inset}
-.spin2{position:absolute;left:12px;top:12px;width:72px;height:72px;border-radius:50%;box-sizing:border-box;
-  border:3px solid color-mix(in srgb, var(--magic) 28%, transparent);
-  border-top:3px solid var(--magic);
-  border-left:3px solid color-mix(in srgb, var(--magic) 55%, transparent);
-  animation:sp3d 1.6s linear infinite reverse;
-  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0)}
-.spin3{position:absolute;left:26px;top:26px;width:44px;height:44px;border-radius:50%;box-sizing:border-box;
-  border:2px dashed color-mix(in srgb, var(--hero) 55%, transparent);
-  animation:sp3d 2.2s linear infinite;
-  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0)}
-/* 进度条：10s 走到 92%，收到响应补到 100% */
-.busy-prog{width:260px;max-width:78vw;height:6px;margin:4px 0 16px;border-radius:999px;
-  background:color-mix(in srgb, var(--fg-0) 10%, transparent);
-  box-shadow:0 0 0 1px color-mix(in srgb, var(--fg-0) 8%, transparent) inset;
-  overflow:hidden;position:relative}
+#busy .spin-wrap, #busy #busyQuote{display:none}
+#busyTxt{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  padding:7px 16px;border-radius:999px;
+  background:color-mix(in srgb,var(--bg-2) 92%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line-2));
+  color:var(--fg-1);font-size:12.5px;font-weight:600;
+  box-shadow:0 4px 18px rgba(0,0,0,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  max-width:88vw;text-align:center;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.busy-prog{height:3px;width:100%;background:transparent;overflow:hidden;position:absolute;top:0;left:0}
 .busy-prog i{display:block;height:100%;width:0%;
-  background:linear-gradient(90deg,color-mix(in srgb, var(--accent) 92%, transparent),var(--accent),color-mix(in srgb, var(--magic) 70%, var(--accent)));
-  box-shadow:0 0 12px color-mix(in srgb, var(--accent) 50%, transparent);
-  transition:width .35s ease;will-change:width}
+  background:linear-gradient(90deg,var(--accent),var(--magic),var(--accent));
+  box-shadow:0 0 10px color-mix(in srgb,var(--accent) 60%,transparent);
+  animation:busyPulse 1.2s ease-in-out infinite;
+  transition:width .3s ease}
+@keyframes busyPulse{0%,100%{opacity:.7}50%{opacity:1}}
 /* 双语标语条：英文原句 + 中文翻译 + 作者英文原名·中文译名，一整次加载最多换 2~3 条 */
 #busyQuote{
   max-width:720px;margin-top:6px;padding:18px 24px 16px;border-radius:14px;
@@ -1135,9 +1113,8 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] .modal .noteline code{
   background:var(--bg-1);color:var(--hero)}
 :root[data-theme='light'] #busy{
-  background:rgba(239,231,214,.92);
-  background-image:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--accent) 10%,transparent) 0%, rgba(239,231,214,.95) 60%),
-                  linear-gradient(180deg,rgba(239,231,214,.95),rgba(228,217,191,.95))}
+  background:transparent}
+:root[data-theme='light'] #busyTxt{background:color-mix(in srgb,var(--bg-2) 96%,transparent);color:var(--fg-1)}
 :root[data-theme='light'] #ioBox{background:var(--bg-1);border-color:var(--line-2)}
 :root[data-theme='light'] .reg-card{
   background:var(--bg-2);border-color:var(--line-2)}
@@ -1232,6 +1209,32 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 :root[data-theme='light'] [style*='#ffb3ba']:not([data-keep-color]),
 :root[data-theme='light'] [style*='#e2cf95']:not([data-keep-color]){
   color: var(--fg-0) !important;
+}
+/* 🔧 浅色主题关键修复：内联白色/浅灰文字 → 强制深色，避免白底白字看不见 */
+:root[data-theme='light'] [style*='color:#fff']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#ffffff']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#ddd']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#dddddd']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#e8eaf0']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#f4efe5']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#cfe0f2']:not([data-keep-color]){
+  color: var(--fg-0) !important;
+}
+:root[data-theme='light'] [style*='color:#aaa']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#999']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#888']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#ccc']:not([data-keep-color]){
+  color: var(--fg-2) !important;
+}
+/* 强调金/紫色在浅色下加深确保可读 */
+:root[data-theme='light'] [style*='color:#9d7cff']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#8fe0a0']:not([data-keep-color]){
+  color: #6a4db5 !important;
+}
+:root[data-theme='light'] [style*='color:#f2c54d']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#e8c66a']:not([data-keep-color]),
+:root[data-theme='light'] [style*='color:#ffe7a0']:not([data-keep-color]){
+  color: var(--accent) !important;
 }
 /* 4) 强调色：在浅色下稍微加深，确保对比度 */
 :root[data-theme='light'] [style*='#e2cf95']:not([data-keep-color]){
@@ -5056,7 +5059,7 @@ function busy(on,txt){var b=$('busy');if(!b)return;
       }
     }catch(_){}
   }else{
-    b.style.display='flex';
+    b.style.display='block';
     if(txt)$('busyTxt').textContent=txt;
     /* Beta v2.2 · S6：请求开始 → 选项卡灰态禁点，防小白重复点击导致剧情错位/重复请求扣额度 */
     try{
@@ -5951,7 +5954,7 @@ async function callApi(messages,maxTok){
       if(r.status>=500)throw new Error('HTTP '+r.status+' · 服务端错误，稍后再试（离线模式不影响游玩）。');
       throw new Error('HTTP '+r.status+' · '+t.slice(0,300));
     }
-    /* SSE 流式：边读边把文字写到 #busyTxt 上（用户看到文字在冒出来就不焦虑） */
+    /* SSE 流式：边读边把文字写到世界日志里（玩家边读边等，不再看枯燥加载界面） */
     if(USE_SSE && r.body && typeof r.body.getReader === 'function' && typeof TextDecoder === 'function'){
       try{
         var reader = r.body.getReader();
@@ -5961,6 +5964,16 @@ async function callApi(messages,maxTok){
         var finReason = '';   /* 兼容 finish_reason，但大多数兼容接口不需要 */
         var bt = $('busyTxt');
         var firstByte = true;
+        /* v2.6：流式剧情直接写入世界日志 */
+        var streamDiv = null;
+        var storyEl = $('story');
+        if(storyEl){
+          streamDiv = document.createElement('div');
+          streamDiv.className = 'entry self stream-entry';
+          streamDiv.innerHTML = '<div class="t">AI 撰写中…</div><div class="b stream-b"></div>';
+          storyEl.appendChild(streamDiv);
+          try{ var bs=$('body_story'); if(bs) bs.scrollTop = bs.scrollHeight; }catch(_){}
+        }
         while(true){
           var chunk = await reader.read();
           if(chunk.done)break;
@@ -5994,10 +6007,15 @@ async function callApi(messages,maxTok){
                 if(delta){
                   fullText += delta;
                   if(firstByte){firstByte=false;try{_bumpBusySSE(0)}catch(_){}}
+                  /* v2.6：流式文字实时写入世界日志 */
+                  if(streamDiv){
+                    var sb = streamDiv.querySelector('.stream-b');
+                    if(sb){ sb.textContent = fullText; }
+                    try{ var bs2=$('body_story'); if(bs2) bs2.scrollTop = bs2.scrollHeight; }catch(_){}
+                  }
                   if(bt){
                     var len=fullText.length;
-                    var cap='已撰写 '+(len>1200?Math.round(len/100)+' 百':len)+' 字…';
-                    bt.textContent='引擎推演中… '+cap;
+                    bt.textContent = len>0 ? '✍ 已撰写 '+len+' 字…' : '引擎推演中…';
                     /* v1.8：SSE 每收到一批数据，进度条微推进，让用户感觉"在动" */
                     if(_B_PROG_V<98){_B_PROG_V=Math.min(98,_B_PROG_V+0.2);var pe=$('busyProg');if(pe)pe.style.width=_B_PROG_V+'%'}
                   }
@@ -6006,6 +6024,8 @@ async function callApi(messages,maxTok){
             }
           }
         }
+        /* 流式结束：清理临时流式条目（最终 renderStory 会重建） */
+        if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
         /* 读完：返回与 r.json() 同结构，让 applyReply / parseReply 无改动兼容 */
         if(fullText){
           /* v1.5：SSE 最后一段 finish_reason=content_filter 但 delta 已经写完时 → 依然统一抛出（不吞错误）*/
@@ -6019,6 +6039,8 @@ async function callApi(messages,maxTok){
         }catch(_){}
       }catch(sseErr){
         console.warn('[callApi] SSE 解析失败，退化请求 JSON 模式：', sseErr);
+        /* v2.6：清理流式临时条目 */
+        if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
         /* SSE 解析失败 → 重发一次 stream:false（极少见，例如代理没返回 text/event-stream） */
         payload.stream = false; headers['Accept']='application/json';
         bodyStr = JSON.stringify(payload); fetchOpts.body = bodyStr;
