@@ -16,6 +16,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 input, select, textarea { font-family: inherit; }
 a { color: inherit; text-decoration: none; }
 
+/* ===== v2.6 通用工具类（从内联 style 提取，减少重复） ===== */
+.ic-svg { vertical-align: -2px; margin-right: 2px; }
+.banner-btn { font-size: 13px; padding: 7px 14px; min-height: 36px; }
+.txt-gold { color: #e8c66a; }
+.txt-purple { color: #9d7cff; }
+.txt-dim { color: var(--fg-2); font-size: 11.5px; }
+
 /* ===== 页面系统 ===== */
 .page { display: none; min-height: 100vh; padding: var(--sp-4); }
 .page.active { display: flex; flex-direction: column; animation: pageIn var(--dur-slow) var(--ease-out); }

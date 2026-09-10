@@ -2554,6 +2554,14 @@ html,body,div,span,p,button,input,textarea{
 </head>
 <body>
 
+<!-- ================= v2.6 首屏骨架屏（JS 加载前显示，减少白屏感） ================= -->
+<div id="bootSplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#1a1f2e 0%,#080b10 70%);color:#8fa3b8;font-family:system-ui,sans-serif;transition:opacity .4s">
+  <div style="font-size:42px;margin-bottom:16px;animation:pulse 1.6s ease-in-out infinite">🛡️</div>
+  <div style="font-size:15px;font-weight:600;color:#cfd9e3;letter-spacing:1px">漫威模拟器</div>
+  <div style="font-size:11.5px;color:#5a6b7d;margin-top:6px">正在加载世界线…</div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}</style>
+
 <!-- ================= 作者水印（CX）· 全屏可见层 ================= -->
 <div class="fullscreen-watermark" id="cxWatermark" aria-hidden="true"></div>
 <div class="cx-badge" id="cxBadge" aria-hidden="true">
@@ -2614,12 +2622,12 @@ html,body,div,span,p,button,input,textarea{
 
   <div class="topbar">
     <div class="topbtns">
-      <button onclick="openThemePanel()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>外观</button>
-      <button onclick="openSave()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>存档</button>
-      <button onclick="openLoad()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>读档</button>
-      <button onclick="openLifeReview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>人生回顾</button>
-      <button onclick="openAbout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>支持</button>
+      <button onclick="openThemePanel()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>外观</button>
+      <button onclick="openSave()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>存档</button>
+      <button onclick="openLoad()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>读档</button>
+      <button onclick="openLifeReview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>人生回顾</button>
+      <button onclick="openAbout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</button>
+      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>支持</button>
     </div>
   </div>
 
@@ -5801,16 +5809,8 @@ async function callApi(messages,maxTok){
   var USE_SSE = true;
   var headers={'Content-Type':'application/json','Accept':USE_SSE?'text/event-stream':'application/json'};
   if(key)headers['Authorization']='Bearer '+key;
-  /* v1.4 提速：GLM-4.7/5 系列模型参数
-     - enable_thinking:false → 关闭"行动前思考"（默认开启会额外生成大量思考 tokens，既慢又烧 Token，剧情模拟完全不需要）
-     - response_format = json_object → 让模型直接以 JSON 结构生成（少走弯路少写解释，更直接）
-     - top_p 0.85 让采样范围收缩一点点（配合 temp=0.7 又快又稳） */
-  var extra = {};
-  try{
-    var mlow = String(model||'').toLowerCase();
-    if(/glm-.*(4\.7|5\.)/.test(mlow)) extra.enable_thinking = false;  /* GLM 4.7 / 5.x 关思考 */
-  }catch(_){}
-  var payload = Object.assign(extra, {model:model,messages:messages,temperature:temp,top_p:0.85,max_tokens:maxTok||max,stream:USE_SSE,response_format:{type:"json_object"}});
+  /* v2.6：复用 AIService.buildPayload 统一构建（GLM 关思考链 + top_p 0.85 + json_object） */
+  var payload = AIService.buildPayload(model, messages, {temp:temp, max:maxTok||max, stream:USE_SSE, json:true});
   /* 防御：请求体量控制，避免 >6MB 的 POST 被服务端/运营商直接拦截 */
   var bodyStr;try{bodyStr=JSON.stringify(payload)}catch(e){throw new Error('请求序列化失败：'+e.message)}
   if(bodyStr.length>6*1024*1024){
@@ -5818,7 +5818,7 @@ async function callApi(messages,maxTok){
     try{
       if(messages.length>2){
         var m2=[messages[0]].concat(messages.slice(-1));
-        bodyStr=JSON.stringify(Object.assign(extra,{model:model,messages:m2,temperature:temp,top_p:0.85,max_tokens:maxTok||max,stream:USE_SSE,response_format:{type:"json_object"}}));
+        bodyStr=JSON.stringify(AIService.buildPayload(model, m2, {temp:temp, max:maxTok||max, stream:USE_SSE, json:true}));
         console.warn('[callApi] 超大请求裁剪：原 '+messages.length+' 条 → 保留 2 条');
       }
     }catch(_){}
@@ -6080,34 +6080,25 @@ var EXP_ACC_GROUPS=[
 
 function _accGroupField(key,g){return (g&&g.cols)?' cx-cols-'+g.cols:''}
 
-/* ------- v2.2 新 buildForm：简易 6 字段 3 组手风琴 / 专家 6 组 12 项手风琴 ------- */
+/* ------- v2.6 buildForm：统一 6 组 12 项手风琴（已取消简易/专家区别）------- */
 function buildForm(){
-  var easy=(typeof getMode==='function'&&getMode()==='easy');
-  var groups=easy?EASY_ACC_GROUPS:EXP_ACC_GROUPS;
+  var groups=EXP_ACC_GROUPS;
   var html='';
-  /* 简易模式：顶部提示条 */
-  if(easy){
-    html+='<div style="padding:11px 13px;margin:8px 0 4px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line-2));background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 12%,transparent),color-mix(in srgb,var(--magic) 7%,transparent));font-size:12.5px;line-height:1.8">'+
-      '🌱 <b>简易模式 · 小白零门槛：</b>下面只有 3 张卡片共 6 个必填位。<b>看不懂的直接不填</b>，AI 会合理帮你安排好一位漫威世界的普通人。填完直接点下面大按钮「⚔ 进入世界」就开玩～<br>'+
-      '<span style="color:var(--fg-2);font-size:11.5px">（想玩 12 项更细致定制？切到首页顶部「🔬 专家模式」再回来就行）</span></div>';
-  }else{
-    html+='<div style="padding:10px 12px;margin:6px 0;border-radius:10px;border:1px solid var(--line-2);font-size:12px;line-height:1.7;color:var(--fg-1)">'+
-      '🔬 专家模式 · 共 6 组 12 项，点击卡片展开子选项（chip 点击选择，不再需要打开原生下拉）。'+
-      '所有字段选了「自定义」后会弹出文本框让你手填。</div>';
-  }
+  html+='<div style="padding:10px 12px;margin:6px 0;border-radius:10px;border:1px solid var(--line-2);font-size:12px;line-height:1.7;color:var(--fg-1)">'+
+    '🔬 共 6 组 12 项，点击卡片展开子选项（chip 点击选择，不再需要打开原生下拉）。'+
+    '所有字段选了「自定义」后会弹出文本框让你手填，看不懂的留空让 AI 安排。</div>';
   html+='<div class="cx-acc" id="cxAccWrap">';
   groups.forEach(function(g,gi){
-    var gFields=FIELDS.filter(function(f){return f.group===g.id && (!easy || EASY_FIELDS_KEYS[f.k])});
+    var gFields=FIELDS.filter(function(f){return f.group===g.id});
     if(!gFields.length)return;
-    var isOpen=(gi===0||!!g.rec); /* 推荐或第一组默认展开 */
-    html+='<div class="cx-acc-item'+(isOpen?' is-open':'')+(easy&&g.rec?' easy-rec':'')+'" data-group="'+g.id+'">'+
+    var isOpen=(gi===0||!!g.rec);
+    html+='<div class="cx-acc-item'+(isOpen?' is-open':'')+'" data-group="'+g.id+'">'+
       (g.rec?'<div class="cx-rec-badge">✨ 小白推荐</div>':'')+
       '<div class="cx-acc-hd" onclick="_accToggle(this)">'+
         '<div class="cx-acc-ic">'+g.ic+'</div>'+
         '<div style="flex:1 1 auto;min-width:0">'+
           '<div class="cx-acc-title">'+esc(g.title)+'</div>'+
           '<div class="cx-acc-sub">'+esc(g.sub)+'</div>'+
-          (easy&&g.rec?'<span class="cx-acc-pill">留空也行 · 不坑你</span>':'')+
         '</div>'+
         '<div class="cx-acc-caret">▾</div>'+
       '</div>'+
@@ -6305,17 +6296,12 @@ function _doStartGame(){
  var errs=validateForm();
  if(errs.length){alert('以下栏目选择了「自定义」，请先填写内容：\n\n'+errs.join('、'));return}
  var setup={};
- var easyNow=(typeof getMode==='function'&&getMode()==='easy');
  FIELDS.forEach(function(f){
    var v=fieldValue(f);
-   /* 简易模式：留空即交给引擎（转为空字符串时，setup 写 null，引擎初始化时会合理生成）*/
-   if(easyNow && (!f.easy) && String(v||'').trim()===''){v=null}
    /* 对所有文本字段："留空/引擎安排/交给命运/随机/不选由AI随机生成" 字样都视作 null，让 AI 自由生成 */
    if(typeof v==='string' && /^\s*(留空|引擎安排|交给命运|随机|留空让引擎安排|留空由引擎随机|什么特别的都没有|走一步看一步|—\s*不选.*AI.*随机生成.*—)\s*$/.test(v)){v=null}
    setup[f.k]=v;
  });
- /* 简易模式下，专家模式专属字段默认引擎生成 */
- if(easyNow){['blood','birth','age','skills','gear','fac','traits','goal'].forEach(function(k){if(!setup[k])setup[k]=null})}
  /* v2.6: 起始日期从所选时代自动推导，不再让玩家选择 */
  var eraObj = ERA.find(function(e){return e.k === setup.era}) || ERA[0];
  setup.sdate = eraObj.d;
@@ -8463,8 +8449,8 @@ async function doTurn(mode){
               '<div style="font-weight:600;font-size:14.5px;color:'+accent+'">'+esc(info.icon+' '+info.title)+'</div>' +
               '<div style="margin-top:4px;font-size:12.5px;color:var(--fg-2)">'+info.html+'</div>' +
               '<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:7px">' +
-                '<button class="primary" style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{var c=getCfg();c.engine=\'offline\';setCfg(c);updEng();document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();toast(\'已切换：离线推演 ✓\')}catch(_){}">🟢 一键切离线推演</button>' +
-                '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="this.closest(\'#_apiErrTip\')&&this.closest(\'#_apiErrTip\').remove()">知道了 ×</button>' +
+                '<button class="primary banner-btn" onclick="try{var c=getCfg();c.engine=\'offline\';setCfg(c);updEng();document.getElementById(\'_apiErrTip\')&&document.getElementById(\'_apiErrTip\').remove();toast(\'已切换：离线推演 ✓\')}catch(_){}">🟢 一键切离线推演</button>' +
+                '<button class="banner-btn" onclick="this.closest(\'#_apiErrTip\')&&this.closest(\'#_apiErrTip\').remove()">知道了 ×</button>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -9829,6 +9815,10 @@ function tryDismissOib(){
    6. enterGame 后用 renderAllNow 同步渲染（首帧不 rAF，用户不看到白屏） */
 function _boot(){
   if(!document.body){setTimeout(_boot,30);return}
+  /* v2.6：移除首屏骨架屏 */
+  try{var sp=document.getElementById('bootSplash');if(sp){sp.style.opacity='0';setTimeout(function(){try{sp.remove()}catch(_){}},420)}}catch(_){}
+  /* v2.6：空闲时预加载收款码图片，点击"支持"时秒开 */
+  try{setTimeout(function(){try{var d=_loadDonate();if(d.wx){var i1=new Image();i1.src=d.wx}if(d.ali){var i2=new Image();i2.src=d.ali}}catch(_){}},3000)}catch(_){}
   try{
     /* ============ v1.5：滚动锁 3 次兜底 —— 防 F5 刷新 / 崩溃残留 / 微信 WebView 重启脏状态 ============
        只要用户 F5 的瞬间正好有 modal 开着，overflow:hidden 就会"粘"在 DOM 上，页面刷新也解不掉。
@@ -9869,8 +9859,8 @@ function _boot(){
                   '要给朋友玩或抖音投放：上传到 GitHub Pages / Vercel / 腾讯云静态托管，拿 <b>HTTPS 公网链接</b>分发。'+
                   '</span></div>'+
                 '<div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap">'+
-                  '<button class="primary" style="font-size:13px;padding:7px 14px;min-height:36px" onclick="try{var t=document.createElement(\'textarea\');t.value=\'cd /d C:\\\\Users\\\\Administrator\\\\Desktop\\\\漫威模拟器\\npython -m http.server 8080\';document.body.appendChild(t);t.select();document.execCommand(\'copy\');document.body.removeChild(t);toast(\'启动命令已复制到剪贴板 ✓ 粘贴到 cmd 回车即可\')}catch(_){toast(\'复制失败，手动选中上面两行\')}">📋 复制启动命令（2 行）</button>'+
-                  '<button style="font-size:13px;padding:7px 14px;min-height:36px" onclick="this.closest(\'#_fileProtoTip\')&&this.closest(\'#_fileProtoTip\').remove()">知道了 ✕</button>'+
+                  '<button class="primary banner-btn" onclick="try{var t=document.createElement(\'textarea\');t.value=\'cd /d C:\\\\Users\\\\Administrator\\\\Desktop\\\\漫威模拟器\\npython -m http.server 8080\';document.body.appendChild(t);t.select();document.execCommand(\'copy\');document.body.removeChild(t);toast(\'启动命令已复制到剪贴板 ✓ 粘贴到 cmd 回车即可\')}catch(_){toast(\'复制失败，手动选中上面两行\')}">📋 复制启动命令（2 行）</button>'+
+                  '<button class="banner-btn" onclick="this.closest(\'#_fileProtoTip\')&&this.closest(\'#_fileProtoTip\').remove()">知道了 ✕</button>'+
                 '</div>'+
               '</div>'+
             '</div>'+

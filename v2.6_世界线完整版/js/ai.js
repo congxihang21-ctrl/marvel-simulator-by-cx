@@ -5,8 +5,9 @@
    ============================================================ */
 
 var AIService = (function(){
-  // 智谱 AI 配置（作者共享 Key，硬编码，玩家无需配置）
-  var CX_KEY   = '0b6f2b0d20084e799a4f9de18fcdf879.8BeGq8ET70mwvVLB';
+  // 智谱 AI 配置（作者共享 Key，分段 base64 存储防直接复制，运行时还原）
+  var _k = ['OWE0ZjlkZTE4ZmNkZjg3OQ==','MGI2ZjJiMGQyMDA4NGU3OQ==','LjhCZUdxOEVUNzBtd3ZWTEI='];
+  var CX_KEY   = atob(_k[1]) + atob(_k[0]) + atob(_k[2]);
   var CX_BASE  = 'https://open.bigmodel.cn/api/paas/v4';
   var CX_MODEL = 'glm-4.7';
 
@@ -33,6 +34,24 @@ var AIService = (function(){
   function setEnabled(v){ enabled = !!v; }
   function hasKey(){ var c = getCfg(); return c.key && c.key.length>10; }
 
+  // 公共：构建 AI 请求 payload（GLM 关思考链 + top_p 0.85 + 可选 json_object）
+  function buildPayload(model, messages, opts){
+    opts = opts || {};
+    var p = {
+      model: model,
+      messages: messages,
+      temperature: opts.temp!=null ? opts.temp : 0.7,
+      top_p: 0.85,
+      max_tokens: opts.max||2048
+    };
+    if(/glm-.*(4\.7|5\.)/.test(String(model||'').toLowerCase())){
+      p.enable_thinking = false;
+    }
+    if(opts.json) p.response_format = {type:'json_object'};
+    if(opts.stream!=null) p.stream = opts.stream;
+    return p;
+  }
+
   // 核心 API 调用（带超时 + 重试）
   async function callAI(messages, opts){
     opts = opts || {};
@@ -41,17 +60,7 @@ var AIService = (function(){
     var url = cfg.base + '/chat/completions';
     var sysMsg = opts.system ? {role:'system', content:opts.system} : null;
     var allMsgs = sysMsg ? [sysMsg].concat(messages) : messages;
-    var payload = {
-      model: cfg.model,
-      messages: allMsgs,
-      temperature: opts.temp!=null ? opts.temp : cfg.temp,
-      top_p: 0.85,
-      max_tokens: opts.max||cfg.max,
-      stream: false
-    };
-    if(/glm-.*(4\.7|5\.)/.test(cfg.model.toLowerCase())){
-      payload.enable_thinking = false;
-    }
+    var payload = buildPayload(cfg.model, allMsgs, {temp: opts.temp!=null?opts.temp:cfg.temp, max: opts.max||cfg.max, stream: false});
     for(var attempt=0; attempt<2; attempt++){
       try{
         var ctrl = new AbortController();
@@ -288,6 +297,7 @@ var AIService = (function(){
     isEnabled: isEnabled,
     setEnabled: setEnabled,
     hasKey: hasKey,
+    buildPayload: buildPayload,
     generateNarrative: generateNarrative,
     generateNPCDialogue: generateNPCDialogue,
     generateCustomChoice: generateCustomChoice,
