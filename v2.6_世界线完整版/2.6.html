@@ -932,17 +932,17 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 /* 先做平板过渡：>1100px 双面板；≤1100 单面板堆叠 */
 @media(max-width:1100px){.grid{grid-template-columns:1fr}}
 @media(max-width:768px){
- .screen{padding:10px}
+ .screen{padding:max(10px, env(safe-area-inset-top,0px)) max(10px, env(safe-area-inset-right,10px)) max(10px, env(safe-area-inset-bottom,0px)) max(10px, env(safe-area-inset-left,0px))}
  .setup-card{padding:16px;margin:10px auto;border-radius:12px}
  .modal .box{padding:15px;border-radius:11px}
  .kv .k{flex:0 0 72px}
 }
 @media(max-width:600px){
- .screen{padding:8px}
- .big-title{letter-spacing:1px}
+ .screen{padding:max(8px, env(safe-area-inset-top,0px)) max(8px, env(safe-area-inset-right,8px)) max(8px, env(safe-area-inset-bottom,0px)) max(8px, env(safe-area-inset-left,0px))}
+ .big-title{letter-spacing:1px;word-break:break-word;overflow-wrap:break-word}
  .topbar{padding:8px 10px;gap:7px}
  .topbtns{flex:1 1 100%;gap:5px}
- .topbtns button{flex:1 1 0;min-width:0;padding:8px 4px;font-size:12.5px;min-height:44px}
+ .topbtns button{flex:1 1 calc(33.333% - 4px);min-width:0;padding:8px 4px;font-size:12px;min-height:42px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
  .panel h3{padding:9px 10px;font-size:13px;min-height:44px}
  .ptime{flex:1 1 100%;margin-left:22px;text-align:left;font-size:10.5px;margin-top:1px}
  .opt{padding:10px;gap:8px}
@@ -968,9 +968,11 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
 @media(max-width:380px){
  .big-title{font-size:17px}
  .timecard .big{font-size:16px}
- .topbtns button{font-size:12px;padding:8px 2px}
+ .topbtns button{font-size:11.5px;padding:8px 2px;min-height:40px}
  .opt{padding:9px 8px}
  .opt .txt{font-size:12.5px}
+ .easy-go-main{font-size:18px;padding:14px 16px}
+ .easy-go-main .ic{font-size:24px}
 }
 /* iOS/鸿蒙 横屏模式（抖音直播横屏 / 平板横屏） */
 @media(max-height:520px) and (orientation:landscape){
@@ -980,9 +982,14 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
  .timecard .lab,.timecard .sub,.timecard .turn{display:inline;margin-right:8px}
  .panel .body{max-height:min(300px,68vh)}
  #story{max-height:min(340px,68vh)}
- .screen{padding:8px 10px}
+ .screen{padding:max(8px, env(safe-area-inset-top,0px)) max(10px, env(safe-area-inset-right,10px)) max(8px, env(safe-area-inset-bottom,0px)) max(10px, env(safe-area-inset-left,0px))}
  .setup-card{padding:14px;margin:8px auto}
  .foot{padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+ .topbar{padding:6px 10px;gap:5px}
+ .topbtns button{flex:0 0 auto;padding:6px 10px;font-size:12px;min-height:36px}
+ .easy-go-main{font-size:18px;padding:12px 16px}
+ .easy-go-main .ic{font-size:22px}
+ .opt{padding:8px 10px;min-height:44px}
 }
 /* 更极端横屏（旧手机 / 折叠屏外屏） */
 @media(max-height:420px) and (orientation:landscape){
@@ -1657,43 +1664,8 @@ html,body,div,span,p,button,input,textarea{
 
 /* =============== Beta v2.0 · 世界日志滚动修复（双端）===============
 
-/* 模式选择双卡片（新手教程 Step0 / 引擎设置里） */
-.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0 6px}
-.mode-card{position:relative;border:2px solid transparent;border-radius:14px;padding:14px 14px 12px;background:color-mix(in srgb,var(--bg-2) 80%,transparent);cursor:pointer;transition:all .18s ease;min-height:110px}
-.mode-card:hover{transform:translateY(-1px)}
-.mode-card:active{-webkit-transform:scale3d(.98,.98,1);transform:scale3d(.98,.98,1)}
-.mode-card.active{border-color:var(--accent);box-shadow:0 3px 14px rgba(232,198,106,.18);background:color-mix(in srgb,var(--accent) 8%,var(--bg-2))}
-.mode-card .ic{font-size:28px;line-height:1;margin-bottom:6px}
-.mode-card .nm{font-weight:800;font-size:15px;color:var(--fg-0);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px}
-.mode-card .ds{font-size:12px;line-height:1.65;color:var(--fg-2)}
-.mode-card .tip{margin-top:7px;font-size:11px;color:var(--accent);font-weight:700}
-.mode-card.easy .active-dot{color:#5ecfff}
-.mode-card.expert .active-dot{color:#9d7cff}
-@media (max-width:520px){
-  .mode-cards{grid-template-columns:1fr;gap:9px}
-  .mode-card{min-height:90px;padding:12px}
-}
-
-/* 简易模式：body 加了 .mode-easy 后的整体视觉调整 */
-body.mode-easy #body_action .opthead{display:none}
-body.mode-easy #opts .opt{padding:16px 14px;border-radius:14px;min-height:60px;font-size:15px;line-height:1.55;margin-bottom:10px;position:relative}
-body.mode-easy #opts .opt .tag{width:38px;height:38px;line-height:38px;font-size:15px;border-radius:12px;font-weight:800;margin-right:12px;flex-shrink:0}
-body.mode-easy #opts .opt::after{content:"";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--accent)}
-body.mode-easy #opts .opt.opt-a::after{content:"🥇"}
-body.mode-easy #opts .opt.opt-b::after{content:"🌟"}
-body.mode-easy #opts .opt.opt-c::after{content:"🎲"}
-body.mode-easy #opts .opt .lbl-f{display:block;font-size:11.5px;color:var(--hero);font-weight:700;margin-bottom:4px;letter-spacing:.3px}
-
-/* 简易模式：弱化自定义输入框（但保留高级用户可以找到） */
-body.mode-easy #playerInput{min-height:44px;font-size:13px;opacity:.72;background:color-mix(in srgb,var(--bg-2) 65%,transparent);border-style:dashed;color:var(--fg-2)}
-body.mode-easy #playerInput:focus{opacity:1;color:var(--fg)}
-body.mode-easy .subh:has(+ #playerInput){font-size:11.5px;color:var(--fg-2);font-weight:500;margin-top:6px}
-body.mode-easy .subh:has(+ #playerInput)::before{content:"🔍 "}
-body.mode-easy .subh:has(+ #playerInput)::after{content:"（给想自己写剧情的朋友～不写也完全可以玩）";font-weight:400;margin-left:4px}
-
-/* 简易模式：巨大的「继续推进⏭️」按钮条（行动区最上方） — 用户一眼就能看到 */
+/* 统一模式：「继续推进⏭️」按钮条（行动区最上方） — 用户一眼就能看到 */
 .easy-go-bar{display:flex;align-items:stretch;justify-content:space-between;gap:10px;margin:6px 0 14px;flex-wrap:wrap}
-body.mode-easy .easy-go-bar{display:flex}
 .easy-go-main{flex:1;min-width:220px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-weight:800;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 75%,#fff 5%),color-mix(in srgb,var(--magic) 55%,#fff 5%));color:#fff;letter-spacing:.6px;box-shadow:0 6px 22px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08);border:none;cursor:pointer;transition:transform .12s ease, box-shadow .18s ease, filter .18s ease}
 .easy-go-main:hover{filter:brightness(1.06);box-shadow:0 8px 28px rgba(232,198,106,.32),inset 0 -2px 0 rgba(0,0,0,.08)}
 .easy-go-main:active{transform:translateY(1px) scale3d(.992,.992,1);box-shadow:0 3px 12px rgba(232,198,106,.22),inset 0 -2px 0 rgba(0,0,0,.08)}
@@ -1701,25 +1673,17 @@ body.mode-easy .easy-go-bar{display:flex}
 .easy-go-main .sub{font-size:12px;font-weight:500;opacity:.9;letter-spacing:.2px;display:block;line-height:1.4}
 .easy-go-side{display:flex;gap:8px;flex-wrap:wrap;flex:0 1 auto;align-items:stretch}
 .easy-go-side button{min-height:100%;padding:12px 14px;font-size:14px;border-radius:14px;font-weight:700}
-body.mode-easy .actrow{opacity:.55;transform:scale(.97);transform-origin:left top;margin-top:6px}
-body.mode-easy .actrow:hover{opacity:1}
 
-/* 简易模式：跳过到大事件按钮直接贴在主按钮旁边，更显眼 */
+/* 跳过/世界按钮样式 */
 .easy-skip-btn{background:linear-gradient(135deg,rgba(157,124,255,.18),rgba(143,224,160,.18));border:1px solid rgba(157,124,255,.5);color:#e6deff}
 .easy-world-btn{background:linear-gradient(135deg,rgba(94,207,255,.18),rgba(232,198,106,.18));border:1px solid rgba(94,207,255,.5);color:#d6efff}
 
-/* 简易模式：顶部时间卡片里的模式徽章更显眼，用户随时知道自己现在在哪档 */
-body.mode-easy .timecard .lab{font-size:13px}
-body.mode-easy .turn{padding:3px 9px;font-size:11px;font-weight:700}
-
-/* 简易模式：新手提示（开局前几回合，在 opts 上方加引导条，3 回合后自动隐藏）*/
+/* 新手提示（开局前几回合，在 opts 上方加引导条，3 回合后自动隐藏）*/
 .easy-tip-strip{display:none;padding:10px 12px;margin:6px 0 10px;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,#5ecfff 14%,transparent),color-mix(in srgb,#8fe0a0 14%,transparent));border:1px dashed rgba(94,207,255,.5);line-height:1.6;font-size:12.5px;color:var(--fg-1)}
-body.mode-easy .easy-tip-strip.on{display:block}
+.easy-tip-strip.on{display:block}
 .easy-tip-strip b{color:var(--hero)}
 
-/* 新手教程里的「双模式专属内容」：根据当前 body 类只显示其中一套 */
-body.mode-expert .easy-show{display:none !important}
-body.mode-easy .expert-show{display:none !important}
+/* 教程提示卡片 */
 .easy-show, .expert-show{margin-top:8px;padding:10px 12px;border-radius:10px;line-height:1.7}
 .easy-show{background:linear-gradient(180deg,rgba(94,207,255,.08),rgba(143,224,160,.05));border:1px dashed rgba(94,207,255,.4)}
 .expert-show{background:linear-gradient(180deg,rgba(157,124,255,.08),rgba(232,198,106,.05));border:1px dashed rgba(157,124,255,.4)}
@@ -1765,10 +1729,8 @@ body.mode-easy .expert-show{display:none !important}
 .stat-row .s-tk i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 62%,#fff 0%),var(--accent));transition:width .45s ease}
 .stat-row .s-vl{flex:0 0 32px;text-align:right;font-family:Consolas,monospace;font-weight:800;color:var(--fg-0);font-size:13px}
 
-/* =============== Beta v2.0 · 简易模式专属顶部信息条（生涯模拟器风格）===============
-   只在 body.mode-easy 下显示；专家模式保持 v1.9 的 8 张迷你卡不变。 */
+/* =============== Beta v2.0 · 顶部信息条（生涯模拟器风格）=============== */
 .easy-hud{display:none;margin:0 0 10px;border:1px solid var(--line-2);border-radius:17px;padding:13px 15px 11px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 94%,transparent),color-mix(in srgb,var(--bg-1) 82%,transparent));box-shadow:0 4px 16px rgba(0,0,0,.16)}
-body.mode-easy .easy-hud{display:block}
 .eh-top{display:flex;align-items:center;gap:13px}
 .eh-ovr{flex:0 0 auto;width:66px;height:66px;border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 3px 10px rgba(0,0,0,.25);cursor:pointer}
 .eh-ovr .n{font-size:27px;font-family:Consolas,monospace;line-height:1;letter-spacing:.5px}
@@ -1804,56 +1766,12 @@ body.mode-easy .easy-hud{display:block}
   .eh-bars{gap:10px}.eh-wealth{min-width:70px}.eh-wealth .vl{font-size:14.5px}
 }
 
-/* 简易模式：隐藏专家模式的 8 张迷你卡网格 + 目标条（信息全部收进 easyHUD）*/
-body.mode-easy .grid{display:none !important}
-body.mode-easy #goalBarWrap{display:none !important}
-
-/* =============== Beta v2.0 · 简易模式选项 = 2×2 大卡片（A/B/C + D 自定义）=============== */
-body.mode-easy #opts{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:4px}
-@media(max-width:560px){body.mode-easy #opts{grid-template-columns:1fr;gap:9px}}
-body.mode-easy #opts .opt{flex-direction:column;align-items:flex-start;gap:7px;margin:0;min-height:0;padding:15px 16px 14px;border-radius:16px;border-width:1.5px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 96%,transparent),color-mix(in srgb,var(--bg-1) 78%,transparent));box-shadow:0 2px 8px rgba(0,0,0,.12)}
-body.mode-easy #opts .opt:hover{border-color:var(--accent);transform:translateY(-1px)}
-body.mode-easy #opts .opt .tag{width:auto;height:auto;line-height:1.35;border-radius:9px;padding:3px 11px;font-size:12.5px;font-weight:900;letter-spacing:1px;margin-right:0}
-body.mode-easy #opts .opt .txt{font-size:14.5px;line-height:1.6;font-weight:600;width:100%}
-body.mode-easy #opts .opt .lbl-f{display:block;font-size:11px;color:var(--hero);font-weight:800;margin-bottom:3px;letter-spacing:.5px}
-body.mode-easy #opts .opt.opt-a{border-color:color-mix(in srgb,#f2cf6a 45%,var(--line-2))}
-body.mode-easy #opts .opt.opt-b{border-color:color-mix(in srgb,#8fe0a0 42%,var(--line-2))}
-body.mode-easy #opts .opt.opt-c{border-color:color-mix(in srgb,#7cc0ff 42%,var(--line-2))}
-body.mode-easy #opts .opt.opt-a .tag{background:color-mix(in srgb,#f2cf6a 18%,transparent);color:#f2d272}
-body.mode-easy #opts .opt.opt-b .tag{background:color-mix(in srgb,#8fe0a0 18%,transparent);color:#9fe8b4}
-body.mode-easy #opts .opt.opt-c .tag{background:color-mix(in srgb,#7cc0ff 18%,transparent);color:#9fd0ff}
-body.mode-easy #opts .opt.opt-d{border-style:dashed;border-color:color-mix(in srgb,var(--fg-2) 45%,var(--line-2));background:color-mix(in srgb,var(--bg-2) 55%,transparent);justify-content:center;align-items:center;text-align:center;min-height:84px}
-body.mode-easy #opts .opt.opt-d .tag{background:color-mix(in srgb,var(--magic) 16%,transparent);color:#cdaaff;border-color:transparent}
-body.mode-easy #opts .opt.opt-d .txt{color:var(--fg-2);font-size:13.5px}
-body.mode-easy #opts .opt.opt-go{border-color:color-mix(in srgb,var(--accent) 60%,var(--line-2));background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--bg-2)),color-mix(in srgb,var(--magic) 14%,var(--bg-2)));justify-content:center;align-items:center;text-align:center;min-height:84px}
-body.mode-easy #opts .opt.opt-go .tag{background:var(--accent);color:#1a1408;border-color:transparent}
-body.mode-easy #opts .opt.opt-go .txt{color:var(--fg-0);font-weight:800;font-size:15px}
-body.mode-easy #opts .opt .d-sub{display:block;font-size:11.5px;font-weight:500;color:var(--fg-2);margin-top:4px;line-height:1.5}
-body.mode-easy #opts .opt.opt-go .d-sub{color:color-mix(in srgb,var(--fg-0) 72%,transparent)}
-/* v2.0：简易模式行动区纵向重排——世界日志下面直接是选项卡，辅助按钮在选项下方 */
-body.mode-easy #body_action{display:flex;flex-direction:column}
-body.mode-easy #body_action .easy-tipstrip,
-body.mode-easy #body_action #easyTipStrip{order:0}
-body.mode-easy #body_action #opts{order:1}
-body.mode-easy #body_action .easy-custom{order:2}
-body.mode-easy #body_action .easy-go-bar{order:3}
-body.mode-easy #opts .opt .tag{cursor:pointer}
-
-/* D 卡点开后的自定义行动区（简易模式收起，专家模式常驻）*/
+/* D 卡点开后的自定义行动区 */
 .easy-custom{display:none;margin-top:11px;padding:12px 13px;border:1.5px dashed color-mix(in srgb,var(--magic) 55%,var(--line-2));border-radius:14px;background:color-mix(in srgb,var(--magic) 7%,var(--bg-2));animation:fadeIn3d .2s ease-out}
-body.mode-easy .easy-custom.on{display:block}
-body.mode-expert .easy-custom{display:block !important;border:none;background:transparent;padding:0;border-radius:0}
-body.mode-expert .easy-custom .ec-hint,body.mode-expert .easy-custom .ec-actions{display:none !important}
+.easy-custom.on{display:block}
 .easy-custom .ec-hint{font-size:12.5px;color:#cdaaff;font-weight:700;margin-bottom:8px;line-height:1.6}
 .easy-custom .ec-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
 .easy-custom .ec-actions button{flex:1;min-width:130px;padding:11px 16px;font-size:14.5px;font-weight:800;border-radius:11px;min-height:46px}
-body.mode-easy .actrow{display:none !important}       /* 专家按钮组在简易模式下隐藏（功能收进选项卡/辅助链接）*/
-body.mode-easy .subh{display:none !important}        /* 「✍ 自定义行动」小标题在简易模式隐藏（D 卡自带说明）*/
-/* v2.0：简易模式把「继续推进」大按钮条降级为底部辅助链接行（主推进 = 点选项卡）*/
-body.mode-easy .easy-go-bar{margin:12px 0 2px;justify-content:center}
-body.mode-easy .easy-go-main{display:none}
-body.mode-easy .easy-go-side{flex:1 1 100%;display:flex;gap:10px;max-width:560px;margin:0 auto}
-body.mode-easy .easy-go-side button{flex:1;padding:13px 10px;font-size:13.5px;border-radius:13px;min-height:48px}
 
 /* =============== Beta v2.0 · 世界日志滚动修复（双端）===============
    根因：#story 自带 max-height+overflow 滚动，外层 .panel .body 也滚动
@@ -1867,7 +1785,6 @@ body.mode-easy .easy-go-side button{flex:1;padding:13px 10px;font-size:13.5px;bo
   overscroll-behavior:auto;
 }
 #body_story{max-height:min(640px,74vh) !important;overflow:auto !important;-webkit-overflow-scrolling:touch;padding:4px 0 44px 0}
-body.mode-easy #body_story{max-height:min(580px,72vh) !important}
 #body_story .entry:last-child{margin-bottom:0}
 /* 手机端底部安全区 + 64px：iOS 小横条 / 安卓手势条 不盖住日志最后一句（v2.3 复核：再 + 2px 避免华为鸿蒙圆形手势条） */
 @media(max-width:720px){
@@ -2081,7 +1998,7 @@ body.mode-easy #body_story{max-height:min(580px,72vh) !important}
 }
 /* ---- 液态玻璃基类（统一的饱和雾化+双层描边）---- */
 .topbar, .panel, .opt, .modal .box, .chip,
-body.mode-easy #opts .opt, .btn, .btn-primary, .btn-ghost{
+.btn, .btn-primary, .btn-ghost{
   position:relative; isolation:isolate;
   -webkit-backdrop-filter: blur(var(--liq-blur)) saturate(var(--liq-sat));
   backdrop-filter: blur(var(--liq-blur)) saturate(var(--liq-sat));
@@ -2360,18 +2277,6 @@ body.mode-easy #opts .opt, .btn, .btn-primary, .btn-ghost{
   .cx-cols-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .cx-cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 }
-body.mode-easy .cx-acc-hd{padding:13px 14px}
-body.mode-easy .cx-acc-item{border-radius:16px}
-body.mode-easy .cx-acc-ic{width:42px;height:42px;line-height:42px;font-size:21px;border-radius:12px;flex-basis:42px}
-body.mode-easy .cx-acc-title{font-size:15.5px}
-body.mode-easy .cx-chip{min-height:44px;font-size:13.5px;padding:9px 13px;border-radius:999px}
-body.mode-easy .cx-acc-sub{font-size:12px}
-body.mode-easy .cx-acc-item.easy-rec{
-  border-color:color-mix(in srgb,var(--accent) 45%,var(--line-2))
-}
-body.mode-easy .cx-acc-item.easy-rec .cx-acc-ic{
-  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 32%,transparent),color-mix(in srgb,var(--magic) 18%,transparent))
-}
 .cx-rec-badge{
   position:absolute;top:8px;right:10px;font-size:10px;padding:2px 8px;border-radius:999px;
   background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 28%,transparent),color-mix(in srgb,var(--magic) 16%,transparent));
@@ -2458,16 +2363,13 @@ body.mode-easy .cx-acc-item.easy-rec .cx-acc-ic{
   margin-right: 0;
   box-shadow: 0 1px 3px rgba(0,0,0,.18);
 }
-/* 专家模式正文开头加一点顶部 padding，防止第一行被右上角胶囊遮住 1~2px */
+/* 正文开头加一点顶部 padding，防止第一行被右上角胶囊遮住 1~2px */
 .opt .txt{ padding-top: 18px }
-/* 简易模式：方向胶囊 + 前缀（lbl-f）的视觉顺序 — 胶囊在右上角，前缀标签用 display:block 放正文最顶 */
-body.mode-easy #opts .opt .txt{ padding-top: 14px }
 /* 深色/浅色主题同步高亮 —— 胶囊字色不改，只加一点浅色主题 border 对比 */
 :root[data-theme='light'] .hint-dir{ box-shadow:0 1px 2px rgba(0,0,0,.08) }
 
 /* ============ Beta v2.2 · 六建议之 S6 · 加载期间 opts 禁用（灰态 + 禁点） ============ */
-#opts.busy .opt,
-body.mode-easy #opts.busy .opt{
+#opts.busy .opt{
   pointer-events: none;
   opacity: .42;
   filter: grayscale(.55) blur(.2px);
@@ -3117,24 +3019,6 @@ document.addEventListener('keydown',function(e){
 <div class="modal" id="settings">
   <div class="box">
     <h3>⚙ 游玩设置</h3>
-    <!-- v2.6: 已取消简易/专家模式区别，统一展示全部字段 -->
-    <div style="margin-bottom:12px;display:none">
-      <div class="subh" style="margin-bottom:6px">🎯 游玩模式（不影响剧情内核，只影响操作界面复杂程度）</div>
-      <div class="mode-cards" id="settingModeCards">
-        <div class="mode-card easy" id="sMc_easy" onclick="setMode('easy',true)">
-          <div class="ic">🌱</div>
-          <div class="nm">简易模式 <span class="active-dot" id="sMc_easy_dot" style="display:none">● 当前</span></div>
-          <div class="ds">第一次玩、对漫威不熟悉、<b>找不到推进按钮</b>的朋友选这档：按钮更大、操作更少、选项会给你白话解释。</div>
-          <div class="tip">✓ 推荐 · 朋友分享 / 新人首选</div>
-        </div>
-        <div class="mode-card expert" id="sMc_expert" onclick="setMode('expert',true)">
-          <div class="ic">🔬</div>
-          <div class="nm">专家模式 <span class="active-dot" id="sMc_expert_dot" style="display:none">● 当前</span></div>
-          <div class="ds">漫威爱好者 / 懂点 AI 的人 / 想自由发挥自定义行动的人选这档：完整的自定义行动输入框 + 全部高级选项。</div>
-          <div class="tip">适合老手 · 原 1.6 版完整界面</div>
-        </div>
-      </div>
-    </div>
     <div class="line" style="margin:0 0 10px;height:1px;background:rgba(255,255,255,.06)"></div>
     <!-- v2.6: AI 配置界面已隐藏，默认使用智谱 glm-4.7（Key 硬编码于 js/ai.js） -->
     <div id="engineConfigSection" style="display:none">
@@ -6374,24 +6258,6 @@ function _cxInputEnter(ev, inp, fk, kind){
     try{inp.blur()}catch(_){}
   }catch(_){}
 }
-
-/* 简易/专家模式切换时自动重建创角表单（不然字段数/分组不对应） */
-try{
-  if(typeof homeSetMode==='function'){
-    var _origHomeSetMode=homeSetMode;
-    homeSetMode=function(m){
-      _origHomeSetMode(m);
-      try{if(typeof buildForm==='function'&& $('formArea') && !($('setupScreen')&&$('setupScreen').style.display==='none'))buildForm()}catch(_){}
-    };
-  }
-  if(typeof setMode==='function'){
-    var _origSetMode=setMode;
-    setMode=function(m,show){
-      _origSetMode(m,show);
-      try{if(typeof buildForm==='function'&& $('formArea') && $('setupScreen') && window.getComputedStyle($('setupScreen')).display!=='none')buildForm()}catch(_){}
-    };
-  }
-}catch(_){}
 
 /* 兼容旧版：fieldValue 逻辑基本不变，增加 "era custom → 保持文本" */
 function fieldValue(f){

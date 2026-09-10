@@ -73,6 +73,17 @@
     backdrop-filter: blur(var(--blur-md));
     -webkit-backdrop-filter: blur(var(--blur-md));
   }
+  /* v2.6: 2.6.html 内联元素的移动端 blur 降级 —— 22px → 8px，低端安卓不卡 */
+  .topbar, .panel, .opt, .chip, .modal .box, .btn, .btn-primary, .btn-ghost, .cx-acc-item {
+    --liq-blur: 8px;
+  }
+}
+
+/* 超小屏进一步降级 blur */
+@media (max-width: 430px) {
+  .topbar, .panel, .opt, .chip, .modal .box, .btn, .btn-primary, .btn-ghost, .cx-acc-item {
+    --liq-blur: 5px;
+  }
 }
 
 /* 减少动画偏好 */
