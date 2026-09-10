@@ -594,29 +594,29 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   transition:transform .18s ease;transform:translateZ(0);
   display:inline-block;line-height:1}
 .panel.collapsed .tri{-webkit-transform:rotate(-90deg) translateZ(0);transform:rotate(-90deg) translateZ(0)}
-.ptime{margin-left:auto;color:#8496ab;font-size:11.5px;font-family:Consolas,monospace;font-weight:400;letter-spacing:0;text-align:right}
+.ptime{margin-left:auto;color:var(--fg-2);font-size:11.5px;font-family:Consolas,monospace;font-weight:400;letter-spacing:0;text-align:right}
 .panel .body{padding:10px 12px;max-height:400px;max-height:min(400px,58vh);overflow:auto;-webkit-overflow-scrolling:touch;
   /* v1.9：去掉 contain:layout（会切断 body 滚动链）与 overscroll-behavior:contain
      （电脑端鼠标滚轮在 story 面板里滚到底就卡住、不传到页面）→ 改 auto 让滚轮顺利续滚整页 */
   contain:style paint;
   overscroll-behavior:auto
 }
-.kv{display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed #1b2430;font-size:13px;
+.kv{display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line-2);font-size:13px;
   /* kv 是高重复元素，减少每个条目都产生新合成层 */
   contain:layout style}
-.kv .k{color:#7f8da0;flex:0 0 78px;font-size:12px}
+.kv .k{color:var(--fg-2);flex:0 0 78px;font-size:12px}
 .kv .v{color:var(--fg-0);flex:1;word-break:break-word;overflow-wrap:anywhere}
-.subh2{color:var(--fg-2);font-size:12px;margin:8px 0 3px;border-left:2px solid #2f3d4e;padding-left:6px}
-.card{border:1px solid #22303f;border-radius:7px;padding:7px 9px;margin-bottom:7px;background:#101822;font-size:12.5px;
+.subh2{color:var(--fg-2);font-size:12px;margin:8px 0 3px;border-left:2px solid var(--line-2);padding-left:6px}
+.card{border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--bg-2);font-size:12.8px;line-height:1.7;
   -webkit-transform:translateZ(0);transform:translateZ(0)}
 .card b{color:var(--accent)}
 ul{margin:4px 0;padding-left:18px}
-li{margin:3px 0;font-size:13px}
-.dim{color:#5f6d7e;font-size:12.5px}
+li{margin:3px 0;font-size:13px;line-height:1.7}
+.dim{color:var(--fg-2);font-size:12.5px;line-height:1.7}
 /* 世界日志滚动容器：长列表优化 */
 #story{
   max-height:560px;max-height:min(560px,62vh);overflow-y:auto;padding:12px;
-  background:#0a1017;border-radius:8px;border:1px solid #1c2634;
+  background:var(--bg-1);border-radius:10px;border:1px solid var(--line-2);
   -webkit-overflow-scrolling:touch;
   /* contain + 滚动锚定，防 100+ 条日志时滚到底部卡顿 */
   contain:layout style paint;
@@ -625,17 +625,23 @@ li{margin:3px 0;font-size:13px}
   -webkit-mask-image:-webkit-radial-gradient(white,black)
 }
 .entry{
-  border-left:2px solid var(--line-2);padding:6px 0 10px 12px;margin-bottom:12px;
+  border-left:2.5px solid color-mix(in srgb,var(--line-2) 80%,transparent);
+  padding:7px 0 11px 13px;margin-bottom:13px;
   contain:layout style;
-  -webkit-transform:translateZ(0);transform:translateZ(0)
+  -webkit-transform:translateZ(0);transform:translateZ(0);
+  position:relative
 }
-.entry .t{color:#6f7f92;font-size:11.5px;margin-bottom:4px;font-family:Consolas,monospace}
-.entry.self{border-left-color:#c1272d;background:#170f12;border-radius:0 6px 6px 0;padding-right:8px}
-.entry .b{color:#d5dfec}
-.entry blockquote{margin:6px 0;padding:4px 10px;border-left:2px solid #4a5b70;color:#a8b8cc;background:#0f1620}
-.entry code{background:#1a2431;padding:1px 5px;border-radius:4px;color:var(--accent);word-break:break-all}
-.entry hr{border:none;border-top:1px solid #243040;margin:10px 0}
-.hints{margin-top:8px;padding:7px 9px;border:1px dashed #33465c;border-radius:6px;background:#0d1520;font-size:12px;color:var(--fg-2)}
+.entry .t{color:var(--fg-2);font-size:11.5px;margin-bottom:5px;font-family:Consolas,"SF Mono",monospace;letter-spacing:.3px}
+.entry.self{
+  border-left-color:#c1272d;
+  background:linear-gradient(90deg,color-mix(in srgb,#c1272d 8%,transparent),transparent 80%);
+  border-radius:0 8px 8px 0;padding-right:10px
+}
+.entry .b{color:var(--fg-0);line-height:1.75;font-size:13.8px}
+.entry blockquote{margin:8px 0;padding:6px 12px;border-left:2.5px solid color-mix(in srgb,var(--magic) 60%,transparent);color:var(--fg-1);background:color-mix(in srgb,var(--bg-2) 60%,transparent);border-radius:0 6px 6px 0;font-size:13px;line-height:1.7}
+.entry code{background:color-mix(in srgb,var(--bg-2) 85%,transparent);padding:1px 6px;border-radius:5px;color:var(--accent);word-break:break-all;font-size:12.5px}
+.entry hr{border:none;border-top:1px solid var(--line-2);margin:11px 0}
+.hints{margin-top:9px;padding:8px 11px;border:1px dashed color-mix(in srgb,var(--accent) 35%,var(--line-2));border-radius:8px;background:color-mix(in srgb,var(--accent) 6%,transparent);font-size:12px;color:var(--fg-1);line-height:1.7}
 .foot{text-align:center;color:#55636f;font-size:11.5px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
 
 /* ===================== 选项卡 opt · 玻璃卡片式（选中金色描边+脉动发光）===================== */
@@ -1918,6 +1924,29 @@ body.mode-easy #body_story{max-height:min(580px,72vh) !important}
 .panel h3 .ptime{margin-left:auto;color:var(--fg-2);font-weight:500;font-size:12px}
 .panel .body{padding:12px 14px}
 
+/* ===== v2.6 主体舞台：世界日志 + 行动（核心交互区） ===== */
+.main-stage{margin:10px 0 14px;display:flex;flex-direction:column;gap:12px}
+.panel-story{
+  border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line-2));
+  box-shadow:0 2px 20px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.03) inset;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 92%,transparent),color-mix(in srgb,var(--bg-1) 96%,transparent));
+}
+.panel-story > h3{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%),color-mix(in srgb,var(--bg-1) 60%,transparent);
+  color:var(--accent);font-weight:800;font-size:14.5px;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 28%,var(--line-2));
+}
+.panel-action{border-color:color-mix(in srgb,var(--magic) 30%,var(--line-2))}
+.panel-action > h3{color:var(--magic);font-weight:800}
+/* 世界日志更高更醒目 */
+#body_story{max-height:min(720px,78vh) !important}
+/* 次体网格（属性/关系等）稍弱化 */
+.sub-grid{opacity:.97}
+@media(max-width:720px){
+  #body_story{max-height:min(520px,72vh) !important}
+  .main-stage{gap:10px}
+}
+
 /* 详情子界面（模态框）：复用 tutorialModal 同款 skipAbsolute 架构 */
 .detail-modal .box{width:min(760px,94vw);max-height:none}
 .detail-modal .box h3{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:10px;border-bottom:1px solid var(--line-2)}
@@ -2693,16 +2722,13 @@ body.mode-easy #opts.busy .opt{
 
   <div id="checkBanner"></div>
 
-  <div class="grid">
-    <div id="colL"></div>
-    <div id="colR"></div>
-  </div>
+  <!-- ⭐ 主体区：世界日志（最核心交互）+ 我的行动 -->
+  <div class="main-stage">
+    <div class="panel panel-story"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>📜 世界日志<span class="ptime" id="time_story">—</span></h3>
+      <div class="body" id="body_story"><div id="story"></div></div></div>
 
-  <div class="panel"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>【世界日志】<span class="ptime" id="time_story">—</span></h3>
-    <div class="body" id="body_story"><div id="story"></div></div></div>
-
-  <div class="panel"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>【我的行动】· 此刻<span class="ptime" id="time_action">—</span></h3>
-    <div class="body" id="body_action" style="max-height:none">
+    <div class="panel panel-action"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>⚡ 我的行动 · 此刻<span class="ptime" id="time_action">—</span></h3>
+      <div class="body" id="body_action" style="max-height:none">
       <div class="easy-go-bar" id="easyGoBar">
         <button class="easy-go-main" onclick="locked('doTurn',function(){try{if(CUR_HINTS&&CUR_HINTS[0]){var pi=$('playerInput');if(pi&&!pi.value.trim())pi.value=CUR_HINTS[0];doTurn('normal')}else{doTurn('world')}}catch(e){console.warn(e)}},900)" title="如果填了行动就执行；没填就自动走世界轮">
           <span class="ic">⏭️</span>
@@ -2732,6 +2758,12 @@ body.mode-easy #opts.busy .opt{
         <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳到有事情发生</button>
       </div>
     </div></div>
+  </div>
+
+  <!-- 次体区：属性/关系/世界等概览卡（次要信息，放下方）-->
+  <div class="grid sub-grid">
+    <div id="colL"></div>
+    <div id="colR"></div>
   </div>
 
   <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed #2b3a4d;border-radius:9px;background:#0b1219;text-align:center">
