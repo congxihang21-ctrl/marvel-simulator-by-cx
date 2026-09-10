@@ -2284,18 +2284,24 @@ body.mode-easy #opts .opt, .btn, .btn-primary, .btn-ghost{
 /* ============ Beta v2.2 · 手风琴二级子菜单创角界面（小白手机友好） ============ */
 .cx-acc{display:flex;flex-direction:column;gap:10px;margin-top:6px}
 .cx-acc-item{
-  border:1.5px solid var(--line-2);border-radius:14px;overflow:hidden;position:relative;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 88%,transparent),color-mix(in srgb,var(--bg-1) 70%,transparent));
+  border:1.5px solid var(--line-2);border-radius:16px;overflow:hidden;position:relative;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 90%,transparent),color-mix(in srgb,var(--bg-1) 72%,transparent));
   -webkit-backdrop-filter:var(--liq-blur) saturate(var(--liq-sat));backdrop-filter:var(--liq-blur) saturate(var(--liq-sat));
-  box-shadow:0 3px 10px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.04);
-  transition:border-color .2s, box-shadow .2s;
+  box-shadow:0 4px 14px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.05);
+  transition:border-color .25s, box-shadow .25s, transform .25s;
   contain:layout style
+}
+.cx-acc-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--accent),var(--magic));
+  opacity:0;transition:opacity .25s
 }
 .cx-acc-item:focus-within,
 .cx-acc-item.is-open{
-  border-color:color-mix(in srgb,var(--accent) 55%,var(--line-2));
-  box-shadow:0 6px 22px rgba(232,198,106,.12), inset 0 1px 0 rgba(255,255,255,.06)
+  border-color:color-mix(in srgb,var(--accent) 50%,var(--line-2));
+  box-shadow:0 8px 26px rgba(232,198,106,.14), inset 0 1px 0 rgba(255,255,255,.07)
 }
+.cx-acc-item.is-open::before{opacity:1}
 .cx-acc-hd{
   display:flex;align-items:center;gap:10px;padding:12px 14px 12px 14px;cursor:pointer;user-select:none;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:48px
@@ -2326,18 +2332,26 @@ body.mode-easy #opts .opt, .btn, .btn-primary, .btn-ghost{
 /* 子选项网格：chip 样式，点击选中即可，避免小白用原生 select */
 .cx-chips{display:flex;flex-wrap:wrap;gap:7px 8px;margin-top:4px}
 .cx-chip{
-  display:inline-flex;align-items:center;justify-content:center;padding:7px 11px;min-height:36px;
-  border-radius:999px;border:1.2px solid var(--line-2);background:var(--bg-2);
+  display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;min-height:38px;
+  border-radius:999px;border:1.5px solid var(--line-2);
+  background:linear-gradient(180deg,var(--bg-2),color-mix(in srgb,var(--bg-1) 60%,var(--bg-2)));
   font-size:12.5px;line-height:1.3;font-weight:600;color:var(--fg-1);cursor:pointer;user-select:none;
-  transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  text-align:center;word-break:break-word
+  transition:all .18s cubic-bezier(.2,.8,.2,1);touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  text-align:center;word-break:break-word;
+  box-shadow:0 1px 3px rgba(0,0,0,.06)
 }
-.cx-chip:active{transform:scale(.97)}
+.cx-chip:hover{
+  border-color:color-mix(in srgb,var(--accent) 50%,var(--line-2));
+  color:var(--fg-0);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.1),0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)
+}
+.cx-chip:active{transform:scale(.96)}
 .cx-chip.on{
-  border-color:color-mix(in srgb,var(--accent) 70%,var(--line-2));
-  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 22%,var(--bg-2)),color-mix(in srgb,var(--magic) 12%,var(--bg-2)));
+  border-color:var(--accent);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 28%,var(--bg-2)),color-mix(in srgb,var(--magic) 18%,var(--bg-2)));
   color:var(--fg-0);font-weight:800;
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 14%,transparent)
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent),0 4px 14px rgba(232,198,106,.18)
 }
 .cx-chip-wrap{flex:1 1 100%}
 .cx-chip-wrap input{border-radius:10px;min-height:44px}
@@ -4885,15 +4899,15 @@ var PRESETS=[
   '<code>gemini-2.5-flash</code>（默认）/ <code>gemini-2.0-flash</code> / <code>gemini-2.5-pro</code>（最强）。用 Google 官方 OpenAI 兼容层，地址不用改。'}];
 
 var ERA=[
- {k:'① 二战与超级士兵时代（1943-1945）',d:'1943-06-01'},
- {k:'② 冷战与神盾局时代（1950-1995）',d:'1970-09-01'},
- {k:'③ 英雄时代黎明（2008-2011）',d:'2008-05-02'},
- {k:'④ 纽约之战时代（2012-2013）',d:'2012-04-27'},
- {k:'⑤ 奥创与索科维亚时代（2014-2015）',d:'2014-07-04'},
- {k:'⑥ 内战与协议时代（2016-2017）',d:'2016-05-06'},
- {k:'⑦ 无限战争与烁灭五年（2018-2023）',d:'2018-04-27'},
- {k:'⑧ 回归与多元宇宙时代（2023-2026）',d:'2024-09-01'},
- {k:'⑨ 自定义时代',d:'2025-01-01'}];
+ {k:'⚔ 二战与超级士兵（1943-1945）',d:'1943-06-01'},
+ {k:'🕵 冷战与神盾局（1950-1995）',d:'1970-09-01'},
+ {k:'🦾 英雄时代黎明（2008-2011）',d:'2008-05-02'},
+ {k:'🌍 纽约之战（2012-2013）',d:'2012-04-27'},
+ {k:'🤖 奥创与索科维亚（2014-2015）',d:'2014-07-04'},
+ {k:'⚖ 内战与协议（2016-2017）',d:'2016-05-06'},
+ {k:'💎 无限战争与烁灭五年（2018-2023）',d:'2018-04-27'},
+ {k:'🌌 回归与多元宇宙（2023-2026）',d:'2024-09-01'},
+ {k:'✏️ 自定义时代',d:'2025-01-01'}];
 
 /* [Beta v2.2 · 已迁移] FIELDS / CUSTOM_FIELDS / CUSTOM_PH 统一移到 buildForm 所在的创角模块（文件后半段），
    这里保留占位，避免早期 `panel setup` 渲染逻辑出错（PANEL_DEF 仍在此段下方定义）。
@@ -6114,16 +6128,16 @@ var FIELDS=[
   custable:1,isTextChip:1},
  /* ======== 简易模式下归为"能力资质"一项（chip 选择）======== */
  {k:'apt',   t:'能力资质',       type:'select', group:'power',  easy:1, easyRec:1,
-  opts:['① 纯人类（无超能力）','② 科技天才','③ 基因潜能（未觉醒）','④ 血清/实验改造','⑤ 魔法亲和','⑥ 宇宙能量敏感','⑦ 随机·交给命运'],
+  opts:['🧍 纯人类（无超能力）','🔧 科技天才','🧬 基因潜能（未觉醒）','💉 血清/实验改造','🔮 魔法亲和','🌌 宇宙能量敏感','🎲 随机·交给命运'],
   custph:'描述你的能力资质（比如：继承了父亲的变种基因但还没觉醒）',
   custable:1},
 
  /* ======== 专家模式专属（简易模式下隐藏，引擎自行生成合理值）======== */
  {k:'blood', t:'血统/出身',      type:'select', group:'origin', easy:0,
-  opts:['— 不选，由 AI 随机生成 —','① 普通人类','② 科技世家','③ 军人/特工世家','④ 变种人（隐性，未觉醒）','⑤ 异人','⑥ 外星混血','⑦ 魔法/神秘血脉','⑧ 血清实验幸存者（高风险）','⑨ 斯库鲁寄居者','⑩ 非地球出身','⑪ 自定义'],
+  opts:['🎲 不选，由 AI 随机生成','🧍 普通人类','🔧 科技世家','🎖 军人/特工世家','🧬 变种人（隐性，未觉醒）','👁 异人','👽 外星混血','🔮 魔法/神秘血脉','💉 血清实验幸存者（高风险）','🦎 斯库鲁寄居者','🌍 非地球出身','✏️ 自定义'],
   custph:'描述你的自定义血统/出身',custable:1},
  {k:'birth', t:'出生身份',       type:'select', group:'origin', easy:0,
-  opts:['— 不选，由 AI 随机生成 —','① 普通家庭','② 军人家庭','③ 科学家家庭','④ 亿万富豪家庭','⑤ 街头/贫民区','⑥ 孤儿院/领养','⑦ 神盾局关联家庭','⑧ 隐秘社会出身（瓦坎达/塔罗等）','⑨ 外星殖民地/难民家庭','⑩ 自定义'],
+  opts:['🎲 不选，由 AI 随机生成','🏠 普通家庭','🎖 军人家庭','🔬 科学家家庭','💰 亿万富豪家庭','🏚 街头/贫民区','👶 孤儿院/领养','🕵 神盾局关联家庭','🌴 隐秘社会出身（瓦坎达/塔罗等）','🛸 外星殖民地/难民家庭','✏️ 自定义'],
   custph:'描述你的自定义出生身份',custable:1},
  {k:'age',   t:'年龄',           type:'text',   group:'id',     easy:0, ph:'留空 = 系统生成；建议 12~60 岁'},
  {k:'skills',t:'初始技能',       type:'text',   group:'power',  easy:0,
@@ -6135,7 +6149,7 @@ var FIELDS=[
   presetChip:['手机+钱包+钥匙','家里有把老旧小猎枪','祖传一块怀表','什么特别的都没有','留空引擎生成'],
   custable:1,isTextChip:1},
  {k:'fac',   t:'阵营倾向',       type:'select', group:'extra',  easy:0,
-  opts:['① 中立平民','② 政府/军方','③ 情报机构','④ 复仇者支持','⑤ 地下/黑市','⑥ 自由独立','⑦ 自定义'],
+  opts:['🧍 中立平民','🎖 政府/军方','🕵 情报机构','🛡 复仇者支持','🌑 地下/黑市','🦅 自由独立','✏️ 自定义'],
   custph:'描述你的阵营倾向',custable:1},
  {k:'traits',t:'性格关键词',     type:'text',   group:'extra',  easy:0,
   custph:'用逗号分隔多个性格关键词，留空由系统生成',
