@@ -846,6 +846,7 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
   max-height: calc(100dvh - 48px);
   max-height: min(900px, calc(var(--dvh, 1vh) * 100 - 48px));
   overflow-y:auto;  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;  /* v2.6.2：body 锁滚后，手机浏览器需显式允许竖向滚动手势，否则面板滑不动 */
   margin:0;
   -webkit-transform:translateZ(0);transform:translateZ(0);
   -webkit-mask-image:-webkit-radial-gradient(white,black);
@@ -2368,7 +2369,7 @@ html,body,div,span,p,button,input,textarea{
   .modal{padding:0;align-items:flex-end}
   .modal .box{
     width:100%;max-width:none;border-radius:18px 18px 0 0;margin:0;min-height:60vh;max-height:92vh;
-    overflow:auto;-webkit-overflow-scrolling:touch
+    overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y
   }
   .cx-acc-hd{min-height:52px}
 }
@@ -2666,7 +2667,8 @@ html,body,div,span,p,button,input,textarea{
       <div class="hv-footlinks">
         <a onclick="openThemePanel()">🎨 外观主题</a><i></i>
         <a onclick="openAbout()">ℹ 关于 · 版权</a><i></i>
-        <a onclick="openDonate()" class="hv-tip">☕ 支持一下</a>
+        <a onclick="openDonate()" class="hv-tip">☕ 支持一下</a><i></i>
+        <a onclick="selfHeal()" style="color:#f2c54d">🔧 修复显示</a>
       </div>
       <div class="hv-disclaimer">🛡 非官方同人作品，漫威 IP 归属迪士尼 / 漫威，AI 生成剧情仅供娱乐 · 建议 16+ 游玩，未成年人请在监护人指导下使用。</div>
     </div>
@@ -2723,6 +2725,7 @@ html,body,div,span,p,button,input,textarea{
       <button onclick="openLifeReview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>人生回顾</button>
       <button onclick="openAbout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</button>
       <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>支持</button>
+      <button onclick="selfHeal()" title="修复显示（清缓存重载）" style="color:#f2c54d">🔧</button>
     </div>
   </div>
 
@@ -3293,7 +3296,10 @@ document.addEventListener('keydown',function(e){
 <!-- ================= 主题设置（v1.4：深色 / 浅色 / 跟随系统 / 自定义背景图） ================= -->
 <div class="modal" id="themeModal" onclick="if(event.target===this)closeThemePanel()" style="z-index:118">
   <div class="box" style="max-width:560px">
-    <h3>🎨 外观主题（四端通用）</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <h3 style="margin:0">🎨 外观主题（四端通用）</h3>
+      <button onclick="closeThemePanel()" style="font-size:22px;background:none;border:none;color:var(--fg-2,#888);cursor:pointer;padding:4px 10px;border-radius:8px;line-height:1;flex-shrink:0" aria-label="关闭">✕</button>
+    </div>
     <div class="subh" style="font-size:12.5px">选择你喜欢的外观风格。所有设置会自动保存在本机，下次打开自动生效。</div>
     <div id="themeGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
       <!-- 选项由 JS 动态生成 → 见 renderThemeOptions() -->
@@ -10473,8 +10479,35 @@ if('serviceWorker' in navigator){
       if(_refreshed)return;_refreshed=true;
       location.reload();
     });
+    /* 收到自愈完成通知：SW 已清缓存注销，强制无缓存重载 */
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='HEAL_DONE'){
+        location.replace(location.pathname+'?_heal='+Date.now());
+      }
+    });
   });
 }
+/* 自愈：清掉所有 SW 缓存并注销，让页面完全走网络重新加载。
+   不清缓存也能玩的关键——当缓存损坏/资源 404 时自动或手动触发。 */
+function selfHeal(){
+  try{
+    if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}
+  }catch(_){}
+  if('serviceWorker' in navigator && navigator.serviceWorker.controller){
+    try{navigator.serviceWorker.controller.postMessage({type:'SELF_HEAL'});return}catch(_){}
+  }
+  location.replace(location.pathname+'?_heal='+Date.now());
+}
+/* 关键资源加载失败（css/js）时自动自愈一次，避免坏缓存导致白屏 */
+var _healTried=false;
+window.addEventListener('error',function(e){
+  if(_healTried)return;
+  var t=e.target;
+  if(t&&(t.tagName==='SCRIPT'||t.tagName==='LINK')&&t.src){
+    _healTried=true;
+    setTimeout(selfHeal,400);
+  }
+},true);
 </script>
 </body>
 </html>

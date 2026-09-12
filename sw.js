@@ -58,6 +58,13 @@ self.addEventListener('message', e => {
   if (e.data && e.data.type === 'GET_VERSION') {
     e.source.postMessage({ type: 'VERSION_RESPONSE', version: CACHE, isWaiting: !self.clients.claim });
   }
+  /* 自愈：前端发现缓存损坏/资源 404 时调用，清掉所有缓存并注销 SW，让页面下次加载完全走网络 */
+  if (e.data && e.data.type === 'SELF_HEAL') {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll())
+      .then(clients => { clients.forEach(c => c.postMessage({ type: 'HEAL_DONE' })); });
+  }
 });
 
 self.addEventListener('fetch', e => {
