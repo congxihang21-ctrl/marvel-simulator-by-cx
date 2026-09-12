@@ -3315,7 +3315,7 @@ document.addEventListener('keydown',function(e){
       </div>
       <button id="sfxToggleBtn" onclick="toggleSfx()" style="min-width:96px"></button>
     </div>
-    <div style="margin-top:18px;text-align:center">
+    <div style="margin-top:18px;text-align:center;position:sticky;bottom:0;background:var(--bg-1,#0f1620);padding:10px 0 4px;margin:18px -18px -18px;border-top:1px solid var(--line-2,#2f3d4e);border-radius:0 0 12px 12px">
       <button class="primary" onclick="closeThemePanel()">完成</button>
     </div>
   </div>
@@ -5403,11 +5403,26 @@ function _anyModalOpen(){
 }
 function _lockBodyScroll(lock){
   try{
-    if(lock){_bodyScrollRef++;}else{_bodyScrollRef=Math.max(0,_bodyScrollRef-1);}
+    if(lock){_bodyScrollRef++;}
+    else{
+      _bodyScrollRef=Math.max(0,_bodyScrollRef-1);
+      /* 安全兜底：解锁时若实际没有模态框开着，强制清零，杜绝「弹窗关了但页面滑不动」 */
+      if(_bodyScrollRef>0 && !_anyModalOpen())_bodyScrollRef=0;
+    }
     document.body.style.overflow = _bodyScrollRef>0 ? 'hidden' : '';
     document.documentElement.style.overflowY = _bodyScrollRef>0 ? 'hidden' : 'auto';
   }catch(_){}
 }
+/* 每 3 秒巡检一次：若没有模态框但 body 还被锁，强制解锁（防异常关闭后永久卡死） */
+setInterval(function(){
+  try{
+    if(_bodyScrollRef>0 && !_anyModalOpen()){
+      _bodyScrollRef=0;
+      document.body.style.overflow='';
+      document.documentElement.style.overflowY='auto';
+    }
+  }catch(_){}
+},3000);
 /* Beta v1.9 · 电脑端鼠标滚轮终极修复
    用户反馈：在 Windows 端，整页 UI 中只有鼠标放在「指定区域」里滚轮才响应，空区域滚不动。
    根因分析（Windows 端）：
@@ -8591,7 +8606,13 @@ function applyReply(o){
  }
  if(o.events){
   if(Array.isArray(o.events['进行中']))S.events['进行中']=o.events['进行中'];
-  if(Array.isArray(o.events['已发生']))S.events['已发生']=(S.events['已发生']||[]).concat(o.events['已发生']);
+  if(Array.isArray(o.events['已发生'])){
+    var _now=fmtShort(curDate());
+    S.events['已发生']=(S.events['已发生']||[]).concat(o.events['已发生'].map(function(ev){
+      if(ev&&typeof ev==='object'&&!ev.time){ev.time=_now}
+      return ev;
+    }));
+  }
   if(Array.isArray(o.events['隐藏']))S.events['隐藏']=o.events['隐藏'];
  }
  if(o.org!==undefined)S.org=o.org;
