@@ -847,9 +847,9 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
   max-height: min(900px, calc(var(--dvh, 1vh) * 100 - 48px));
   overflow-y:auto;  -webkit-overflow-scrolling:touch;
   touch-action:pan-y;  /* v2.6.2：body 锁滚后，手机浏览器需显式允许竖向滚动手势，否则面板滑不动 */
+  overscroll-behavior:contain;  /* v2.6.2：滚到边界不传给背景，iOS 滚动穿透 */
   margin:0;
   -webkit-transform:translateZ(0);transform:translateZ(0);
-  -webkit-mask-image:-webkit-radial-gradient(white,black);
   box-shadow:0 24px 80px rgba(0,0,0,.72);
   box-sizing:border-box;
 }
@@ -2368,8 +2368,9 @@ html,body,div,span,p,button,input,textarea{
 @media(max-width:560px){
   .modal{padding:0;align-items:flex-end}
   .modal .box{
-    width:100%;max-width:none;border-radius:18px 18px 0 0;margin:0;min-height:60vh;max-height:92vh;
-    overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y
+    width:100%;max-width:none;border-radius:18px 18px 0 0;margin:0;
+    min-height:60vh;max-height:92vh;max-height:92dvh;
+    overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain
   }
   .cx-acc-hd{min-height:52px}
 }
@@ -3505,6 +3506,14 @@ document.addEventListener('keydown',function(e){
   var _lastTouch=0;
   on(document,'touchstart',function(e){
     if(!e)return;
+    /* 弹窗内部豁免：iOS 上 touchstart 被 preventDefault 会连带阻止弹窗滚动启动（外观面板卡死根因之一）*/
+    try{
+      var _tt=e.target;
+      while(_tt&&_tt!==document.documentElement){
+        if(_tt.nodeType===1&&_tt.classList&&_tt.classList.contains('modal')&&_tt.style.display!=='none')return;
+        _tt=_tt.parentNode;
+      }
+    }catch(_){}
     /* 双指缩放拦截（抖音投放：用户误操作不会打乱布局） */
     if(e.touches&&e.touches.length>1){
       if(e.cancelable)try{e.preventDefault()}catch(_){}
@@ -3532,6 +3541,16 @@ document.addEventListener('keydown',function(e){
   on(document,'touchmove',function(e){
     if(!e)return;
     if(e.touches&&e.touches.length>1){if(e.cancelable)try{e.preventDefault()}catch(_){}return}
+    /* ⓪ iOS 专项豁免：触摸点在任何打开的 .modal 内 → 一律放行，交给 .box 的原生 overflow 滚动。
+       背景已被 _lockBodyScroll 的 position:fixed 锁死不会穿透；
+       旧逻辑在弹窗打开、body 被锁时会误判可滚祖先而 preventDefault，导致外观等长面板在 iPhone 上滑不动。*/
+    try{
+      var tt=e.target;
+      while(tt&&tt!==document.documentElement){
+        if(tt.nodeType===1&&tt.classList&&tt.classList.contains('modal')&&tt.style.display!=='none') return;
+        tt=tt.parentNode;
+      }
+    }catch(_){}
     /* ① 滚动根元素 (html)：只要它 scrollHeight>innerHeight+4 → 说明整页要可滚，直接放行，不拦截。*/
     try{
       var se=document.scrollingElement||document.documentElement;
@@ -5399,6 +5418,8 @@ function toggleSfx(){
          b) 页面 load / init / 5 秒后 强制清 3 次；
          c) 所有 open* / close* 函数改走这个接口（下面逐个改）。*/
 var _bodyScrollRef=0;
+var _savedScrollY=0;
+var _bodyLocked=false;
 var _MODAL_IDS=['tutorialModal','themeModal','aboutModal','ioModal','engModal','busyMask','openinbrowserMask','oibMask','detailModal','settingsModal','onboardModal','lifeReviewModal'];
 function _anyModalOpen(){
   for(var i=0;i<_MODAL_IDS.length;i++){
@@ -5406,6 +5427,32 @@ function _anyModalOpen(){
     if(m && (m.style.display==='flex'||m.style.display==='block'||m.style.display==='grid'))return true;
   }
   return false;
+}
+/* iOS（iPhone/iPad Safari）判定：iOS WebKit 下用 overflow:hidden 锁 body 会连带冻结弹窗内部滚动手势，
+   必须改用 position:fixed 锁定法（body-scroll-lock 同款），弹窗内 overflow:auto 才能正常滑动。 */
+var _isIOS=/iP(hone|ad|od)/i.test(navigator.userAgent)||
+  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function _applyBodyLock(lock){
+  var b=document.body,h=document.documentElement;
+  if(lock&&!_bodyLocked){
+    _bodyLocked=true;
+    _savedScrollY=window.pageYOffset||h.scrollTop||0;
+    if(_isIOS){
+      b.style.position='fixed';
+      b.style.top=(-_savedScrollY)+'px';
+      b.style.left='0';b.style.right='0';b.style.width='100%';
+    }
+    b.style.overflow='hidden';
+    h.style.overflow='hidden';h.style.height='100%';
+  }else if(!lock&&_bodyLocked){
+    _bodyLocked=false;
+    if(_isIOS){
+      b.style.position='';b.style.top='';b.style.left='';b.style.right='';b.style.width='';
+    }
+    b.style.overflow='';
+    h.style.overflow='';h.style.height='';
+    try{window.scrollTo(0,_savedScrollY);}catch(_){}
+  }
 }
 function _lockBodyScroll(lock){
   try{
@@ -5415,8 +5462,7 @@ function _lockBodyScroll(lock){
       /* 安全兜底：解锁时若实际没有模态框开着，强制清零，杜绝「弹窗关了但页面滑不动」 */
       if(_bodyScrollRef>0 && !_anyModalOpen())_bodyScrollRef=0;
     }
-    document.body.style.overflow = _bodyScrollRef>0 ? 'hidden' : '';
-    document.documentElement.style.overflowY = _bodyScrollRef>0 ? 'hidden' : 'auto';
+    _applyBodyLock(_bodyScrollRef>0);
   }catch(_){}
 }
 /* 每 3 秒巡检一次：若没有模态框但 body 还被锁，强制解锁（防异常关闭后永久卡死） */
@@ -5424,8 +5470,7 @@ setInterval(function(){
   try{
     if(_bodyScrollRef>0 && !_anyModalOpen()){
       _bodyScrollRef=0;
-      document.body.style.overflow='';
-      document.documentElement.style.overflowY='auto';
+      _applyBodyLock(false);
     }
   }catch(_){}
 },3000);
