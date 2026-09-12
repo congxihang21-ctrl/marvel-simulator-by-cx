@@ -1,24 +1,24 @@
 /* 漫威宇宙·英雄纪元 PWA Service Worker
    策略：缓存游戏核心文件，离线可用，更新时后台刷新 */
-const CACHE = 'marvel-hero-v2.6.1';
+const CACHE = 'marvel-hero-v2.6.2';
 const CORE = [
   './',
   './index.html',
   './manifest.json',
-  './v2.6.1_体验优化版/2.6.1.html',
-  './v2.6.1_体验优化版/css/design-tokens.css',
-  './v2.6.1_体验优化版/css/glass.css',
-  './v2.6.1_体验优化版/css/components.css',
-  './v2.6.1_体验优化版/css/responsive.css',
-  './v2.6.1_体验优化版/js/ai.js',
-  './v2.6.1_体验优化版/js/endingEngine.js',
-  './v2.6.1_体验优化版/js/eventDirector.js',
-  './v2.6.1_体验优化版/js/game_seed.js',
-  './v2.6.1_体验优化版/js/relationshipEngine.js',
-  './v2.6.1_体验优化版/js/worldlineEngine.js',
-  './v2.6.1_体验优化版/js/characterEngine.js',
-  './v2.6.1_体验优化版/js/seed_data.js',
-  './v2.6.1_体验优化版/js/rng.js'
+  './v2.6.2_开档向导版/2.6.2.html',
+  './v2.6.2_开档向导版/css/design-tokens.css',
+  './v2.6.2_开档向导版/css/glass.css',
+  './v2.6.2_开档向导版/css/components.css',
+  './v2.6.2_开档向导版/css/responsive.css',
+  './v2.6.2_开档向导版/js/ai.js',
+  './v2.6.2_开档向导版/js/endingEngine.js',
+  './v2.6.2_开档向导版/js/eventDirector.js',
+  './v2.6.2_开档向导版/js/game_seed.js',
+  './v2.6.2_开档向导版/js/relationshipEngine.js',
+  './v2.6.2_开档向导版/js/worldlineEngine.js',
+  './v2.6.2_开档向导版/js/characterEngine.js',
+  './v2.6.2_开档向导版/js/seed_data.js',
+  './v2.6.2_开档向导版/js/rng.js'
 ];
 
 self.addEventListener('install', e => {

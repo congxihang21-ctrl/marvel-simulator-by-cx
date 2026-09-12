@@ -1,0 +1,96 @@
+/* ============================================================
+   MCU v2.4 · Responsive
+   移动端优先，断点：375 / 390 / 430 / 768 / 1024 / 1280
+   ============================================================ */
+
+/* 基础移动端 (≤ 430px) */
+@media (max-width: 430px) {
+  .page { padding: var(--sp-3); }
+  .home-logo { font-size: 56px; }
+  .game-body { padding: var(--sp-3); }
+  .event-card { padding: var(--sp-4); }
+  .event-title { font-size: 17px; }
+  .origin-stats { grid-template-columns: repeat(4, 1fr); }
+  .status-strip { gap: 6px; }
+  .sc-value { font-size: 12px; }
+}
+
+/* 平板 (≥ 768px) */
+@media (min-width: 768px) {
+  .home-btns { max-width: 360px; }
+  .era-grid { grid-template-columns: repeat(2, 1fr); }
+  .origin-grid { grid-template-columns: repeat(2, 1fr); }
+  .ach-grid { grid-template-columns: repeat(2, 1fr); }
+  .save-grid { grid-template-columns: repeat(2, 1fr); }
+  .status-strip { grid-template-columns: repeat(4, 1fr); }
+  .game-body { max-width: 720px; margin: 0 auto; }
+}
+
+/* 桌面 (≥ 1024px) */
+@media (min-width: 1024px) {
+  .page { padding: var(--sp-6); }
+  .home-wrap { max-width: 1200px; margin: 0 auto; }
+  .era-grid { grid-template-columns: repeat(3, 1fr); }
+  .origin-grid { grid-template-columns: repeat(2, 1fr); }
+  .ach-grid { grid-template-columns: repeat(3, 1fr); }
+  .save-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-body { max-width: 800px; }
+  .char-form { max-width: 520px; }
+}
+
+/* 大屏 (≥ 1440px) */
+@media (min-width: 1440px) {
+  .era-grid { grid-template-columns: repeat(4, 1fr); }
+  .ach-grid { grid-template-columns: repeat(4, 1fr); }
+  .game-body { max-width: 900px; }
+}
+
+/* 横屏优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+  .home-wrap { padding: var(--sp-3); }
+  .home-hero { margin-bottom: var(--sp-4); }
+  .home-logo { font-size: 40px; }
+  .home-btns .btn { padding: 10px 20px; }
+}
+
+/* 安全区适配 */
+@supports (padding: max(0px)) {
+  .game-topbar {
+    padding-top: max(var(--sp-3), env(safe-area-inset-top));
+  }
+  .game-bottom {
+    padding-bottom: max(var(--sp-3), env(safe-area-inset-bottom));
+  }
+}
+
+/* 性能优化：移动端减少 blur */
+@media (max-width: 768px) {
+  .glass-container, .glass-module, .glass-special {
+    backdrop-filter: blur(var(--blur-sm));
+    -webkit-backdrop-filter: blur(var(--blur-sm));
+  }
+  .drawer, .modal-box {
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+  }
+  /* v2.6: 2.6.html 内联元素的移动端 blur 降级 —— 22px → 8px，低端安卓不卡 */
+  .topbar, .panel, .opt, .chip, .modal .box, .btn, .btn-primary, .btn-ghost, .cx-acc-item {
+    --liq-blur: 8px;
+  }
+}
+
+/* 超小屏进一步降级 blur */
+@media (max-width: 430px) {
+  .topbar, .panel, .opt, .chip, .modal .box, .btn, .btn-primary, .btn-ghost, .cx-acc-item {
+    --liq-blur: 5px;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

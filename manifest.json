@@ -2,7 +2,7 @@
   "name": "漫威宇宙·英雄纪元",
   "short_name": "漫威模拟器",
   "description": "沉浸式 AI 剧情模拟器——在漫威电影宇宙里活一次你的人生",
-  "start_url": "./v2.6.1_体验优化版/2.6.1.html",
+  "start_url": "./v2.6.2_开档向导版/2.6.2.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -27,7 +27,7 @@
   "shortcuts": [
     {
       "name": "开始新游戏",
-      "url": "./v2.6.1_体验优化版/2.6.1.html"
+      "url": "./v2.6.2_开档向导版/2.6.2.html"
     }
   ]
 }
