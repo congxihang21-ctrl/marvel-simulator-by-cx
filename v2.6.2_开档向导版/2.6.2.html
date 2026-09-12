@@ -10428,10 +10428,39 @@ if(document.readyState==='loading'){
 }else{
   try{_boot()}catch(_){}
 }
-/* PWA: 注册 Service Worker，支持离线 + 添加到桌面 */
+/* PWA: 注册 Service Worker，支持离线 + 发版自动刷新 */
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('../sw.js').catch(function(){});
+    navigator.serviceWorker.register('../sw.js').then(function(reg){
+      /* 主动检查 SW 更新，绕过浏览器默认 24 小时检查周期 */
+      try{reg.update();}catch(_){}
+      /* 发现新 SW 安装中：安装完自动进入激活，无需用户确认 */
+      reg.addEventListener('updatefound',function(){
+        var nw=reg.installing;
+        if(!nw)return;
+        nw.addEventListener('statechange',function(){
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            /* 新 SW 已就绪且有旧版在运行：请求立即激活（install 里也会 skipWaiting，双重保险）*/
+            try{nw.postMessage({type:'SKIP_WAITING'});}catch(_){}
+          }
+        });
+      });
+    }).catch(function(){});
+    /* 控制器变更：说明新 SW 已接管，刷新页面应用新版（sessionStorage 防止无限刷新） */
+    var _refreshed=false;
+    navigator.serviceWorker.addEventListener('controllerchange',function(){
+      if(_refreshed)return;_refreshed=true;
+      try{sessionStorage.setItem('sw_reload','1');}catch(_){}
+      location.reload();
+    });
+    /* SW 主动通知版本更新 */
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='VERSION_UPDATED'&&!_refreshed){
+        _refreshed=true;
+        try{sessionStorage.setItem('sw_reload','1');}catch(_){}
+        location.reload();
+      }
+    });
   });
 }
 </script>
