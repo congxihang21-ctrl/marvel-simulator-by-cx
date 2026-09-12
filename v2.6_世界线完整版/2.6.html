@@ -1830,6 +1830,22 @@ html,body,div,span,p,button,input,textarea{
 .story-tab .st-y{font-size:9.5px;letter-spacing:.5px;color:var(--fg-2);font-family:Consolas,monospace;line-height:1}
 .story-tab .st-d{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
 .story-tab .st-n{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;line-height:16px;padding:0 4px;border-radius:8px;background:var(--magic);color:#fff;font-size:9.5px;font-weight:800;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.story-tab.key{border-color:rgba(255,90,90,.55)}
+.story-tab.key .st-d{color:#ff8a8a}
+.story-tab.key.on .st-d{color:#ffb0b0}
+.st-key{position:absolute;top:-5px;left:-5px;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a8a,#e0293a);border:1.5px solid var(--bg-1);box-shadow:0 0 8px rgba(255,60,70,.85);animation:keyPulse 2s ease-in-out infinite}
+@keyframes keyPulse{0%,100%{box-shadow:0 0 5px rgba(255,60,70,.6)}50%{box-shadow:0 0 11px rgba(255,60,70,.95)}}
+/* ===== v2.6：首次进入引导浮层 ===== */
+.ob-box{max-width:420px;text-align:center;animation:obPop .28s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes obPop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.ob-dots{display:flex;gap:7px;justify-content:center;margin-bottom:14px}
+.ob-dots i{width:8px;height:8px;border-radius:50%;background:var(--line-3);transition:background .2s,transform .2s}
+.ob-dots i.on{background:var(--accent);transform:scale(1.25);box-shadow:0 0 8px rgba(var(--accent-rgb),.7)}
+.ob-emoji{font-size:46px;line-height:1;margin-bottom:8px;animation:obFloat 2.4s ease-in-out infinite}
+@keyframes obFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.ob-actions{display:flex;gap:10px;justify-content:space-between}
+.ob-actions button{flex:1;padding:11px 14px;border-radius:11px;font-size:14px;font-weight:700;border:1px solid var(--line-2);background:var(--bg-2);color:var(--fg-1)}
+.ob-actions .primary{flex:1.6}
 .story-tab.on{
   border-color:var(--accent);
   background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 20%,var(--bg-2)),color-mix(in srgb,var(--accent) 6%,var(--bg-2)));
@@ -3181,6 +3197,10 @@ document.addEventListener('keydown',function(e){
 <div class="modal about-modal" id="lifeReviewModal" onclick="if(event.target===this)closeLifeReview()" style="z-index:120">
   <div class="box" style="max-width:620px">
     <h3>📜 人生回顾</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button onclick="copyLifeReview(event)">📋 复制全文</button>
+      <button onclick="exportLifeReview()">⬇ 导出 TXT</button>
+    </div>
     <div id="lifeReviewBody" style="margin-top:10px;max-height:65vh;overflow-y:auto"></div>
     <div style="text-align:center;margin-top:14px">
       <button class="primary" onclick="closeLifeReview()">关闭</button>
@@ -3268,8 +3288,29 @@ document.addEventListener('keydown',function(e){
         提示：图片会保存在浏览器本地（localStorage · data:URL），尺寸过大可能影响存档体积，建议 1920×1080 或更小。
       </div>
     </div>
+    <div style="margin-top:16px;padding:14px;border:1px dashed var(--line-2);border-radius:10px;background:var(--bg-1);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1 1 200px">
+        <div class="subh" style="font-size:12.5px;margin-bottom:4px">🔊 音效与震动</div>
+        <div class="dim" style="font-size:12px;line-height:1.6">点亮选项、推进剧情、撞上大事件、解锁成就时播放轻音效；手机端附带轻微震动。</div>
+      </div>
+      <button id="sfxToggleBtn" onclick="toggleSfx()" style="min-width:96px"></button>
+    </div>
     <div style="margin-top:18px;text-align:center">
       <button class="primary" onclick="closeThemePanel()">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= v2.6 首次进入 3 步引导（只出现一次） ================= -->
+<div class="modal" id="onboardModal" onclick="if(event.target===this)finishOnboard()" style="z-index:130;display:none">
+  <div class="box ob-box">
+    <div class="ob-dots" id="obDots"></div>
+    <div class="ob-emoji" id="obEmoji">📜</div>
+    <h3 id="obTitle" style="text-align:center;margin:6px 0 10px">这里是「世界日志」</h3>
+    <p id="obText" style="font-size:14px;line-height:1.85;color:var(--fg-1);margin:0 0 18px"></p>
+    <div class="ob-actions">
+      <button id="obSkip" onclick="finishOnboard()">跳过</button>
+      <button class="primary" id="obNext" onclick="nextOnboard()">下一步</button>
     </div>
   </div>
 </div>
@@ -4040,6 +4081,68 @@ function openLifeReview(){
 function closeLifeReview(){
   var m=$('lifeReviewModal');if(m)m.style.display='none';
   _lockBodyScroll(false);
+}
+/* v2.6：人生回顾 → 纯文本（用于复制 / 导出 TXT） */
+function buildLifeReviewText(){
+  var L=[];
+  var name=(S.setup&&S.setup.name)||'无名者';
+  L.push('════════════════════════════');
+  L.push('  漫威模拟器 · 人生回顾');
+  L.push('════════════════════════════');
+  L.push('姓名：'+name);
+  L.push('时代：'+((S.setup&&S.setup.era)||'—'));
+  L.push('出身：'+((S.setup&&S.setup.birth)||'—'));
+  L.push('当前年龄：'+((S.player&&S.player.年龄)||'—'));
+  L.push('职业：'+((S.player&&S.player.职业)||'—'));
+  L.push('已活回合：'+(S.turn||0)+' 轮');
+  if(S.seedKey)L.push('世界种子：'+S.seedKey);
+  L.push('');
+  var achs=(S.goals&&S.goals.unlockedAchievements)||[];
+  L.push('【🏆 已解锁成就】（'+achs.length+'）');
+  if(!achs.length)L.push('  还没有解锁成就。');
+  achs.forEach(function(a){L.push('  '+String(a.ic||'🏆')+' '+String(a.name||'')+' ['+String(a.tier||'')+'] — '+String(a.desc||''))});
+  L.push('');
+  var ms=(S.goals&&S.goals.milestones)||[];
+  L.push('【🎯 人生里程碑】');
+  if(!ms.length)L.push('  尚未记录重要节点。');
+  ms.slice(0,30).forEach(function(m){L.push('  第 '+(m.turn||0)+' 轮 · '+String(m.at||'')+'  '+String(m.name||''))});
+  L.push('');
+  var evs=(S.events&&S.events['已发生'])||[];
+  L.push('【📰 人生大事】');
+  if(!evs.length)L.push('  人生才刚刚开始。');
+  evs.slice(-30).forEach(function(e){L.push('  '+String(e.time||'')+'  '+String(e.text||''))});
+  L.push('');
+  L.push('—— 由「漫威模拟器」生成 · 作者 CX · 非官方同人作品，漫威IP归属迪士尼/漫威');
+  return L.join('\n');
+}
+function copyLifeReview(evt){
+  try{
+    var txt=buildLifeReviewText();
+    var done=function(){
+      var b=evt&&evt.target;if(b){var o=b.textContent;b.textContent='✅ 已复制';setTimeout(function(){b.textContent=o},1500)}
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(function(){_fallbackCopy(txt);done()});
+    }else{_fallbackCopy(txt);done()}
+  }catch(e){alert('复制失败：'+e.message)}
+}
+function _fallbackCopy(txt){
+  try{
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  }catch(_){}
+}
+function exportLifeReview(){
+  try{
+    var txt=buildLifeReviewText();
+    var name=(S.setup&&S.setup.name)||'无名者';
+    var blob=new Blob(['﻿'+txt],{type:'text/plain;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='漫威人生回顾_'+name+'_'+fmtShort(curDate()).replace(/[^\d\u4e00-\u9fa5]/g,'')+'.txt';
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){try{URL.revokeObjectURL(a.href);a.remove()}catch(_){}},800);
+  }catch(e){alert('导出失败：'+e.message)}
 }
 
 /* ===================== 常量 ===================== */
@@ -5247,9 +5350,21 @@ function renderThemeOptions(){
 function openThemePanel(){
   var m=$('themeModal');if(!m)return;
   renderThemeOptions();
+  try{syncSfxBtn()}catch(_){}
   m.style.display='flex';_lockBodyScroll(true);
 }
 function closeThemePanel(){var m=$('themeModal');if(!m)return;m.style.display='none';_lockBodyScroll(false);}
+/* v2.6：音效开关按钮状态 */
+function syncSfxBtn(){
+  var b=$('sfxToggleBtn');if(!b)return;
+  var on=CX_SFX.isOn();
+  b.textContent=on?'🔊 已开启':'🔇 已关闭';
+  b.className=on?'primary':'';
+}
+function toggleSfx(){
+  try{CX_SFX.toggle()}catch(_){}
+  try{syncSfxBtn()}catch(_){}
+}
 /* ========== v1.5：Body 滚动锁管理器（彻底消灭「某个弹窗关完之后就再也滑不动」）==========
    背景：之前每个 open/close 函数各自写 body.style.overflow='hidden'/''，
    一旦 A 开 → B 开 → A 关，A 关会把 overflow 清空为 '' 而 B 还开着 → 页面能滚动；
@@ -5258,7 +5373,7 @@ function closeThemePanel(){var m=$('themeModal');if(!m)return;m.style.display='n
          b) 页面 load / init / 5 秒后 强制清 3 次；
          c) 所有 open* / close* 函数改走这个接口（下面逐个改）。*/
 var _bodyScrollRef=0;
-var _MODAL_IDS=['tutorialModal','themeModal','aboutModal','ioModal','engModal','busyMask','openinbrowserMask','oibMask','detailModal','settingsModal'];
+var _MODAL_IDS=['tutorialModal','themeModal','aboutModal','ioModal','engModal','busyMask','openinbrowserMask','oibMask','detailModal','settingsModal','onboardModal','lifeReviewModal'];
 function _anyModalOpen(){
   for(var i=0;i<_MODAL_IDS.length;i++){
     var m=document.getElementById(_MODAL_IDS[i]);
@@ -7953,6 +8068,21 @@ function _dayKeyFromTime(t){
   if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
   return '更早';
 }
+/* v2.6：判断某天是不是"关键日"——当天日志有🔴/人生大事件标记，或撞上已发生大事 / 里程碑 */
+function _isKeyDay(dk,entries){
+  try{
+    var i;
+    for(i=0;i<entries.length;i++){
+      var tx=String(entries[i].text||'');
+      if(tx.indexOf('\ud83d\udd34')>=0||tx.indexOf('人生大事件')>=0||tx.indexOf('【大事件】')>=0||tx.indexOf('大事件]')>=0)return true;
+    }
+    var evs=(S&&S.events&&S.events['已发生'])||[];
+    for(i=0;i<evs.length;i++){ if(_dayKeyFromTime(evs[i]&&evs[i].time)===dk)return true; }
+    var ms=(S&&S.goals&&S.goals.milestones)||[];
+    for(i=0;i<ms.length;i++){ if(_dayKeyFromTime(ms[i]&&ms[i].at)===dk)return true; }
+  }catch(_){}
+  return false;
+}
 function _storyEntryHtml(e){
   var div='<div class="entry'+(e.self?' self':'')+'"><div class="t">'+esc(e.time||'')+'</div><div class="b">'+md(String(e.text==null?'':e.text))+'</div>';
   if(e.hints&&e.hints.length){
@@ -7992,17 +8122,21 @@ function renderStory(keepScroll){
     var parts=dk.split('-'),year='',label=dk;
     if(parts.length===3){year=parts[0];label=parseInt(parts[1],10)+'月'+parseInt(parts[2],10)+'日'}
     var n=groups[dk].length;
-    return '<button class="story-tab'+(dk===_storyDay?' on':'')+'" data-key="'+esc(dk)+'" onclick="selectStoryDay(this.getAttribute(\'data-key\'))">'+
+    var keyDay=_isKeyDay(dk,groups[dk]);
+    return '<button class="story-tab'+(dk===_storyDay?' on':'')+(keyDay?' key':'')+'" data-key="'+esc(dk)+'"'+(keyDay?' title="这一天发生了关键事件"':'')+' onclick="selectStoryDay(this.getAttribute(\'data-key\'))">'+
       (year?'<span class="st-y">'+year+'</span>':'')+
       '<span class="st-d">'+label+'</span>'+
+      (keyDay?'<span class="st-key"></span>':'')+
       (n>1?'<span class="st-n">'+n+'</span>':'')+'</button>';
   }).join('');
   var dayEntries=groups[_storyDay]||[];
   var wm=String((dayEntries[0]&&dayEntries[0].time)||'').match(/周./);
   var dp=_storyDay.split('-');
   var dayTitle=(dp.length===3)?(dp[0]+'年'+parseInt(dp[1],10)+'月'+parseInt(dp[2],10)+'日'):_storyDay;
+  var viewKey=_isKeyDay(_storyDay,dayEntries);
   var head='<div class="story-day-hd"><span class="dy">📅 '+esc(dayTitle)+'</span>'+
     (wm?'<span class="dw">'+wm[0]+'</span>':'')+
+    (viewKey?'<span class="dw" style="color:#ff7b7b;font-weight:700">🔴 关键事件日</span>':'')+
     '<span class="dc">这一天 '+dayEntries.length+' 条记录</span></div>';
   el.innerHTML='<div class="story-tabs">'+tabs+'</div><div id="storyList">'+head+dayEntries.map(_storyEntryHtml).join('')+'</div>';
   try{
@@ -8048,6 +8182,44 @@ function updInputPH(){
 }
 /* v2.6：A/B/C 多选状态。CUR_HINTS 一变就自动清空（_lastHk 指纹判断）*/
 var SELECTED_OPTS={}, _lastHk='';
+/* ===== v2.6：CX 音效引擎（Web Audio 实时合成，零音频文件 + 手机震动，可在外观面板关闭） ===== */
+var CX_SFX=(function(){
+  var K='mcu_sfx_on_v1', on=true, actx=null;
+  try{on=localStorage.getItem(K)!=='0'}catch(_){}
+  function ctx(){
+    if(!on)return null;
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+      if(!actx)actx=new AC();
+      if(actx.state==='suspended'){try{actx.resume()}catch(_){}}
+      return actx;
+    }catch(_){return null}
+  }
+  function tone(freq,dur,type,vol,when,slideTo){
+    var c=ctx();if(!c)return;
+    try{
+      var t0=c.currentTime+(when||0);
+      var o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.setValueAtTime(freq,t0);
+      if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,t0+dur);
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(vol||0.1,t0+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+      o.connect(g);g.connect(c.destination);
+      o.start(t0);o.stop(t0+dur+0.03);
+    }catch(_){}
+  }
+  function vib(p){try{if(navigator.vibrate)navigator.vibrate(p)}catch(_){}}
+  return {
+    isOn:function(){return !!on},
+    setOn:function(v){on=!!v;try{localStorage.setItem(K,on?'1':'0')}catch(_){}if(on)this.tick()},
+    toggle:function(){this.setOn(!on);this.syncBtn&&this.syncBtn();return on},
+    tick:function(){tone(660,0.07,'triangle',0.07);vib(8)},
+    go:function(){tone(392,0.1,'sine',0.09,0);tone(523,0.14,'sine',0.08,0.09);vib(12)},
+    big:function(){tone(196,0.28,'sawtooth',0.045,0);tone(262,0.34,'triangle',0.085,0.06);tone(392,0.42,'sine',0.075,0.14);vib([30,40,30])},
+    win:function(){tone(523,0.12,'triangle',0.09,0);tone(659,0.12,'triangle',0.09,0.1);tone(784,0.22,'triangle',0.1,0.2);vib([15,30,15])}
+  };
+})();
 function renderOpts(){
  var h=[],T=['A','B','C','D','E'];
  /* 建议内容变了（进入新一轮）→ 清空点亮状态 */
@@ -8085,7 +8257,7 @@ function renderOpts(){
 function toggleOpt(i){
  try{
   if(!CUR_HINTS||CUR_HINTS[i]==null)return;
-  if(SELECTED_OPTS[i]){delete SELECTED_OPTS[i]}else{SELECTED_OPTS[i]=true}
+  if(SELECTED_OPTS[i]){delete SELECTED_OPTS[i]}else{SELECTED_OPTS[i]=true;try{CX_SFX.tick()}catch(_){}}
   var card=$('optCard_'+i);
   if(card)card.classList.toggle('sel',!!SELECTED_OPTS[i]);
  }catch(_){}
@@ -8341,7 +8513,12 @@ function buildRequest(mode,inp){
   lines.push('═══ 玩家本轮输入 ═══');
   lines.push(inp);
   lines.push('');
-  lines.push('【⏩ 玩家行动回合】时间推进 2～5 天（你按剧情节奏定天数，真实公历推进）。围绕「'+String(inp||'').slice(0,30)+'」展开：可先用 2～3 句概括日常进展，再落到最有戏的场景收尾。narrative 300～450 字，不写流水账；除响应行动外有 ~15% 概率加一件日常小事，大事件按冷却约束。');
+  /* v2.6：玩家用「；同时，」合并了多个点亮的方向 → 明确要求按顺序处理，不能揉成一团 */
+  if(String(inp||'').indexOf('；同时，')>=0){
+   lines.push('【⏩ 玩家行动回合 · 多行动】玩家这回合同时想做几件事（用「；同时，」分隔）。请严格按列出的先后顺序逐一处理：每件事都要给出真实的过程与结果（成功/失败/被拒都可能），彼此之间允许有因果影响，但禁止把多件事揉成一句话或互相张冠李戴。时间推进 2～5 天（真实公历），narrative 350～500 字，最后落在最有戏的那件事的场景收尾。');
+  }else{
+   lines.push('【⏩ 玩家行动回合】时间推进 2～5 天（你按剧情节奏定天数，真实公历推进）。围绕「'+String(inp||'').slice(0,30)+'」展开：可先用 2～3 句概括日常进展，再落到最有戏的场景收尾。narrative 300～450 字，不写流水账；除响应行动外有 ~15% 概率加一件日常小事，大事件按冷却约束。');
+  }
  }
  /* =============== v2.6 · 叙事优化指令（去重后保留核心：专有名词解释/文风/省算力）=============== */
  try{
@@ -8465,7 +8642,13 @@ function applyReply(o){
       var _s=String(o.events_log[_eli]);
       if(_s.indexOf('人生大事件')>=0 || _s.indexOf('\ud83d\udd34')>=0){hadBig=true;break}
     }
-    if(hadBig)S._lastBigEventTurn = Math.max(S._lastBigEventTurn||0, S.turn+1);
+    if(hadBig){S._lastBigEventTurn = Math.max(S._lastBigEventTurn||0, S.turn+1);try{CX_SFX.big()}catch(_){}}
+  }catch(_){}
+  /* v2.6：本回合解锁成就 → 庆祝音效 */
+  try{
+    var _au=o.achievements_unlock;
+    if(Array.isArray(_au)&&_au.length){try{CX_SFX.win()}catch(_){}}
+    else if(o.narrative&&(/\ud83d\udd34/.test(o.narrative)||o.narrative.indexOf('人生大事件')>=0)){try{CX_SFX.big()}catch(_){}}
   }catch(_){}
  }
  var d2=curDate(),tm=fmtShort(d2);
@@ -8511,6 +8694,7 @@ async function doTurn(mode){
    if(!inp){try{alert('先点亮上面的 A/B/C 方向，或在下面写一句行动；什么都不做就点「🌙 自行推进」。')}catch(_){}return}
   }
   try{SELECTED_OPTS={}}catch(_){}   /* v2.6：开始推进，清空多选点亮 */
+  try{if(mode!=='check')CX_SFX.go()}catch(_){}  /* v2.6：推进音效 */
   if(S._needCheck&&mode!=='check'){mode='check';mode_last='check'}
   var eng=resolveEngine();
   /* ① 路由决定直接离线：off / rec_offline / adv_empty */
@@ -9207,6 +9391,13 @@ function normalizeSave(o){
    if(typeof o.age!=='number')o.age=(o.player&&o.player['年龄'])?parseInt(o.player['年龄'])||18:18;
    /* 人际关系格式迁移：老存档 rel 是数组，新版同时支持 relations 对象 */
    if(!o.relations||typeof o.relations!=='object')o.relations={};
+   /* v2.6.3：装备 / 能力 / 组织字段补齐（老存档缺失会导致面板或装备引擎报错）*/
+   if(!Array.isArray(o.equipment))o.equipment=[];
+   if(o.ability==null||typeof o.ability==='undefined')o.ability=o.player&&o.player['战斗能力']?o.player['战斗能力']:'普通人';
+   if(o.org==null)o.org=[];
+   if(!Array.isArray(o.chapters))o.chapters=[];
+   /* stats 兜底交给 ensureStats()，这里仅保证不是非法数组/字符串 */
+   if(o.stats!=null&&(Array.isArray(o.stats)||typeof o.stats!=='object'))o.stats=null;
  }catch(_){}
  /* 导入存档时补全作者字段，即使存档被人手动抠掉也会自动回填 CX */
  try{
@@ -9344,6 +9535,40 @@ function handleFile2(ev){
 /* ===================== 首页 ↔ 游戏 切换 ===================== */
 /* 进入游戏：统一入口。显示游戏界面 + 底部栏（只在进入游戏后出现，首页不显示）。
    ⚠ 关键：此处绝不能再递归调用 enterGame()，否则会栈溢出导致页面卡死/无响应。 */
+/* ===================== v2.6 · 首次进入 3 步引导（localStorage 记一次） ===================== */
+var OB_STEPS=[
+ {ic:'📜',t:'这里是「世界日志」',d:'AI 写的每一段剧情都记录在这里，而且已经按"天"分好了。顶部日期可以左右滑动切换；<b>左上角带红点的日子</b>，说明那天发生了关键大事件，点一下就能跳回去看。'},
+ {ic:'💡',t:'点亮你想做的方向',d:'每回合系统会给出 <b>A / B / C 三个方向</b>。点一下卡片就会"亮灯"选中，可以同时点亮好几个，再点一下取消。下面的输入框还能自己补充或改写行动，留空也行。'},
+ {ic:'⚡',t:'开始推进世界',d:'选好后点「<b>✅ 按选择推进</b>」；什么都不想做就点「🌙 自行推进」，想直奔剧情就点「⚡ 到有事件发生」。更长跨度的"周/月/季/年"在下面小字入口里。'}
+];
+var _obStep=0;
+function maybeStartOnboard(){
+ try{
+   if(localStorage.getItem('mcu_ob_v26')==='1')return;
+   _obStep=0;showObStep();
+   var m=$('onboardModal');if(m){m.style.display='flex';_lockBodyScroll(true)}
+ }catch(_){}
+}
+function showObStep(){
+ try{
+   var s=OB_STEPS[_obStep];
+   $('obEmoji').textContent=s.ic;
+   $('obTitle').textContent=s.t;
+   $('obText').innerHTML=s.d;
+   $('obDots').innerHTML=OB_STEPS.map(function(_,i){return '<i class="'+(i===_obStep?'on':'')+'"></i>'}).join('');
+   var nx=$('obNext');if(nx)nx.textContent=(_obStep>=OB_STEPS.length-1)?'开始游玩 →':'下一步';
+ }catch(_){}
+}
+function nextOnboard(){
+ _obStep++;
+ if(_obStep>=OB_STEPS.length){finishOnboard();return}
+ showObStep();
+}
+function finishOnboard(){
+ try{localStorage.setItem('mcu_ob_v26','1')}catch(_){}
+ var m=$('onboardModal');if(m)m.style.display='none';
+ try{_lockBodyScroll(false)}catch(_){}
+}
 function enterGame(){
  var setupScreen=$('setupScreen'),gameScreen=$('gameScreen');
  if(setupScreen)setupScreen.style.display='none';
@@ -9363,6 +9588,8 @@ function enterGame(){
  try{restoreModeFromSaved()}catch(_){}
  applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
  window.scrollTo(0,0);
+ /* v2.6：首次进入游戏弹 3 步引导（本机只弹一次）*/
+ try{setTimeout(maybeStartOnboard,500)}catch(_){}
 }
 function backToHome(){
  try{save()}catch(e){}
