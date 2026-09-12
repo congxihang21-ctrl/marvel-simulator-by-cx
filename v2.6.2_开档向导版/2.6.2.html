@@ -2079,12 +2079,29 @@ html,body,div,span,p,button,input,textarea{
     linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.22) 60%, transparent),
     linear-gradient(135deg, rgba(var(--accent-rgb),.07), rgba(var(--accent-2-rgb),.05));
 }
-/* ---- 液态玻璃基类（统一的饱和雾化+双层描边）---- */
-.topbar, .panel, .opt, .modal .box, .chip,
+/* ---- 液态玻璃基类（统一的饱和雾化+双层描边）----
+   注意：.modal .box 不挂 backdrop-filter —— 它本身是 overflow:auto 的滚动容器，
+   iOS Safari 在「滚动容器 + backdrop-filter」组合下会每帧重新模糊，滚动即冻结/卡死（iPhone15PM 实测）。
+   box 自身背景不透明，视觉无损。*/
+.topbar, .panel, .opt, .chip,
 .btn, .btn-primary, .btn-ghost{
   position:relative; isolation:isolate;
   -webkit-backdrop-filter: blur(var(--liq-blur)) saturate(var(--liq-sat));
   backdrop-filter: blur(var(--liq-blur)) saturate(var(--liq-sat));
+}
+/* 滚动弹窗盒子：所有端强制关闭模糊，用不透明实色，杜绝 iOS 滚动卡死（优先级压过后面的 !important）*/
+.modal .box{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  background:var(--liq-modal-bg),#0c131c;
+}
+/* 触屏设备（iPhone/安卓）：弹窗内部任何元素的模糊也一并关闭——
+   滚动容器内只要有一个带 backdrop-filter 的后代，iOS WebKit 滚动时仍会逐帧重绘导致冻结。弹窗底色不透明，视觉无损。*/
+@media (pointer:coarse){
+  .modal .box, .modal .box *{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
 }
 /* 扫光 shimmer：用伪元素做流动高光条 */
 .panel::after, .opt::before, .topbar::after, .modal .box::after,
@@ -2912,7 +2929,7 @@ html,body,div,span,p,button,input,textarea{
 .opt:hover{background:rgba(157,124,255,.14)!important;border-color:rgba(157,124,255,.4)!important;transform:translateX(3px);}
 button.primary,button.btn-primary{background:linear-gradient(135deg,rgba(157,124,255,.9),rgba(124,92,255,.9))!important;border:none!important;border-radius:10px!important;box-shadow:0 4px 16px rgba(157,124,255,.3);}
 button.primary:hover,button.btn-primary:hover{box-shadow:0 6px 24px rgba(157,124,255,.45);transform:translateY(-1px);}
-.modal .box{background:linear-gradient(160deg,rgba(30,30,45,.92),rgba(15,15,25,.92))!important;border:1px solid rgba(157,124,255,.2)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important;box-shadow:0 20px 60px rgba(0,0,0,.5)!important;}
+.modal .box{background:linear-gradient(160deg,rgba(30,30,45,.97),rgba(15,15,25,.99))!important;border:1px solid rgba(157,124,255,.2)!important;box-shadow:0 20px 60px rgba(0,0,0,.5)!important;}
 #gameScreen{background:radial-gradient(ellipse at top,rgba(30,25,50,.4),transparent 60%),linear-gradient(180deg,#0a0a12,#0d0d18)!important;}
 .screen{background:radial-gradient(ellipse at top,rgba(40,30,60,.3),transparent 60%),linear-gradient(180deg,#0a0a12,#0d0d18)!important;}
 #story .log-item{background:rgba(255,255,255,.02);border-left:3px solid rgba(157,124,255,.3);padding:10px 12px;margin:8px 0;border-radius:0 8px 8px 0;}
@@ -3578,6 +3595,33 @@ document.addEventListener('keydown',function(e){
       if(ENV.isIOS||ENV.isHarmony||ENV.isX5) e.preventDefault();
     }catch(_){}
   },_passiveOpt?{passive:false,capture:false}:false);
+
+  /* ---------- 7.5 滑动误触抑制（iPhone 专项）----------
+     现象：在外观等弹窗内上下滑动时，手指起点压在主题卡/按钮上，iOS 惯性滚动结束后仍派发 click，
+     误触 applyTheme() 之类，触发整页重绘并让随后的「完成/✕」点击失灵。
+     做法：记录 touch 起点，移动超过 12px 即标记为「滑动」，拦截该手势落在弹窗内的下一次 click；轻点不受影响。*/
+  (function(){
+    var sx=0,sy=0,swiped=false,armed=false;
+    document.addEventListener('touchstart',function(e){
+      swiped=false;armed=false;
+      if(e.touches&&e.touches[0]){sx=e.touches[0].clientX;sy=e.touches[0].clientY;}
+    },{passive:true,capture:true});
+    document.addEventListener('touchmove',function(e){
+      if(swiped||!e.touches||!e.touches[0])return;
+      var dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+      if(dx*dx+dy*dy>144){swiped=true;armed=true;} /* 12px */
+    },{passive:true,capture:true});
+    document.addEventListener('touchend',function(){
+      /* 给惯性滚动留一点判定窗口，click 通常在 touchend 后立即派发 */
+      if(swiped){setTimeout(function(){armed=false;swiped=false;},350);}
+    },{passive:true,capture:true});
+    document.addEventListener('click',function(e){
+      if(armed&&e.target&&e.target.closest&&e.target.closest('.modal')){
+        try{e.stopPropagation();e.preventDefault();}catch(_){}
+        armed=false;
+      }
+    },true);
+  })();
 
   /* ---------- 8. iOS Safari 键盘弹起修复 ---------- */
   var _fixKB=function(){
