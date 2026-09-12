@@ -659,6 +659,7 @@ li{margin:3px 0;font-size:13px;line-height:1.7}
 /* v2.6：AI 流式撰写中的条目 —— 带闪烁光标 */
 .stream-entry{border-left-color:var(--accent)!important;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 6%,transparent),transparent 80%)!important}
 .stream-entry .t{color:var(--accent)!important;font-weight:700}
+.stream-b{white-space:pre-wrap;word-break:break-word}
 .stream-b::after{content:'▋';display:inline-block;margin-left:2px;color:var(--accent);animation:streamCursor 1s step-end infinite;vertical-align:baseline}
 @keyframes streamCursor{0%,100%{opacity:1}50%{opacity:0}}
 .foot{text-align:center;color:#55636f;font-size:11.5px;padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
@@ -715,8 +716,28 @@ li{margin:3px 0;font-size:13px;line-height:1.7}
   box-shadow:0 1px 0 rgba(255,255,255,.05) inset;
 }
 .opt .txt{flex:1;color:var(--fg-1);font-size:14px;line-height:1.62;font-weight:500}
+/* ===== v2.6：A/B/C 多选点亮态（金色描边 + 呼吸发光 + 右上对勾） ===== */
+.opt.sel{
+  border-color:var(--accent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 16%,var(--bg-2)),color-mix(in srgb,var(--accent) 5%,var(--bg-2)) 70%);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 20px rgba(var(--accent-rgb),.38),var(--shadow-xs);
+  animation:optGlowPulse 1.8s ease-in-out infinite;
+}
+.opt.sel .tag{background:var(--accent);color:#0b1219;border-color:var(--accent)}
+.opt.sel::before{content:'✓';position:absolute;top:9px;right:11px;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;background:var(--accent);color:#0b1219;font-size:11px;font-weight:900;box-shadow:0 0 10px rgba(var(--accent-rgb),.85)}
+@keyframes optGlowPulse{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 16px rgba(var(--accent-rgb),.30),var(--shadow-xs)}50%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 70%,transparent),0 0 26px rgba(var(--accent-rgb),.5),var(--shadow-xs)}}
+/* ===== v2.6：精简后的行动按钮行 ===== */
+.actrow-v2{display:flex;gap:9px;flex-wrap:wrap;align-items:stretch;margin-top:12px}
+.actrow-v2 button{flex:1 1 auto;min-width:104px;padding:12px 12px;font-size:14px;font-weight:700;border-radius:12px;border:1px solid var(--line-2);background:var(--bg-2);color:var(--fg-0);transition:transform .1s,box-shadow .18s,filter .18s}
+.actrow-v2 button:active{transform:scale(.97)}
+.actrow-v2 .act-main{flex:2 1 190px;font-size:15px}
+.act-world{border-color:rgba(94,207,255,.45)!important;color:#9fd0ff!important;background:linear-gradient(135deg,rgba(94,207,255,.14),transparent)!important}
+.act-next{border-color:rgba(157,124,255,.5)!important;color:#d9ccff!important;background:linear-gradient(135deg,rgba(157,124,255,.16),rgba(143,224,160,.10))!important}
+.actrow-more{margin-top:9px;text-align:center}
+.actrow-more button{font-size:12px;color:var(--fg-2);padding:6px 12px;border-radius:9px}
+.actrow-more button:hover{color:var(--fg-0)}
 .actrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
-#playerInput{min-height:74px}
+#playerInput{min-height:64px}
 
 /* ===================== chip · 圆角胶囊（选中金底描边+微发光）===================== */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 3px}
@@ -1786,6 +1807,40 @@ html,body,div,span,p,button,input,textarea{
 }
 #body_story{max-height:min(640px,74vh) !important;overflow:auto !important;-webkit-overflow-scrolling:touch;padding:4px 0 44px 0}
 #body_story .entry:last-child{margin-bottom:0}
+/* ===== v2.6：世界日志 · 日期选项卡（吸顶横向时间轴） ===== */
+.story-tabs{
+  position:sticky;top:-4px;z-index:8;
+  display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;
+  padding:8px 6px 10px;margin:0 0 6px;
+  background:linear-gradient(180deg,var(--bg-1) 78%,transparent);
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent);
+}
+.story-tabs::-webkit-scrollbar{height:4px}
+.story-tabs::-webkit-scrollbar-thumb{background:var(--line-3);border-radius:4px}
+.story-tab{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;
+  min-width:58px;padding:7px 11px;border-radius:11px;
+  border:1px solid var(--line-2);background:var(--bg-2);color:var(--fg-1);
+  font-family:inherit;transition:border-color .18s,background .18s,box-shadow .18s,transform .1s;
+  position:relative;
+}
+.story-tab:active{transform:scale(.95)}
+.story-tab .st-y{font-size:9.5px;letter-spacing:.5px;color:var(--fg-2);font-family:Consolas,monospace;line-height:1}
+.story-tab .st-d{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap}
+.story-tab .st-n{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;line-height:16px;padding:0 4px;border-radius:8px;background:var(--magic);color:#fff;font-size:9.5px;font-weight:800;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.story-tab.on{
+  border-color:var(--accent);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 20%,var(--bg-2)),color-mix(in srgb,var(--accent) 6%,var(--bg-2)));
+  color:var(--fg-0);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 50%,transparent),0 0 14px rgba(var(--accent-rgb),.32);
+}
+.story-tab.on .st-y{color:var(--accent)}
+.story-day-hd{display:flex;align-items:baseline;gap:9px;margin:2px 0 10px;padding:0 2px}
+.story-day-hd .dy{font-size:14px;font-weight:800;color:var(--accent)}
+.story-day-hd .dw{font-size:11.5px;color:var(--fg-2)}
+.story-day-hd .dc{font-size:11px;color:var(--fg-2);margin-left:auto}
 /* 手机端底部安全区 + 64px：iOS 小横条 / 安卓手势条 不盖住日志最后一句（v2.3 复核：再 + 2px 避免华为鸿蒙圆形手势条） */
 @media(max-width:720px){
   #body_story{padding:4px 0 64px 0}
@@ -2670,36 +2725,18 @@ html,body,div,span,p,button,input,textarea{
     <div class="panel panel-story"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>📜 世界日志<span class="ptime" id="time_story">—</span></h3>
       <div class="body" id="body_story"><div id="story"></div></div></div>
 
-    <div class="panel panel-action"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>⚡ 我的行动 · 此刻<span class="ptime" id="time_action">—</span></h3>
+    <div class="panel panel-action"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>⚡ 我的行动<span class="ptime" id="time_action">—</span></h3>
       <div class="body" id="body_action" style="max-height:none">
-      <div class="easy-go-bar" id="easyGoBar">
-        <button class="easy-go-main" onclick="locked('doTurn',function(){try{if(CUR_HINTS&&CUR_HINTS[0]){var pi=$('playerInput');if(pi&&!pi.value.trim())pi.value=CUR_HINTS[0];doTurn('normal')}else{doTurn('world')}}catch(e){console.warn(e)}},900)" title="如果填了行动就执行；没填就自动走世界轮">
-          <span class="ic">⏭️</span>
-          <span>继续推进<div class="sub">点一下就行 · 推荐新手一直按它</div></span>
-        </button>
-        <div class="easy-go-side">
-          <button class="easy-world-btn" onclick="doTurn('world')" title="不做选择，让时间先往前走几天，世界和身边人都会自己动起来">🌙 先过几天再说</button>
-          <button class="easy-skip-btn" onclick="doTurn('nextevent')" title="跳过日常，直接快进到下一件有故事的事那天">⚡ 跳到有事情发生</button>
-        </div>
-      </div>
-      <div class="opthead"><span class="lbl">【系统建议】</span><span class="tip">点击选项直接推进 ｜ 或在下方自己写</span></div>
+      <div class="opthead"><span class="lbl">【系统建议】可多选</span><span class="tip">点亮你想做的方向（可同时选几个），再点「按选择推进」</span></div>
       <div id="opts"></div>
-      <div class="subh" style="margin-top:10px">✍ 自定义行动</div>
-      <!-- Beta v2.0：D 卡「自己写一个」点开后展开的自定义区（简易模式收起/专家模式常驻）-->
-      <div class="easy-custom" id="easyCustom">
-        <div class="ec-hint">✍ 写下你想做的事（想干嘛都行），然后点「就这么做」：</div>
-        <textarea id="playerInput" placeholder="例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班 / 替汤米去一趟海军征兵处……（Ctrl+Enter 快速推进）"></textarea>
-        <div class="ec-actions">
-          <button class="primary" onclick="locked('doTurn',function(){doTurn('normal')},700)">✅ 就这么做（推进剧情）</button>
-          <button onclick="try{toggleEasyCustom(false)}catch(_){}">收起</button>
-        </div>
+      <div class="subh" style="margin-top:10px">✍ 自己补充（可留空，也会和上面点亮的方向一起生效）</div>
+      <textarea id="playerInput" placeholder="例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班……（Ctrl+Enter 快速推进）"></textarea>
+      <div class="actrow-v2">
+        <button class="primary act-main" id="btnDo" onclick="doSelectedAction()" title="把点亮的方向和你写的行动一起执行">✅ 按选择推进</button>
+        <button class="act-world" onclick="locked('doTurn',function(){doTurn('world')},700)" title="不做选择，让时间自己往前走几天，世界和身边人会自己动起来">🌙 自行推进</button>
+        <button class="act-next" onclick="locked('doTurn',function(){doTurn('nextevent')},700)" title="跳过日常，直接快进到下一件有故事的事那天">⚡ 到有事件发生</button>
       </div>
-      <div class="actrow">
-        <button class="primary" style="font-size:15px;padding:10px 22px" id="btnGo" onclick="var pi=$('playerInput');var inp=(pi?pi.value:'').trim();if(inp){doTurn('normal')}else{doTurn('world')}" title="填了行动就执行；没填就让世界自己运转，事件会找上门">▶ 推进</button>
-        <button onclick="doTurn('world')" title="不做选择，让时间先往前走，世界和身边人都会自己动起来">🌙 先过几天</button>
-        <button onclick="openSkipMenu()" title="跳到 1 周 / 1 月 / 1 季，附带世界总结与身边人动态">🗓 时间快进</button>
-        <button onclick="doTurn('nextevent')" title="直接跳过到下一个随机事件 / 大事件发生的那一刻">⚡ 跳到有事情发生</button>
-      </div>
+      <div class="actrow-more"><button onclick="openSkipMenu()" title="快进一周 / 一月 / 一季 / 一年，附带世界总结">🗓 长时间快进（周 / 月 / 季 / 年）</button></div>
     </div></div>
   </div>
 
@@ -3512,8 +3549,7 @@ document.addEventListener('keydown',function(e){
     /* Ctrl+Enter → 推进（输入框内才触发）*/
     if(isInput && (e.ctrlKey||e.metaKey) && e.keyCode===13){
       e.preventDefault();
-      var btn=$('btnGo');
-      if(btn){try{btn.click()}catch(_){}}
+      try{doSelectedAction()}catch(_){}
       return;
     }
     /* Ctrl+S → 存档（全局） */
@@ -5875,11 +5911,11 @@ async function callApi(messages,maxTok){
         var firstByte = true;
         /* v2.6：流式剧情直接写入世界日志 */
         var streamDiv = null;
-        var storyEl = $('story');
+        var storyEl = $('storyList')||$('story');
         if(storyEl){
           streamDiv = document.createElement('div');
-          streamDiv.className = 'entry self stream-entry';
-          streamDiv.innerHTML = '<div class="t">AI 撰写中…</div><div class="b stream-b"></div>';
+          streamDiv.className = 'entry stream-entry';
+          streamDiv.innerHTML = '<div class="t">✍ AI 正在撰写这段剧情…</div><div class="b stream-b">世界正在推进，请稍候…</div>';
           storyEl.appendChild(streamDiv);
           try{ var bs=$('body_story'); if(bs) bs.scrollTop = bs.scrollHeight; }catch(_){}
         }
@@ -5916,10 +5952,10 @@ async function callApi(messages,maxTok){
                 if(delta){
                   fullText += delta;
                   if(firstByte){firstByte=false;try{_bumpBusySSE(0)}catch(_){}}
-                  /* v2.6：流式文字实时写入世界日志 */
+                  /* v2.6：只把半截 JSON 里的 narrative 抠出来显示，避免玩家看到 JSON 花括号乱码 */
                   if(streamDiv){
                     var sb = streamDiv.querySelector('.stream-b');
-                    if(sb){ sb.textContent = fullText; }
+                    if(sb){ var peek=_ssePeekNarrative(fullText); sb.textContent = peek || '世界正在推进，请稍候…'; }
                     try{ var bs2=$('body_story'); if(bs2) bs2.scrollTop = bs2.scrollHeight; }catch(_){}
                   }
                   if(bt){
@@ -7909,37 +7945,77 @@ function applyGoalsUpdate(o){
     return gotChange;
   }catch(e){console.warn('applyGoalsUpdate',e);return false}
 }
-/* v2.6：增量渲染 —— 只追加新条目，不全量重建（长存档大幅提速） */
-var _renderedLogCount = 0;
-function resetRenderStory(){ _renderedLogCount = 0; }
-function renderStory(){
+/* ===== v2.6：世界日志按"天"分选项卡（替代旧的纯上下滚动） ===== */
+var _storyDay='', _storyPrevLatest='', _storyLastSig='';
+function resetRenderStory(){ _storyDay=''; _storyPrevLatest=''; _storyLastSig=''; }
+function _dayKeyFromTime(t){
+  var m=String(t||'').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})\D/);
+  if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+  return '更早';
+}
+function _storyEntryHtml(e){
+  var div='<div class="entry'+(e.self?' self':'')+'"><div class="t">'+esc(e.time||'')+'</div><div class="b">'+md(String(e.text==null?'':e.text))+'</div>';
+  if(e.hints&&e.hints.length){
+    div+='<div class="hints">当时的方向：'+e.hints.slice(0,3).map(function(x){return esc(String(x))}).join(' ／ ')+'</div>';
+  }
+  return div+'</div>';
+}
+function selectStoryDay(k){
+  _storyDay=k;
+  renderStory(true);
+}
+function renderStory(keepScroll){
   var el=$('story');
-  var log=S.log||[];
-  /* 全量重建：首次渲染或存档加载后 */
-  if(_renderedLogCount===0 || _renderedLogCount>log.length){
-    el.innerHTML='';
-    _renderedLogCount=0;
-  }
-  /* 只追加新增的条目 */
-  for(var i=_renderedLogCount;i<log.length;i++){
-    var e=log[i];
-    var last=(i===(log.length-1));
-    var div=document.createElement('div');div.className='entry'+(e.self?' self':'');
-    var t=document.createElement('div');t.className='t';t.textContent=e.time||'';
-    div.appendChild(t);
-    var b=document.createElement('div');b.className='b';b.innerHTML=md(e.text);
-    div.appendChild(b);
-    if(e.hints&&e.hints.length&&!last){
-      var h=document.createElement('div');h.className='hints';
-      h.textContent='当时的方向：'+e.hints.join(' ／ ');
-      div.appendChild(h);
+  if(!el)return;
+  var log=(S&&S.log)||[];
+  if(!log.length){el.innerHTML='<div class="dim">还没有任何记录。推进时间后，这里会按日期记录世界的变化。</div>';return}
+  /* 按天分组（log 按时间顺序，order 即日期升序）*/
+  var groups={},order=[];
+  log.forEach(function(e){
+    var dk=_dayKeyFromTime(e.time);
+    if(!groups[dk]){groups[dk]=[];order.push(dk)}
+    groups[dk].push(e);
+  });
+  var latest=order[order.length-1]||'';
+  if(!_storyDay||!groups[_storyDay]){_storyDay=latest}
+  else if(_storyDay===_storyPrevLatest&&latest!==_storyPrevLatest){_storyDay=latest} /* 出新一天且在看最新 → 自动跟随 */
+  var onLatest=(_storyDay===latest);
+  _storyPrevLatest=latest;
+  /* 签名守卫：日志与所选日期都没变就不重建（避免切主题等无关渲染导致闪烁/滚动跳动）*/
+  var lastT=(log[log.length-1]&&log[log.length-1].time)||'';
+  var sig=log.length+'|'+lastT+'|'+_storyDay;
+  if(!keepScroll && sig===_storyLastSig && el.getAttribute('data-built')==='1')return;
+  _storyLastSig=sig;
+  el.setAttribute('data-built','1');
+  /* 顶部日期选项卡 */
+  var tabs=order.map(function(dk){
+    var parts=dk.split('-'),year='',label=dk;
+    if(parts.length===3){year=parts[0];label=parseInt(parts[1],10)+'月'+parseInt(parts[2],10)+'日'}
+    var n=groups[dk].length;
+    return '<button class="story-tab'+(dk===_storyDay?' on':'')+'" data-key="'+esc(dk)+'" onclick="selectStoryDay(this.getAttribute(\'data-key\'))">'+
+      (year?'<span class="st-y">'+year+'</span>':'')+
+      '<span class="st-d">'+label+'</span>'+
+      (n>1?'<span class="st-n">'+n+'</span>':'')+'</button>';
+  }).join('');
+  var dayEntries=groups[_storyDay]||[];
+  var wm=String((dayEntries[0]&&dayEntries[0].time)||'').match(/周./);
+  var dp=_storyDay.split('-');
+  var dayTitle=(dp.length===3)?(dp[0]+'年'+parseInt(dp[1],10)+'月'+parseInt(dp[2],10)+'日'):_storyDay;
+  var head='<div class="story-day-hd"><span class="dy">📅 '+esc(dayTitle)+'</span>'+
+    (wm?'<span class="dw">'+wm[0]+'</span>':'')+
+    '<span class="dc">这一天 '+dayEntries.length+' 条记录</span></div>';
+  el.innerHTML='<div class="story-tabs">'+tabs+'</div><div id="storyList">'+head+dayEntries.map(_storyEntryHtml).join('')+'</div>';
+  try{
+    var onTab=el.querySelector('.story-tab.on');
+    if(onTab&&onTab.scrollIntoView)onTab.scrollIntoView({inline:'center',block:'nearest'});
+  }catch(_){}
+  try{
+    var st=$('body_story');
+    if(st){
+      if(keepScroll&&!onLatest){st.scrollTop=0}
+      else if(onLatest){st.scrollTop=st.scrollHeight}
     }
-    el.appendChild(div);
-  }
-  _renderedLogCount=log.length;
-  if(!log.length){
-    el.innerHTML='<div class="dim">还没有任何记录。</div>';
-  }
+  }catch(_){}
 }
 /* ===================== v1.8 · 双模式系统（简易 / 专家）核心函数 =====================
    原则：玩法内核 100% 一致，只改「UI呈现方式 / 操作复杂度 / 新手引导密度 / hints口语化标签」
@@ -7960,79 +8036,81 @@ function restoreModeFromSaved(){}
 function updInputPH(){
   try{
     var pi=$('playerInput');if(!pi)return;
-    var m=getMode();
     var hs=(CUR_HINTS&&CUR_HINTS.length)?CUR_HINTS.slice(0,3):[];
     var ph='';
-    if(m==='easy'){
-      if(!hs.length){
-        ph='（可选·不填也行）想做点什么特别的事？写在这里～例：给爸妈做一顿饭 / 去公园散步 / 去逛逛附近的商场。';
-      }else{
-        ph='（可选·不填也行）写一些上面 3 张卡片里没有提到的事。想做什么就写什么～不知道写啥就别写，直接点上面的大按钮吧！';
-      }
+    if(!hs.length){
+      ph='（可留空）想做点什么？写在这里，或直接点下方「自行推进」。例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班……（Ctrl+Enter 快速推进）';
     }else{
-      if(!hs.length){
-        ph='例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班 / 去地下室翻旧箱子……（Ctrl+Enter 快速推进）';
-      }else{
-        var T=['A','B','C'];
-        ph='你也可以直接点击上面 ' + (T.slice(0,hs.length).join(' / ')) + ' 选项填入，在此基础上自由改写。例：' +
-           hs.map(function(x,i){return '【'+T[i]+'改】'+String(x).slice(0,14)+(String(x).length>14?'…':'')}).join(' / ')+
-           ' 或写完全不同的行动（Ctrl+Enter 快速推进）';
-      }
+      ph='可先点亮上面的 A/B/C 方向，也能在这里补充或改写。留空则只执行点亮的方向；都没选就会自行推进。（Ctrl+Enter 快速推进）';
     }
     pi.placeholder=ph;
   }catch(_){}
 }
+/* v2.6：A/B/C 多选状态。CUR_HINTS 一变就自动清空（_lastHk 指纹判断）*/
+var SELECTED_OPTS={}, _lastHk='';
 function renderOpts(){
  var h=[],T=['A','B','C','D','E'];
- var m=getMode();
+ /* 建议内容变了（进入新一轮）→ 清空点亮状态 */
+ var hk='';try{hk=JSON.stringify(CUR_HINTS)}catch(_){}
+ if(hk!==_lastHk){SELECTED_OPTS={};_lastHk=hk}
  if(!CUR_HINTS||!CUR_HINTS.length){
-  if(m==='easy'){
-   /* Beta v2.0：无建议时 = 1 张大推进卡 + 1 张 D 自定义卡，凑成 2×2 网格的下半格 */
-   h.push('<div class="opt opt-go" onclick="locked(\'doTurn\',function(){doTurn(\'world\')},900)"><div class="tag">▶</div><div class="txt">先过几天再说<div class="d-sub">让时间自己往前走几天，故事会找上门来</div></div></div>');
-   h.push('<div class="opt opt-d" onclick="toggleEasyCustom(true)"><div class="tag">✍</div><div class="txt">我想自己做点什么<div class="d-sub">暂时没想好？点这里亲自写一句行动</div></div></div>');
-  }else{
-   h.push('<div class="dim">暂无建议。点「▶ 推进」或「⏭ 世界自行推进」后，系统会给出三个方向。</div>');
-  }
+   h.push('<div class="dim">还没有方向建议。点下方「🌙 自行推进」或「⚡ 到有事件发生」，系统会给你三个方向。</div>');
  }else{
-  if(m==='easy'){
-    /* Beta v2.2 · 简易模式：选项顶部先放方向条，告诉小白 A/B/C 三种人生方向到底有啥不同 */
-    h.push('<div class="easy-dir-strip" title="'+esc(EASY_DIR_HEAD)+'">'+
-      '<div class="eds eds-a">🥇 A·稳妥目标：朝自己要的方向稳稳走，零风险、容易达成。</div>'+
-      '<div class="eds eds-b">🔥 B·冒险代价：去碰运气/调查异常/挺身而出，有甜头也可能翻车。</div>'+
-      '<div class="eds eds-c">💙 C·感情社交：找人聊聊、约人、修补关系、谈感情线。</div>'+
-      '</div>');
-  }
   CUR_HINTS.forEach(function(t,i){
    var lb=EASY_OPT_LABELS[i];
-   if(m==='easy'&&lb){
-     var dirBadge='<span class="hint-dir '+lb.dir+'">'+lb.k+' 方向</span>';
-     h.push('<div class="opt '+lb.cls+'" onclick="useOpt('+i+')"><div class="tag">'+T[i]+'</div><div class="txt">'+
-       dirBadge+'<span class="lbl-f">'+lb.l+'</span>'+lb.p+esc(t)+
-       '<div class="d-sub">'+lb.dirTxt+'</div></div></div>');
-   }else if(lb){
-     /* 专家模式也带分化视觉标签（让 A/B/C 的区别第一眼就看出来）*/
-     var dirBadge2='<span class="hint-dir '+lb.dir+'">'+lb.k+'</span>';
-     h.push('<div class="opt opt-'+T[i].toLowerCase()+'" onclick="useOpt('+i+')"><div class="tag">'+T[i]+'</div><div class="txt">'+dirBadge2+esc(t)+'</div></div>');
+   var sel=!!SELECTED_OPTS[i];
+   if(lb){
+     /* 带 A稳妥/B冒险/C感情 分化标签；sel 时点亮 */
+     h.push('<div class="opt '+lb.cls+(sel?' sel':'')+'" id="optCard_'+i+'" onclick="toggleOpt('+i+')"><div class="tag">'+T[i]+'</div><div class="txt">'+
+       '<span class="hint-dir '+lb.dir+'">'+lb.k+'</span>'+esc(t)+
+       '<div class="d-sub">'+esc(lb.dirTxt)+'</div></div></div>');
    }else{
-     h.push('<div class="opt opt-'+T[i].toLowerCase()+'" onclick="useOpt('+i+')"><div class="tag">'+T[i]+'</div><div class="txt">'+esc(t)+'</div></div>');
+     h.push('<div class="opt opt-'+T[i].toLowerCase()+(sel?' sel':'')+'" id="optCard_'+i+'" onclick="toggleOpt('+i+')"><div class="tag">'+T[i]+'</div><div class="txt">'+esc(t)+'</div></div>');
    }
   });
-  if(m==='easy'){
-    /* Beta v2.0：D 卡「我想自己写一个」——点开展开自定义输入区（足球模拟器风格 2×2 大卡布局）*/
-    h.push('<div class="opt opt-d" onclick="toggleEasyCustom(true)"><div class="tag">D</div><div class="txt">✍ 我想自己写一个<div class="d-sub">上面三条都不合心意？点这里亲自输入</div></div></div>');
-  }
  }
  $('opts').innerHTML=h.join('');
  updInputPH();
- /* Beta v2.2 · 三建议之 N3 · 简易模式剧情完，instant 把选项滚到视口顶——剧情长的时候，小白不用手指滑半天找选项 */
+ /* 新建议出来，把选项区平滑滚到可视区域（仅当在下方时） */
  try{
-   if(getMode()==='easy' && $('opts')){
+   if(CUR_HINTS&&CUR_HINTS.length&&$('opts')){
      var r=$('opts').getBoundingClientRect();
-     if(r.top > window.innerHeight * 0.45){  /* 只当选项确实在视口下方时才滚，避免刚切到游戏时乱跳 */
-       try{$('opts').scrollIntoView({behavior:'instant',block:'start'})}catch(_){}
+     if(r.top > window.innerHeight * 0.55){
+       try{$('opts').scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
      }
    }
  }catch(_){}
+}
+/* v2.6：点亮 / 取消点亮某条建议（只切 class，不立即推进）*/
+function toggleOpt(i){
+ try{
+  if(!CUR_HINTS||CUR_HINTS[i]==null)return;
+  if(SELECTED_OPTS[i]){delete SELECTED_OPTS[i]}else{SELECTED_OPTS[i]=true}
+  var card=$('optCard_'+i);
+  if(card)card.classList.toggle('sel',!!SELECTED_OPTS[i]);
+ }catch(_){}
+}
+/* v2.6：把点亮的多条方向 + 自定义文字合并成一条行动；啥都没有就走世界轮 */
+function doSelectedAction(){
+ locked('doSelectedAction',function(){
+  try{
+   var pi=$('playerInput');
+   var custom=pi?(pi.value||'').trim():'';
+   var picked=[];
+   Object.keys(SELECTED_OPTS).forEach(function(k){
+    var idx=parseInt(k,10);
+    if(SELECTED_OPTS[k]&&CUR_HINTS[idx])picked.push(String(CUR_HINTS[idx]).trim());
+   });
+   var combo=picked.slice();
+   if(custom)combo.push(custom);
+   if(combo.length){
+    if(pi)pi.value=combo.join('；同时，');
+    doTurn('normal');
+   }else{
+    doTurn('world');
+   }
+  }catch(e){console.warn('doSelectedAction',e)}
+ },600);
 }
 /* Beta v2.0：D 卡自定义区展开/收起（简易模式默认收起；专家模式常驻不受影响）*/
 function toggleEasyCustom(show){
@@ -8296,6 +8374,37 @@ function buildRequest(mode,inp){
  return lines.join('\n');
 }
 
+/* v2.6：SSE 流式时 fullText 是半截 JSON（{"advance":...,"narrative":"正在写..."}）
+   直接显示会让玩家看到一堆 JSON 花括号＝"乱码"。这里增量把 narrative 字段抠出来显示。 */
+function _ssePeekNarrative(full){
+ try{
+  var key='"narrative"',i=full.indexOf(key);
+  if(i<0)return '';
+  var p=full.indexOf('"',i+key.length);
+  if(p<0)return '';
+  var out='',j=p+1;
+  while(j<full.length){
+   var ch=full[j];
+   if(ch==='\\'){
+    var n=full[j+1];
+    if(n==='n'){out+='\n';j+=2}
+    else if(n==='t'){out+='\t';j+=2}
+    else if(n==='r'){j+=2}
+    else if(n==='"'){out+='"';j+=2}
+    else if(n==='\\'){out+='\\';j+=2}
+    else if(n==='/'){out+='/';j+=2}
+    else if(n==='u'){
+     var hex=full.substr(j+2,4);
+     if(/^[0-9a-fA-F]{4}$/.test(hex)){out+=String.fromCharCode(parseInt(hex,16));j+=6}
+     else{out+=ch;j++}
+    }else{out+=n;j+=2}
+   }else if(ch==='"'){
+    break; /* narrative 字符串已闭合 */
+   }else{out+=ch;j++}
+  }
+  return out;
+ }catch(_){return ''}
+}
 function parseReply(txt){
  if(!txt)throw new Error('引擎返回为空');
  var m=txt.match(/```mcu-sim\s*([\s\S]*?)```/i)||txt.match(/```\s*([\s\S]*?)```/);
@@ -8399,8 +8508,9 @@ async function doTurn(mode){
   var piEl=$('playerInput');
   var inp=(piEl?piEl.value:'').trim();
   if(mode==='normal'){
-   if(!inp){try{alert('写点什么，或点上面 A/B/C 选一个方向。')}catch(_){}return}
+   if(!inp){try{alert('先点亮上面的 A/B/C 方向，或在下面写一句行动；什么都不做就点「🌙 自行推进」。')}catch(_){}return}
   }
+  try{SELECTED_OPTS={}}catch(_){}   /* v2.6：开始推进，清空多选点亮 */
   if(S._needCheck&&mode!=='check'){mode='check';mode_last='check'}
   var eng=resolveEngine();
   /* ① 路由决定直接离线：off / rec_offline / adv_empty */
