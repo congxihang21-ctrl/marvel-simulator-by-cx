@@ -32,10 +32,12 @@ function isNavigation(req) {
 }
 
 self.addEventListener('install', e => {
+  /* 关键：只有新缓存写入成功后才 skipWaiting。
+     若 addAll 失败（网络抖动/某文件 404），新 SW 停在 installing，
+     旧 SW 继续服务旧页面，不会出现「旧缓存已删、新缓存没好」的断档卡死。 */
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(CORE)).catch(() => {})
+    caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
@@ -45,12 +47,8 @@ self.addEventListener('activate', e => {
       caches.keys().then(keys =>
         Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
       )
-    ]).then(() =>
-      /* 清完旧缓存、claim 完成后，广播更新通知，让受控页面自动刷新到新版 */
-      self.clients.matchAll().then(clients => {
-        clients.forEach(c => c.postMessage({ type: 'VERSION_UPDATED', version: CACHE }));
-      })
-    )
+    ])
+    /* 不主动广播刷新：由前端 controllerchange 统一处理，避免与 claim 竞争导致重复 reload */
   );
 });
 
