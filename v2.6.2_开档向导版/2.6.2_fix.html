@@ -968,6 +968,18 @@ button.skip-card:active{border-color:var(--accent);background:var(--bg-3)}
   box-shadow:0 4px 12px color-mix(in srgb, var(--accent) 25%, transparent);vertical-align:middle}
 
 /* ===================== 断点 · 四端响应式（横竖屏 + DPR + 暗黑模式） ===================== */
+/* 桌面端：游戏界面居中收窄，避免内容拉太宽难看 */
+@media(min-width:769px){
+  #gameScreen{
+    max-width:760px;
+    margin:0 auto;
+    box-shadow:0 0 80px rgba(0,0,0,.6);
+    border-left:1px solid rgba(255,255,255,.06);
+    border-right:1px solid rgba(255,255,255,.06);
+  }
+  /* 桌面端日志区更高，避免只看到选项看不到剧情 */
+  #story{max-height:min(680px,58vh)!important}
+}
 /* 先做平板过渡：>1100px 双面板；≤1100 单面板堆叠 */
 @media(max-width:1100px){.grid{grid-template-columns:1fr}}
 @media(max-width:768px){
@@ -7256,12 +7268,21 @@ function switchTab(t){
   var pane=document.getElementById('tab-'+t);
   if(pane){var sc=pane.querySelector('.tab-scroll');if(sc)sc.scrollTop=0;}
   try{if(S&&S.uiTab!==t){S.uiTab=t;save&&save();}}catch(_){}
-  /* 目标页没有 body_goals 的 renderAll 钩子，切到时手动渲染 */
-  if(t==='goal'){
-    try{
-      var gb=$('body_goals');
-      if(gb){gb.innerHTML=_renderDetailBody('goals');}
-    }catch(e){console.warn('render goals',e)}
+  /* v2.6.2_fix: 切到任何 Tab 都确保内容已渲染（renderAll 可能被异步延迟）*/
+  var _tabBodies={
+    me:['setup','player','ability'],
+    rel:['rel'],
+    world:['world','events','org'],
+    goal:['goals']
+  };
+  var ids=_tabBodies[t];
+  if(ids){
+    ids.forEach(function(k){
+      try{
+        var el=$('body_'+k);
+        if(el){el.innerHTML=_renderDetailBody(k);}
+      }catch(e){console.warn('render tab '+k,e)}
+    });
   }
 }
 /* openDetail 不再弹窗 —— 直接跳到对应 Tab 页（详情已铺在 Tab 里） */
@@ -8399,7 +8420,14 @@ function renderStory(keepScroll){
   var el=$('story');
   if(!el)return;
   var log=(S&&S.log)||[];
-  if(!log.length){el.innerHTML='<div class="dim">还没有任何记录。推进时间后，这里会按日期记录世界的变化。</div>';return}
+  if(!log.length){
+    /* v2.6.2_fix: seed 事件直接 appendChild 到 #story，不在 S.log 里。
+       若 #story 已有非占位内容（seed 事件），不要用占位覆盖。 */
+    if(!el.children.length || (el.children.length===1 && el.querySelector('.dim'))){
+      el.innerHTML='<div class="dim">还没有任何记录。推进时间后，这里会按日期记录世界的变化。</div>';
+    }
+    return;
+  }
   /* 按天分组（log 按时间顺序，order 即日期升序）*/
   var groups={},order=[];
   log.forEach(function(e){
@@ -8532,6 +8560,13 @@ var CX_SFX=(function(){
   };
 })();
 function renderOpts(){
+ /* v2.6.2_fix: seed 模式下 renderNode 直接操作 #opts（.seed-choice），
+    CUR_HINTS 为空。若 #opts 已有 seed 选项，不要用占位覆盖。 */
+ var optsEl=$('opts');
+ if(optsEl && optsEl.querySelector('.seed-choice')){
+   updInputPH();
+   return;
+ }
  var h=[],T=['A','B','C','D','E'];
  /* 建议内容变了（进入新一轮）→ 清空点亮状态 */
  var hk='';try{hk=JSON.stringify(CUR_HINTS)}catch(_){}
@@ -8612,14 +8647,13 @@ function _renderAllRaw(){
   try{
     var s=$('bigTime');if(s)renderTime();
   try{renderOVRBadge()}catch(e){console.warn('renderOVRBadge',e)}   /* Beta v2.0：时间卡 OVR 徽章（双模式）*/
-  if($('body_setup'))try{renderSetupCard()}catch(e){console.warn('renderSetupCard',e)}
-  if($('body_player'))try{renderPlayer()}catch(e){console.warn('renderPlayer',e)}
-  if($('body_ability'))try{renderAbility()}catch(e){console.warn('renderAbility',e)}
-  if($('body_rel'))try{renderRel()}catch(e){console.warn('renderRel',e)}
-  if($('body_world'))try{renderWorld()}catch(e){console.warn('renderWorld',e)}
-  if($('body_events'))try{renderEvents()}catch(e){console.warn('renderEvents',e)}
-  if($('body_rumors'))try{renderRumors()}catch(e){console.warn('renderRumors',e)}
-  if($('body_org'))try{renderOrg()}catch(e){console.warn('renderOrg',e)}
+  if($('body_setup'))try{$('body_setup').innerHTML=_renderDetailBody('setup')}catch(e){console.warn('renderSetup',e)}
+  if($('body_player'))try{$('body_player').innerHTML=_renderDetailBody('player')}catch(e){console.warn('renderPlayer',e)}
+  if($('body_ability'))try{$('body_ability').innerHTML=_renderDetailBody('ability')}catch(e){console.warn('renderAbility',e)}
+  if($('body_rel'))try{$('body_rel').innerHTML=_renderDetailBody('rel')}catch(e){console.warn('renderRel',e)}
+  if($('body_world'))try{$('body_world').innerHTML=_renderDetailBody('world')}catch(e){console.warn('renderWorld',e)}
+  if($('body_events'))try{$('body_events').innerHTML=_renderDetailBody('events')}catch(e){console.warn('renderEvents',e)}
+  if($('body_org'))try{$('body_org').innerHTML=_renderDetailBody('org')}catch(e){console.warn('renderOrg',e)}
   if($('opts'))try{renderOpts()}catch(e){console.warn('renderOpts',e)}
   /* ========== v1.9 · 概览迷你卡渲染（8 张卡，去重后）========== */
   try{if($('mini_setup'))miniSetup()}catch(e){console.warn('miniSetup',e)}
