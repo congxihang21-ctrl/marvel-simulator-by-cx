@@ -1,8 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- v2.6.2_fix：旧入口统一跳转到修复版，避免用户加载到旧的卡死代码 -->
-<script>try{location.replace('2.6.2_fix.html'+location.search)}catch(e){location.href='2.6.2_fix.html'+location.search}</script>
+<!-- v2.6.2_fix：启动即注销旧 SW + 清所有缓存，打破"旧 sw.js 被缓存导致永远检测不到更新"的死锁。
+     用 localStorage 标记，只执行一次。不 reload——当前页已是新代码，让它正常启动并注册新 SW。 -->
+<script>
+(function(){
+  try{
+    if(!localStorage.getItem('mcu_sw_nuked_v2')){
+      localStorage.setItem('mcu_sw_nuked_v2','1');
+      try{ navigator.serviceWorker.getRegistrations().then(function(rs){
+        rs.forEach(function(r){ r.unregister().catch(function(){}); });
+      }).catch(function(){}); }catch(e){}
+      try{ caches.keys().then(function(ks){
+        ks.forEach(function(k){ caches.delete(k).catch(function(){}); });
+      }).catch(function(){}); }catch(e){}
+    }
+  }catch(e){}
+})();
+</script>
 <meta charset="UTF-8">
 <!-- ============================================================
      四端适配优化版 · viewport 组合拳
@@ -9873,23 +9888,32 @@ function enterGame(){
  if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
  var _ab=$('wzActionBar');if(_ab)_ab.style.display='none';
  var bar=$('gameBottomBar');if(bar)bar.style.display='none'; /* v2.6.2：功能已迁入设置 Tab，不再显示 */
- buildPanels(); /* v1.9：buildPanels 内部已经幂等（先清空 colL/colR 再重建），
-                    直接调用不会重复。不要用 body_player 这种已废弃的 guard。*/
- /* v2.6: 加载存档后确保所有引擎字段完整（老存档兼容） */
- try{
-   if(typeof WorldlineEngine!=='undefined')WorldlineEngine.init(S);
-   if(typeof EventDirector!=='undefined'&&EventDirector.init)EventDirector.init(S);
-   if(typeof RelationshipEngine!=='undefined'&&RelationshipEngine.initAll)RelationshipEngine.initAll(S);
- }catch(e){console.warn('engine init on load',e)}
- /* v2.6: 重置增量渲染计数，确保存档加载后全量重建故事 */
- try{resetRenderStory()}catch(_){}
- /* v1.8：恢复简易/专家模式（存档优先 → localStorage → 默认专家）*/
- try{restoreModeFromSaved()}catch(_){}
- applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
- window.scrollTo(0,0);
- try{busy(false)}catch(_){}
- /* v2.6：首次进入游戏弹 3 步引导（本机只弹一次）*/
- try{setTimeout(maybeStartOnboard,500)}catch(_){}
+ /* v2.6.2_fix：iOS Safari 同步重渲染会卡死主线程。
+    用 setTimeout(0) 让出主线程，让 busy 遮罩先绘制，再分两帧执行重型渲染。*/
+ setTimeout(function(){
+   try{
+     buildPanels();
+     try{
+       if(typeof WorldlineEngine!=='undefined')WorldlineEngine.init(S);
+       if(typeof EventDirector!=='undefined'&&EventDirector.init)EventDirector.init(S);
+       if(typeof RelationshipEngine!=='undefined'&&RelationshipEngine.initAll)RelationshipEngine.initAll(S);
+     }catch(e){console.warn('engine init on load',e)}
+     try{resetRenderStory()}catch(_){}
+     try{restoreModeFromSaved()}catch(_){}
+     /* 再让一帧，避免 buildPanels 的大量 DOM 操作和 renderAll 挤在同一帧卡死 iOS */
+     setTimeout(function(){
+       try{
+         applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
+         window.scrollTo(0,0);
+       }catch(e){console.warn('renderAll',e)}
+       try{var b=$('busy');if(b){b.style.display='none'}var t=$('busyTxt');if(t){t.style.display='none'}}catch(_){}
+       try{busy(false)}catch(_){}
+       try{setTimeout(maybeStartOnboard,500)}catch(_){}
+     },0);
+   }catch(e){console.warn('enterGame build',e);try{busy(false)}catch(_){}}
+ },0);
+ /* v2.6.2_fix：看门狗——若 12 秒后 busy 还没收起，强制关闭，避免永远卡死遮罩 */
+ setTimeout(function(){ try{var b=$('busy');if(b&&b.style.display!=='none'){b.style.display='none'}var t=$('busyTxt');if(t)t.style.display='none'}catch(_){} },12000);
 }
 function backToHome(){
  try{save()}catch(e){}

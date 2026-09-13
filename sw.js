@@ -3,11 +3,12 @@
    - 导航请求（HTML 页面，含根 index.html 跳转脚本）→ 网络优先，失败才回退缓存（保证发版立即可见）
    - 静态资源（css/js/json/img）→ 缓存优先 + 后台更新（stale-while-revalidate，秒开）
    - 新 SW 激活后强制 claim 所有页面 + 广播更新通知 */
-const CACHE = 'marvel-hero-v2.6.4';
+const CACHE = 'marvel-hero-v2.6.5';
 const CORE = [
   './',
   './index.html',
   './manifest.json',
+  './v2.6.2_开档向导版/2.6.2_fix.html',
   './v2.6.2_开档向导版/2.6.2.html',
   './v2.6.2_开档向导版/css/design-tokens.css',
   './v2.6.2_开档向导版/css/glass.css',
