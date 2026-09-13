@@ -178,6 +178,7 @@ var GameSeed = (function(){
               storyEl.innerHTML += '<div class="log-item" style="color:#7ec8e3;font-size:12px">👤 你认识了新的人：<b>'+newNpc.姓名+'</b>（'+newNpc.身份+' · '+newNpc.关系+'）</div>';
               storyEl.scrollTop = storyEl.scrollHeight;
             }
+            try{if(window.Chronicle)Chronicle.addRel(newNpc.姓名,newNpc.身份,newNpc.关系);}catch(_){}
           }
         }
       }
@@ -250,6 +251,14 @@ var GameSeed = (function(){
     if(!S.timeline) S.timeline = [];
     S.timeline.push({date: timeStr, text: node.title, level: node.level});
     if(S.timeline.length > 100) S.timeline.shift();
+
+    /* v2.6.4 编年史：登记节点（含可选项），玩家选择后由 markPicked 回挂 */
+    try{
+      if(window.Chronicle){
+        var _choiceLabels = (node.choices||[]).map(function(c){return c.label||c.text||'';});
+        Chronicle.fromSeedNode(node, _choiceLabels, timeStr);
+      }
+    }catch(_){}
 
     // 渲染到 story 面板
     var storyEl = document.getElementById('story');
@@ -348,6 +357,7 @@ var GameSeed = (function(){
             '<div class="wc-card wc-altered open"><div class="wc-head"><span class="wc-ic">🌟</span><b>历史被你改写</b></div>'+
             '<div class="wc-body">你提前阻止了那场本该席卷世界的灾难。此刻还没有人知道你做了什么——但未来，已经不一样了。</div></div>');
           stEl.scrollTop = stEl.scrollHeight;
+          try{if(window.Chronicle)Chronicle.addAltered('历史被你改写','你提前阻止了那场本该席卷世界的灾难。此刻还没有人知道你做了什么——但未来，已经不一样了。');}catch(_){}
         }
       }catch(e){ console.warn('wc thwart', e); }
       return (S && S._wcReturn) ? S._wcReturn : '_director';
@@ -357,6 +367,8 @@ var GameSeed = (function(){
 
   function makeChoice(choice){
     if(!S) return;
+    /* v2.6.4 编年史：回挂玩家所选（成功/失败都记录，这是你做过的选择）*/
+    try{if(window.Chronicle)Chronicle.markPicked(choice.label||choice.text||'自定义行动');}catch(_){}
     if(choice.check && choice.base !== undefined){
       var cd = calcChanceDetail(choice.base, choice.check);
       runJudge(cd.value, choice, cd.detail);
