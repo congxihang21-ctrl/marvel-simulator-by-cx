@@ -1,0 +1,945 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- v2.6.2_fix：启动即注销旧 SW + 清所有缓存，打破"旧 sw.js 被缓存导致永远检测不到更新"的死锁。
+     用 localStorage 标记，只执行一次。不 reload——当前页已是新代码，让它正常启动并注册新 SW。 -->
+<script>
+(function(){
+  try{
+    if(!localStorage.getItem('mcu_sw_nuked_v2')){
+      localStorage.setItem('mcu_sw_nuked_v2','1');
+      try{ navigator.serviceWorker.getRegistrations().then(function(rs){
+        rs.forEach(function(r){ r.unregister().catch(function(){}); });
+      }).catch(function(){}); }catch(e){}
+      try{ caches.keys().then(function(ks){
+        ks.forEach(function(k){ caches.delete(k).catch(function(){}); });
+      }).catch(function(){}); }catch(e){}
+    }
+  }catch(e){}
+})();
+</script>
+<!-- v2.6.3 低功耗模式：必须在 CSS 渲染前给 <html> 打上 lowfx 类。
+     ?lowfx=1 开启（并记住）｜ ?lowfx=0 关闭；设置页也有开关。 -->
+<script>
+(function(){
+  try{
+    var m=location.search.match(/[?&]lowfx=(1|0)/);
+    if(m){ localStorage.setItem('mcu_lowfx', m[1]==='1'?'1':'0'); }
+    if(localStorage.getItem('mcu_lowfx')==='1'){
+      document.documentElement.classList.add('lowfx');
+    }
+  }catch(e){}
+})();
+</script>
+<meta charset="UTF-8">
+<!-- ============================================================
+     四端适配优化版 · viewport 组合拳
+     1. width=device-width: 基础
+     2. initial-scale=1.0 + maximum-scale=1.0 + user-scalable=no: 禁双指缩放（抖音投放必选）
+     3. viewport-fit=cover: 刘海屏/灵动岛沉浸式（iOS/鸿蒙）
+     4. 加 viewport-fit 后须用 env(safe-area-inset-*) 避让
+============================================================ -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="漫威模拟器">
+<meta name="theme-color" content="#080b10">
+<!-- PWA: 可添加到手机桌面，全屏独立运行 -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<!-- 鸿蒙/安卓 全屏沉浸模式 -->
+<meta name="color-scheme" content="dark">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
+<meta name="x5-fullscreen" content="true">
+<meta name="x5-page-mode" content="app">
+<meta name="full-screen" content="yes">
+<meta name="browsermode" content="application">
+<!-- 禁止 IE 兼容模式 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.7.0（编年史·章节回溯版）</title>
+<script>
+/* 面板去重精简 + 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端适配：iOS / 鸿蒙 / 安卓 X5 / Win Edge
+   在 CSS 之前跑一丢丢 JS：给 :root 注入 --vh / --sat / --sab 三个"真·视口尺寸"变量。
+   为什么要在 CSS 前跑？因为 100dvh 在 iOS17 Beta + WebView 某些组合下仍会被地址栏高度带偏，
+   而 visualViewport.height 才是"真实的、排除了工具栏/键盘的可见高度"。
+   safe-area 也顺手通过 JS 拉一次，作为 CSS env() 的兜底（鸿蒙/部分安卓没有 env() 实现）。*/
+(function(){try{
+  var r=document.documentElement;
+  var setV=function(){
+    try{
+      var w=window, vv=w.visualViewport;
+      var vh = vv && vv.height ? vv.height : (w.innerHeight||r.clientHeight||screen.height||667);
+      var vw = vv && vv.width  ? vv.width  : (w.innerWidth ||r.clientWidth ||screen.width ||375);
+      r.style.setProperty('--vh',(vh*0.01).toFixed(3)+'px');
+      r.style.setProperty('--dvh',(vh*0.01).toFixed(3)+'px');
+      r.style.setProperty('--vw',(vw*0.01).toFixed(3)+'px');
+      /* safe-area：优先 CSS env()，拿不到就用 getComputedStyle 反推 */
+      try{
+        var st=getComputedStyle(r);
+        var sat=parseFloat(st.getPropertyValue('--sat')||'0')||0;
+        var sab=parseFloat(st.getPropertyValue('--sab')||'0')||0;
+        if(!sat||!sab){
+          // 用一个临时元素去读 env()，因为 CSS 变量不会自己展开 env()
+          var t=document.createElement('div');
+          t.style.cssText='position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);left:-9999px;top:-9999px;width:1px;height:1px';
+          document.head.appendChild(t);
+          var cs=getComputedStyle(t);
+          r.style.setProperty('--sat',parseFloat(cs.paddingTop||'0')+'px');
+          r.style.setProperty('--sab',parseFloat(cs.paddingBottom||'0')+'px');
+          t.remove();
+        }
+      }catch(_){}
+    }catch(_){}
+  };
+  setV();
+  var evs=['resize','orientationchange','load','pageshow','scroll'];
+  if(window.visualViewport){window.visualViewport.addEventListener('resize',setV);window.visualViewport.addEventListener('scroll',setV)}
+  for(var i=0;i<evs.length;i++){window.addEventListener(evs[i],setV,{passive:true})}
+  setTimeout(setV,80);setTimeout(setV,500);
+}catch(_){}
+})();
+/* iOS 17 Beta pageshow 兜底：用户从 bfcache（前进/后退缓存）回来时，_boot 可能不会再跑，
+   所以我们在 window 上埋一个全局标记，pageshow.persisted=true 时强制重跑。后续 _boot 里会读它。*/
+window._MCU_FIXED_VH = true;
+</script>
+<link rel="stylesheet" href="style.css?v=2.7.1">
+<style>
+/* ===== v2.6.3 缓存修复保险层（内联，随 index.html 即时生效，不依赖外部 CSS/JS 缓存） ===== */
+/* 1) 游戏画面内永不显示首页式长 footer（它在 #gameScreen 里，靠 _immersive 隐藏，旧缓存会漏掉） */
+#gameScreen .foot{display:none !important}
+/* 2) #gameScreen 可见（display:flex）时，隐藏右下角固定签名徽章，避免遮挡底部 Tab 栏。
+      :has() 支持 iOS Safari 15.4+；同时保留 ._immersive 旧规则做双保险。 */
+body:has(#gameScreen[style*="flex"]) .cx-badge{display:none !important}
+html._immersive .cx-badge{display:none !important}
+</style>
+<!-- ================= v1.8 · 华为/旧版浏览器兼容 polyfill（在 body 前、主脚本前执行） ================= -->
+<script>
+/* 防御：华为默认浏览器（华为浏览器/Quark 内核）可能缺少部分 ES2017+ API，
+   页面白屏大多是因为某行代码用了不支持的 API 直接报错，后续脚本全挂。
+   这里在最前面补齐 polyfill，保证主脚本能跑完。 */
+(function(){
+  try{
+    /* Promise.allSettled：离线目标启发式里用到了 */
+    if(!Promise.allSettled){
+      Promise.allSettled=function(arr){
+        return Promise.all((arr||[]).map(function(p){
+          return Promise.resolve(p).then(function(v){return{status:'fulfilled',value:v}},
+          function(r){return{status:'rejected',reason:r}})
+        }))
+      }
+    }
+    /* Array.prototype.flat / flatMap */
+    if(!Array.prototype.flat){
+      Array.prototype.flat=function(d){
+        d=d===undefined?1:d;var r=[];(function f(a,dep){
+          for(var i=0;i<a.length;i++){
+            if(Array.isArray(a[i])&&dep<d)f(a[i],dep+1);else r.push(a[i])
+          }
+        })(this,0);return r
+      }
+    }
+    if(!Array.prototype.flatMap){
+      Array.prototype.flatMap=function(cb){return Array.prototype.flat.call(this.map(cb),1)}
+    }
+    /* String.prototype.padStart */
+    if(!String.prototype.padStart){
+      String.prototype.padStart=function(t,s){
+        s=s||' ';t=t|0;var str=String(this);
+        while(str.length<t)str=s+str;return str.slice(0,t)
+      }
+    }
+    /* Object.assign 兜底（极旧内核） */
+    if(!Object.assign){
+      Object.assign=function(t){
+        t=t||{};for(var i=1;i<arguments.length;i++){
+          var s=arguments[i];if(s)for(var k in s){if(Object.prototype.hasOwnProperty.call(s,k))t[k]=s[k]}
+        }return t
+      }
+    }
+    /* Number.isNaN */
+    if(!Number.isNaN){
+      Number.isNaN=function(v){return typeof v==='number'&&isNaN(v)}
+    }
+    /* requestAnimationFrame 兜底（极旧内核） */
+    if(!window.requestAnimationFrame){
+      window.requestAnimationFrame=function(cb){return setTimeout(cb,16)}
+      window.cancelAnimationFrame=function(id){clearTimeout(id)}
+    }
+    /* visualViewport 兜底：华为某些内核没有，用 innerHeight 代替 */
+    if(!window.visualViewport){
+      window.visualViewport={height:window.innerHeight||667,width:window.innerWidth||375,
+        addEventListener:function(){},removeEventListener:function(){}}
+    }
+    /* fetch 兜底：用 XMLHttpRequest 模拟一个最简版 */
+    if(!window.fetch){
+      window.fetch=function(url,opts){
+        opts=opts||{};
+        return new Promise(function(resolve,reject){
+          var xhr=new XMLHttpRequest();
+          xhr.open(opts.method||'GET',url,true);
+          var hs=opts.headers||{};for(var k in hs){if(hs[k])xhr.setRequestHeader(k,hs[k])}
+          xhr.responseType='text';
+          xhr.onload=function(){
+            resolve({ok:xhr.status>=200&&xhr.status<300,status:xhr.status,
+              text:function(){return Promise.resolve(xhr.responseText)},
+              json:function(){return Promise.resolve(JSON.parse(xhr.responseText))},
+              body:null})
+          };
+          xhr.onerror=function(){reject(new Error('Network error'))};
+          xhr.ontimeout=function(){reject(new Error('Timeout'))};
+          xhr.send(opts.body||null)
+        })
+      }
+    }
+    /* TextDecoder 兜底：极旧内核没有，用纯 JS decode */
+    if(typeof TextDecoder==='undefined'){
+      window.TextDecoder=function(){
+        this.decode=function(buf){
+          var s='', i;
+          if(buf){ for(i=0;i<buf.length;i++){ s+=String.fromCharCode(buf[i]); } }
+          try{ return decodeURIComponent(escape(s)); }catch(e){ return s; }
+        };
+        return this;
+      };
+    }
+    /* AbortController 兜底 */
+    if(typeof AbortController==='undefined'){
+      window.AbortController=function(){this.signal={aborted:false};this.abort=function(){this.signal.aborted=true}}
+    }
+  }catch(_){}
+})();
+</script>
+<!-- ================= v2.6 融合：引入 v2.4 Liquid Glass 设计令牌与 AI 服务 ================= -->
+<!-- Noto Sans SC 仅作增强：非阻塞加载（print→all swap），国内被墙/弱网超时直接放弃，用系统苹方/雅黑兜底，绝不拖白屏 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" media="print" onload="this.media='all'" onerror="try{this.remove()}catch(_){}">
+<link rel="stylesheet" href="css/design-tokens.css?v=2.6.2">
+<link rel="stylesheet" href="css/glass.css?v=2.6.2">
+<link rel="stylesheet" href="css/components.css?v=2.6.2">
+<link rel="stylesheet" href="css/responsive.css?v=2.6.2">
+<script src="js2/core/diag.js?v=2.7.1" defer></script>
+<script src="js/rng.js?v=2.7.1" defer></script>
+<script src="js/worldlineEngine.js?v=2.7.1" defer></script>
+<script src="js/worldClock.js?v=2.7.1" defer></script>
+<script src="js/characterEngine.js?v=2.7.1" defer></script>
+<script src="js/relationshipEngine.js?v=2.7.1" defer></script>
+<script src="js/eventDirector.js?v=2.7.1" defer></script>
+<script src="js/endingEngine.js?v=2.7.1" defer></script>
+<script src="js/ai.js?v=2.7.1" defer></script>
+<script src="js/seed_data.js?v=2.7.1" defer></script>
+<script src="js/game_seed.js?v=2.7.1" defer></script>
+</head>
+<body>
+
+<!-- ================= v2.6 首屏骨架屏（JS 加载前显示，减少白屏感） ================= -->
+<div id="bootSplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#1a1f2e 0%,#080b10 70%);color:#8fa3b8;font-family:system-ui,sans-serif;transition:opacity .4s">
+  <div style="font-size:42px;margin-bottom:16px;animation:pulse 1.6s ease-in-out infinite">🛡️</div>
+  <div style="font-size:15px;font-weight:600;color:#cfd9e3;letter-spacing:1px">漫威模拟器</div>
+  <div style="font-size:11.5px;color:#5a6b7d;margin-top:6px">正在加载世界线…</div>
+</div>
+<script>
+/* iOS Safari 弱网专项兜底：本内联脚本不依赖任何外部 js/css，解析到这里立即执行。
+   即使 10 个 defer 引擎脚本因弱网长时间 pending（会推迟 DOMContentLoaded/load/pageshow，
+   导致 _boot 不运行、splash 永不消失=「打不开」），1.5 秒后也强制撤掉启动遮罩，露出可点的首页。*/
+(function(){
+  function kill(){try{var sp=document.getElementById('bootSplash');if(sp){sp.style.opacity='0';setTimeout(function(){try{sp.remove()}catch(_){}},420);}}catch(_){}}
+  setTimeout(kill,1500);
+  /* 双保险：页面若从 bfcache 恢复，也立刻撤掉 */
+  window.addEventListener('pageshow',kill);
+})();
+</script>
+
+
+<!-- ================= 作者水印（CX）· 全屏可见层 ================= -->
+<div class="fullscreen-watermark" id="cxWatermark" aria-hidden="true"></div>
+<div class="cx-badge" id="cxBadge" aria-hidden="true">
+  CX<span class="sm">· 漫威模拟器 · 原创</span>
+</div>
+
+<!-- ================= v2.6.2 创角界面（精简首页 + 分步向导） ================= -->
+<div class="screen" id="setupScreen">
+  <div class="setup-card">
+
+    <!-- ===== 首页英雄区 ===== -->
+    <div id="homeView">
+      <div class="hv-badge">◆ BETA v2.6.2 · 开档向导版 ◆</div>
+      <div class="hv-logo">🛡️</div>
+      <div class="big-title">漫威电影宇宙 · 英雄纪元</div>
+      <div class="hv-sub">凡人之躯，亦可比肩神明 —— 在地球-616，把一辈子走一遍</div>
+      <div class="hv-stats">
+        <div class="hv-stat"><b id="hvStatEra">8</b><span>大时代</span></div>
+        <i class="hv-dot"></i>
+        <div class="hv-stat"><b id="hvStatCanon">—</b><span>正典事件</span></div>
+        <i class="hv-dot"></i>
+        <div class="hv-stat"><b id="hvStatAch">—</b><span>个成就</span></div>
+        <i class="hv-dot"></i>
+        <div class="hv-stat"><b>80+</b><span>年时间线</span></div>
+      </div>
+      <button class="hv-start" onclick="openWizard()">⚔ 开始新人生</button>
+      <div class="hv-subrow">
+        <button id="btnBackToGame" class="hv-btn primary" onclick="backToGame()" style="display:none">↩ 继续当前人生</button>
+        <button class="hv-btn" onclick="openLoad()">📂 读取存档</button>
+        <button class="hv-btn" onclick="openTutorial()">❔ 新手帮助</button>
+      </div>
+      <div class="hv-footlinks">
+        <a onclick="openThemePanel()">🎨 外观主题</a><i></i>
+        <a onclick="openAbout()">ℹ 关于 · 版权</a><i></i>
+        <a onclick="openDonate()" class="hv-tip">☕ 支持一下</a><i></i>
+        <a onclick="selfHeal()" style="color:#f2c54d">🔧 修复显示</a>
+      </div>
+      <div class="hv-disclaimer">🛡 非官方同人作品，漫威 IP 归属迪士尼 / 漫威，AI 生成剧情仅供娱乐 · 建议 16+ 游玩，未成年人请在监护人指导下使用。</div>
+    </div>
+
+    <!-- ===== 分步开档向导（5 步 + 总览） ===== -->
+    <div id="wizardView" style="display:none">
+      <input type="hidden" id="f_sdate">
+      <div class="wz-head">
+        <div class="wz-title" id="wzTitle">世界线</div>
+        <div class="wz-prog"><i id="wzFill" style="width:20%"></i></div>
+        <div class="wz-sub" id="wzSub"></div>
+      </div>
+      <div id="formArea"></div>
+    </div>
+
+    <div id="load" style="max-width:680px;margin:14px auto 0;display:none" class="setup-card">
+      <div class="subh" style="font-size:13px">📂 读取存档</div>
+      <div id="ioBox" style="display:block;margin-top:10px;padding:10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg-1)">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="primary" onclick="pickFile()">📁 选择 TXT 文件导入（推荐）</button>
+          <button onclick="var l=$('load');if(l)l.style.display='none'">返回</button>
+        </div>
+        <input type="file" id="fileInput2" accept=".txt,.json,text/plain,application/json" style="display:none">
+        <div style="margin-bottom:6px;font-size:11.5px;color:var(--fg-2);line-height:1.6">
+          或直接把存档文本粘贴到下方，再点「导入存档」。<br>
+          导入前会显示角色、轮次与时间，确认无误后才覆盖当前进度。
+        </div>
+        <textarea id="ioText2" style="min-height:170px"></textarea>
+        <div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">
+          <button class="primary" onclick="doImport2()">📂 导入存档</button>
+        </div>
+        <div id="ioMsg2" style="margin-top:7px;font-size:12px;color:var(--fg-2)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- v2.6.2 向导固定底栏：必须放在 .screen 外面（.screen 有 transform/contain，会破坏 fixed 定位）-->
+<div class="wz-actionbar" id="wzActionBar" style="display:none">
+  <div class="wz-bar-inner">
+    <button class="wz-back" id="wzBackBtn" onclick="wzBack()">← 返回首页</button>
+    <button class="wz-next" id="wzNextBtn" onclick="wzNext()">继续 →</button>
+  </div>
+</div>
+
+<!-- ================= 游戏界面 ================= -->
+<div class="screen" id="gameScreen" style="display:none">
+
+  <!-- 紧凑顶栏：OVR 徽章 + 世界时间 + 轮次（一行，不再是大卡片） -->
+  <div class="game-head">
+    <span id="heroBadge" data-keep-color style="display:none;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--magic) 60%,transparent),color-mix(in srgb,var(--accent) 40%,transparent));color:#fff;font-weight:700;font-size:11.5px;line-height:1.5">🎭 <span id="heroName">无名者</span></span>
+    <span id="ovrBadge" class="ovr-badge ovr-t0" style="display:none" onclick="try{switchTab('me')}catch(_){}" title="点「我」看能力详情">
+      <span class="ovr-num" id="ovrNum">0</span><span class="ovr-tier" id="ovrTier">凡人</span>
+    </span>
+    <span class="gh-time" id="bigTime">—</span>
+    <span class="gh-turn" id="turnNo">第 0 轮</span>
+  </div>
+
+  <!-- 🎯 人生目标条 -->
+  <div id="goalBarWrap" style="display:none">
+    <div class="goal-bar" id="goalBar" onclick="try{switchTab('goal')}catch(_){}">
+      <div class="gb-ic">🎯</div>
+      <div class="gb-info">
+        <div class="gb-title">当前目标</div>
+        <div class="gb-desc" id="goalBarDesc">—</div>
+        <div class="gb-bar"><span id="goalBarPct" style="width:0%"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="checkBanner"></div>
+
+  <!-- ⭐ 主体区：底部 Tab 导航，五个分类页（v2.6.2 大修 · 不再堆砌单页滚动） -->
+  <div class="tab-content">
+    <!-- ① 主页：世界日志 + 行动条（行动条永远在主页底部，不随日志滚动） -->
+    <div class="tab-pane active" id="tab-home">
+      <div class="tab-scroll">
+        <button class="chr-open-btn" onclick="openChronicle()"><span>📖</span> 打开完整编年史<span class="chr-open-sub">按章回看 · 点击跳转</span></button>
+        <div id="story"></div>
+      </div>
+      <div class="home-action">
+        <div class="opthead"><span class="lbl">【系统建议】可多选</span><span class="tip">点亮你想做的方向（可同时选几个），再点「按选择推进」</span></div>
+        <div id="opts"></div>
+        <div class="subh" style="margin:8px 0 4px">✍ 自己补充（可留空，也会和上面点亮的方向一起生效）</div>
+        <textarea id="playerInput" placeholder="例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班……（Ctrl+Enter 快速推进）"></textarea>
+        <div class="actrow-v2">
+          <button class="primary act-main" id="btnDo" onclick="doSelectedAction()" title="把点亮的方向和你写的行动一起执行">✅ 按选择推进</button>
+          <button class="act-world" onclick="locked('doTurn',function(){doTurn('world')},700)" title="不做选择，让时间自己往前走几天，世界和身边人会自己动起来">🌙 自行推进</button>
+          <button class="act-next" onclick="locked('doTurn',function(){doTurn('nextevent')},700)" title="跳过日常，直接快进到下一件有故事的事那天">⚡ 到有事件发生</button>
+        </div>
+        <div class="actrow-more"><button onclick="openSkipMenu()" title="快进一周 / 一月 / 一季 / 一年，附带世界总结">🗓 长时间快进（周 / 月 / 季 / 年）</button></div>
+      </div>
+    </div>
+    <!-- ② 我：出身 + 人生状态 + 能力 + 人生回顾 -->
+    <div class="tab-pane" id="tab-me">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🎴 出身设定</div><div id="body_setup" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">🧍 人生状态</div><div id="body_player" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">⚡ 能力与装备</div><div id="body_ability" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd" onclick="try{openLifeReview()}catch(_){}" style="cursor:pointer">📜 人生回顾 <span style="font-size:12px;color:var(--fg-2);font-weight:400">（点这里查看完整人生时间线）</span></div></div>
+      </div>
+    </div>
+    <!-- ③ 关系 -->
+    <div class="tab-pane" id="tab-rel">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">👥 人际关系</div><div id="body_rel" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ④ 世界：世界动态 + 大事件/传闻 + 组织 -->
+    <div class="tab-pane" id="tab-world">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🌍 世界动态</div><div id="body_world" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">📰 大事件与街头传闻</div><div id="body_events" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">🏛 所属组织</div><div id="body_org" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ⑤ 目标 -->
+    <div class="tab-pane" id="tab-goal">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🎯 人生目标 · 成就 · 里程碑</div><div id="body_goals" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ⑥ 设置：外观 / 存档 / 读档 / 修复 / 关于 / 支持 -->
+    <div class="tab-pane" id="tab-set">
+      <div class="tab-scroll">
+        <div class="set-grid">
+          <button class="set-card" onclick="openThemePanel()"><span class="set-ic">🎨</span><span class="set-tx">外观主题</span></button>
+          <button class="set-card" onclick="openSave()"><span class="set-ic">💾</span><span class="set-tx">存档</span></button>
+          <button class="set-card" onclick="openLoad()"><span class="set-ic">📂</span><span class="set-tx">读档</span></button>
+          <button class="set-card" onclick="selfHeal()"><span class="set-ic">🔧</span><span class="set-tx">修复显示</span></button>
+          <button class="set-card" id="lowfxCard" onclick="toggleLowfx()"><span class="set-ic">🔋</span><span class="set-tx">低功耗模式</span></button>
+          <button class="set-card" onclick="openAbout()"><span class="set-ic">ℹ️</span><span class="set-tx">关于版权</span></button>
+          <button class="set-card" onclick="openDiag()"><span class="set-ic">🩺</span><span class="set-tx">诊断日志</span></button>
+          <button class="set-card" onclick="openDonate()"><span class="set-ic">☕</span><span class="set-tx">支持作者</span></button>
+        </div>
+        <div class="set-tip">所有外观设置自动保存在本机。遇到显示异常点「🔧 修复显示」可清缓存重载。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部 Tab 导航（iOS 安全区适配，无 backdrop-filter） -->
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="home" onclick="switchTab('home')"><span class="tb-ic">📜</span><span class="tb-tx">主页</span></button>
+    <button class="tab-btn" data-tab="me" onclick="switchTab('me')"><span class="tb-ic">👤</span><span class="tb-tx">我</span></button>
+    <button class="tab-btn" data-tab="rel" onclick="switchTab('rel')"><span class="tb-ic">👥</span><span class="tb-tx">关系</span></button>
+    <button class="tab-btn" data-tab="world" onclick="switchTab('world')"><span class="tb-ic">🌍</span><span class="tb-tx">世界</span></button>
+    <button class="tab-btn" data-tab="goal" onclick="switchTab('goal')"><span class="tb-ic">🎯</span><span class="tb-tx">目标</span></button>
+    <button class="tab-btn" data-tab="set" onclick="switchTab('set')"><span class="tb-ic">⚙️</span><span class="tb-tx">设置</span></button>
+  </div>
+
+  <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed var(--line-2);border-radius:9px;background:var(--bg-1);text-align:center">
+    <div class="dim" style="font-size:11.5px;margin-bottom:9px;line-height:1.65">
+      当前进度会自动保存到本机。想换一条人生、读取 TXT 存档，或回到首页重新选择起点……
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center">
+      <button onclick="backToHome()">🔄 重新开始 / 切换存档</button>
+      <button onclick="openSave()">💾 导出存档</button>
+      <button onclick="openLoad()">📂 读取存档</button>
+    </div>
+  </div>
+
+  <div class="foot">作者：<span class="cx-sign" title="独立开发者 · 课余作品 · 漫威模拟器">© CX（独立开发者）</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>
+    <div class="foot-beta" style="margin-top:8px;font-size:12px;line-height:1.9;color:var(--fg-2);padding:0 6px">
+      💾 <b>存档提醒</b>：手机浏览器的 localStorage 可能被清理，重要节点请点「💾 存档 → ⬇ 导出 TXT」备份到本地。<br>
+      🛡 <b>免责</b>：非官方同人作品，漫威 IP 归属迪士尼/漫威；AI 生成剧情仅供娱乐，请勿当真。<br>
+      🎂 <b style="color:#e8c66a">建议 16+ 游玩</b>，未成年人请在监护人指导下使用，合理控制时长。
+    </div>
+  </div>
+</div>
+
+<!-- ================= 存档读写（独立模态框：首页与游戏内都能用） ================= -->
+<div class="modal" id="ioModal">
+  <div class="box">
+    <h3 id="ioModalTitle">存档</h3>
+      <div id="ioBox">
+        <div class="subh" id="ioTitle"></div>
+        <div id="ioSaveBtns" style="display:none;gap:7px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="primary" onclick="exportSave()">⬇ 导出 TXT 文件（推荐）</button>
+          <button onclick="copySave()">📋 复制存档文本</button>
+        </div>
+        <div id="ioLoadBtns" style="display:none;gap:7px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="primary" onclick="pickFile()">📁 选择 TXT 文件导入（推荐）</button>
+        </div>
+        <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" style="display:none">
+        <div id="ioHint" class="dim" style="font-size:11.5px;margin-bottom:6px;line-height:1.6"></div>
+        <textarea id="ioText" style="min-height:170px"></textarea>
+        <div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">
+          <button id="ioImport" onclick="doImport()">📂 用粘贴的文本导入</button>
+          <button onclick="closeIO()">关闭</button>
+        </div>
+        <div id="ioMsg" style="margin-top:7px;font-size:12px;color:var(--fg-2)"></div>
+      </div>
+    <div style="margin-top:12px;text-align:right">
+      <button onclick="closeIO()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= v1.8 · 详情子界面（概览迷你卡点「详情」后弹出；专家/简易模式共用） ================= -->
+<div class="modal detail-modal" id="detailModal" onclick="if(event.target===this)closeDetail()" style="z-index:175">
+  <div class="box" style="max-width:820px;border-radius:22px;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--bg-1) 82%,transparent),var(--bg-0))">
+    <div class="closeX" onclick="closeDetail()" title="关闭">×</div>
+    <div style="padding:18px 22px 14px">
+      <h3 id="detailTitle"><span class="ic">📋</span><span class="tx">详情</span></h3>
+      <div class="dbody" id="detailBody"></div>
+      <div style="margin-top:14px;text-align:right">
+        <button class="primary" onclick="closeDetail()">知道了 ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= v2.6 融合：转盘式判定动画 ================= -->
+<div class="judge-overlay" id="judgeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:linear-gradient(160deg,rgba(30,30,45,.95),rgba(15,15,25,.95));border:1px solid rgba(157,124,255,.3);border-radius:20px;padding:30px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);min-width:280px">
+    <div style="font-size:14px;color:#9d7cff;margin-bottom:8px">判定中…</div>
+    <div class="judge-rate" id="judgeRate" style="font-size:42px;font-weight:700;color:#fff;margin-bottom:16px">—</div>
+    <div style="position:relative;height:8px;background:rgba(255,255,255,.1);border-radius:999px;margin-bottom:16px;overflow:hidden">
+      <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(90deg,#3fae6d 0%,#3fae6d 35%,#e8a33d 50%,#e0554b 65%,#e0554b 100%)"></div>
+      <div id="judgePointer" style="position:absolute;top:-6px;left:50%;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:12px solid #fff;transform:translateX(-50%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));transition:none"></div>
+    </div>
+    <div class="judge-result" id="judgeResult" style="font-size:18px;font-weight:600;min-height:24px"></div>
+    <div id="judgeDetail" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);text-align:left;font-size:13px">
+      <div style="color:#888;margin-bottom:6px;font-size:11px">成功率明细</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= v2.6: 通用确认弹窗（替代浏览器原生 confirm） ================= -->
+<div class="modal" id="confirmModal" onclick="if(event.target===this)window._confirmCancel&&window._confirmCancel()" style="z-index:300">
+  <div class="box" style="max-width:480px;border-radius:18px">
+    <div id="confirmMsg" style="padding:20px 18px;line-height:1.8;font-size:14px;white-space:pre-wrap;color:var(--fg-1,#ddd)"></div>
+    <div style="padding:0 18px 18px;display:flex;gap:10px;justify-content:flex-end">
+      <button id="confirmCancelBtn" onclick="window._confirmCancel&&window._confirmCancel()" style="padding:10px 22px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:var(--fg-2,#aaa);cursor:pointer;font-size:14px">取消</button>
+      <button id="confirmOkBtn" data-keep-color onclick="window._confirmOk&&window._confirmOk()" style="padding:10px 22px;border-radius:10px;border:none;background:linear-gradient(180deg,#e8c66a,#c1272d);color:#fff;cursor:pointer;font-size:14px;font-weight:700">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= v2.6: Debug 控制台（Ctrl+D 切换） ================= -->
+<div class="modal" id="debugModal" onclick="if(event.target===this)this.style.display='none'" style="z-index:350">
+  <div class="box" style="max-width:680px;max-height:80vh;overflow:auto;border-radius:14px">
+    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+      <b style="color:#e8c66a">🐛 Debug 控制台</b>
+      <button onclick="document.getElementById('debugModal').style.display='none'" style="background:transparent;border:none;color:#888;cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <pre id="debugContent" style="padding:14px 18px;font-size:12px;line-height:1.6;color:#9f9;margin:0;white-space:pre-wrap;word-break:break-all"></pre>
+    <div style="padding:10px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-size:12px">刷新</button>
+      <button onclick="S.turn=S.turn+5;advanceTime&&advanceTime();renderAll&&renderAll();refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-size:12px">快进5月</button>
+      <button onclick="S.player.健康=0;refreshDebug()" style="padding:6px 14px;border-radius:8px;border:1px solid #c1272d;background:transparent;color:#c1272d;cursor:pointer;font-size:12px">触发结局</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* v2.6 Debug 模式 */
+function refreshDebug(){
+  if(typeof S==='undefined'){ document.getElementById('debugContent').textContent='游戏未开始'; return; }
+  var d = [];
+  d.push('=== 基础 ===');
+  d.push('Turn: '+(S.turn||0)+'  Date: '+(S.date||'?'));
+  d.push('年龄: '+(S.player&&S.player.年龄||'?')+'  职业: '+((S.player&&S.player.职业路径&&S.player.职业路径.当前职业)||S.player.职业||'?'));
+  d.push('声望: '+(S.player&&S.player.声望||0)+'  健康: '+(S.player&&S.player.健康||100)+'  压力: '+(S.player&&S.player.压力||0));
+  if(S.player&&S.player.经济){ d.push('现金: '+S.player.经济.现金+'  储蓄: '+S.player.经济.储蓄+'  债务: '+S.player.经济.债务+'  月收入: '+S.player.经济.月收入); }
+  d.push('');
+  d.push('=== 世界线 ===');
+  if(S.worldline){
+    d.push('偏离度: '+S.worldline.divergenceLevel+' ('+WorldlineEngine.getDivergenceLabel(S)+')');
+    d.push('正典完整: '+S.worldline.canonIntegrity+'  影响力: '+S.worldline.playerInfluence);
+    d.push('Flags: '+JSON.stringify(S.worldline.majorFlags));
+    d.push('已改变事件: '+(S.worldline.alteredEvents||[]).join(', '));
+  }
+  d.push('');
+  d.push('=== 关系 ('+(S.rel||[]).length+'人) ===');
+  (S.rel||[]).slice(0,8).forEach(function(r){
+    d.push('  '+r.姓名+' | '+r.身份+' | '+r.关系+(r._rel?' [信任'+r._rel.trust+']':''));
+  });
+  d.push('');
+  d.push('=== 事件历史 (最近5) ===');
+  (S.eventHistory||[]).slice(-5).forEach(function(h){ d.push('  '+h.id+' @ turn'+h.turn); });
+  d.push('');
+  d.push('=== 人生记忆 ===');
+  (S.memory||[]).slice(-5).forEach(function(m){ d.push('  '+m.year+': '+m.text); });
+  document.getElementById('debugContent').textContent = d.join('\n');
+}
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='d'){
+    e.preventDefault();
+    var m=document.getElementById('debugModal');
+    if(m){ refreshDebug(); m.style.display = m.style.display==='flex'?'none':'flex'; }
+  }
+});
+</script>
+
+<!-- ================= v2.6: NPC AI 对话模态框 ================= -->
+<div class="modal" id="npcChatModal" onclick="if(event.target===this)closeNPCChat()" style="z-index:160">
+  <div class="box" style="max-width:560px;border-radius:20px;overflow:hidden">
+    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700;font-size:16px" class="npc-chat-name">对方</div>
+        <div style="font-size:12px;color:var(--text-muted,#999)" class="npc-chat-role"></div>
+      </div>
+      <button onclick="closeNPCChat()" style="background:none;border:none;color:var(--text-muted,#999);font-size:20px;cursor:pointer">×</button>
+    </div>
+    <div class="npc-chat-body" style="padding:16px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px"></div>
+    <div style="padding:12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px">
+      <input id="npcChatInput" type="text" placeholder="说点什么…（按回车发送）" style="flex:1;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text-primary)" onkeydown="if(event.key==='Enter')npcChatSend()">
+      <button class="btn btn-glass" onclick="npcChatSend()" style="padding:10px 18px">发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 新手教程引导（v1.4 · 首页第一次打开弹出，看过后不再弹出） ================= -->
+<div class="modal tutorial-modal" id="tutorialModal" onclick="if(event.target===this)closeTutorial()" style="z-index:170">
+  <div class="box" style="max-width:620px;border-radius:22px;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--bg-1) 80%,transparent),var(--bg-0))">
+    <div class="tut-hero">
+      <div class="tut-title">🎬 欢迎来到「地球-616」</div>
+      <div class="tut-sub">这不是普通的文字游戏——你将作为<b>普通人</b>，在真实时间流动的漫威世界里过完你的一生。</div>
+      <div class="tut-step">第 <b id="tutIdx">1</b> / <b id="tutTotal">6</b> 步</div>
+    </div>
+    <div id="tutBody" style="padding:22px 26px 0;font-size:15px;line-height:1.85"></div>
+    <div class="tut-btns">
+      <button id="tutPrev" class="tbtn">&larr; 上一步</button>
+      <button id="tutSkip" class="tbtn skip">跳过教程</button>
+      <button id="tutNext" class="tbtn next">下一步 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 微信 / 抖音 / QQ 内置浏览器跳转提示遮罩 ================= -->
+<div class="modal openinbrowser-mask" id="oibMask" style="z-index:32767;background:rgba(0,0,0,.92)!important">
+  <div class="oib-container">
+    <div class="oib-arrow" id="oibArrow">↗</div>
+    <div class="oib-inner">
+      <div class="oib-icon" id="oibIcon">🧭</div>
+      <div class="oib-title">为获得 <b>最佳游玩体验</b></div>
+      <div class="oib-sub" id="oibSub">请点右上角 &nbsp;<span class="oib-dot">⋯</span>&nbsp; →&nbsp; 选择 <b>「在浏览器打开」</b></div>
+      <div class="oib-tip">
+        ✅ 推荐打开方式：<br>
+        <span id="oibSafariHint">iPhone：Safari</span> &nbsp;·&nbsp;
+        <span id="oibAndroidHint">安卓：Chrome / 系统浏览器</span> &nbsp;·&nbsp;
+        鸿蒙：系统浏览器<br>
+        ❌ 不要在<span id="oibApp">微信/抖音</span>内直接玩：<span id="oibReasons">可能白屏 / 闪退 / 键盘乱跑 / 存档丢失</span>
+      </div>
+      <button class="oib-copy" onclick="copyPageUrlForOpenIn()">📋 复制本页链接，粘贴到浏览器打开</button>
+      <button class="oib-close" onclick="tryDismissOib()">我知道了 · 继续当前容器试试（不推荐）</button>
+      <div class="oib-faq" style="margin-top:14px;padding:10px 12px;background:rgba(255,231,160,.06);border:1px solid rgba(255,231,160,.18);border-radius:10px;text-align:left;font-size:12.5px;line-height:1.8;color:var(--fg-2)">
+        <b style="color:#ffe7a0">❓ 常见坑 1：「用其他应用打开」列表里没有 Safari？</b><br>
+        很正常 —— <b>iOS 苹果故意锁死 Safari 不支持"打开本地 .html 文件"</b>，而且你现在看到的引导按钮<strong>本来就不在那个列表里</strong>：<br>
+        👉 请直接点<strong>当前页面右上角三个点 ⋯</strong>（iOS 微信）或 <strong>右下角 ↗ 分享</strong>（iOS 抖音），在弹出的菜单里找「在 Safari 打开」，<b>100% 有这个选项</b>。
+        <div style="height:8px"></div>
+        <b style="color:#ffe7a0">❓ 常见坑 2：微信提示「不支持打开该类型文件」？</b><br>
+        你收到的是 <b>.html 格式文件（比如"1.4.html"）</b>，不是 URL 链接 —— 微信 iOS 不允许直接预览 html/js 附件。<br>
+        👉 正确做法：请作者给你发一个形如 <code>https://…</code> / <code>http://192.168.…</code> 的<b>网页链接</b>，或者先把文件"存储到文件"→ 用 Chrome / Alook 浏览器打开。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 时间快进面板（v1.4） ================= -->
+<div class="modal" id="skipModal" onclick="if(event.target===this)closeSkipMenu()" style="z-index:119">
+  <div class="box" style="max-width:520px">
+    <h3 style="margin:0 0 8px">🗓 时间快进 · 选择跨度</h3>
+    <div class="dim" style="font-size:12.5px;line-height:1.75;margin-bottom:12px">
+      快进期间<strong>世界会真实运转</strong>：NPC 过各自的生活，正典事件照常发生，你的身体、学业/事业、财富、人际关系也会按自然规律演化。结束时会给出：<br>
+      ① 这阵子<strong>世界整体变化</strong>的总结；<br>
+      ② 你身边<strong>家人 / 朋友 / 同事</strong>都在做什么；<br>
+      ③ 你自己这段时间的<strong>经历、成长、收获与失去</strong>。<br>
+      <span style="color:var(--accent)">若期间发生<strong>大事件</strong>（如：斯塔克公开身份 / 纽约之战 / 被神盾局招募 / 家人生病 / 偶遇英雄 / 意外辐射等），会直接在那一天停住，把选择权交给你。</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <button class="skip-card" onclick="doSkip('week')"><b>跳 1 周</b><div>7 天</div><div class="sd">日常向：学业 / 训练 / 小项目</div></button>
+      <button class="skip-card" onclick="doSkip('month')"><b>跳 1 月</b><div>30 天</div><div class="sd">阶段向：考试、工作试用期</div></button>
+      <button class="skip-card" onclick="doSkip('season')"><b>跳 1 季</b><div>90 天</div><div class="sd">季度向：学期 / 项目 / 夏天</div></button>
+      <button class="skip-card" onclick="doSkip('year')"><b>跳 1 年</b><div>365 天</div><div class="sd">长线向：毕业、入伍、成长</div></button>
+    </div>
+    <div class="hints" id="skipHint" style="display:none"></div>
+    <div style="margin-top:12px;text-align:right">
+      <button onclick="closeSkipMenu()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 引擎设置（三档模式 · 推荐/自定义/离线） ================= -->
+<div class="modal" id="settings">
+  <div class="box">
+    <h3>⚙ 游玩设置</h3>
+    <div class="line" style="margin:0 0 10px;height:1px;background:rgba(255,255,255,.06)"></div>
+    <!-- v2.6: AI 配置界面已隐藏，默认使用智谱 glm-4.7（Key 硬编码于 js/ai.js） -->
+    <div id="engineConfigSection" style="display:none">
+    <div class="dim" style="margin-bottom:6px;line-height:1.6">
+      想直接玩？<b>选第 1 档就好（零配置开玩）</b>；想升级 AI 文笔、想自己换模型，切到下面的档位。
+    </div>
+    <!-- v1.2：档位切换 toast 反馈条 — 点卡片后立即显示"已切到 XXX 档"，用户不再怀疑自己点没点上 -->
+    <div id="engToast" style="height:0;overflow:hidden;transition:height .2s;margin-bottom:6px;line-height:1.6">
+      <div id="engToastBody" style="padding:7px 12px;border-radius:8px;font-size:13px;font-weight:600"></div>
+    </div>
+
+    <!-- 三档模式切换卡 -->
+    <div class="eng-tabs">
+      <div class="eng-tab rec" id="etab_rec" onclick="switchEngineTab('rec')">
+        <div class="t"><span class="emoji">🚀</span>推荐档 · 作者共享池（零配置·开箱即玩）</div>
+        <div class="d">默认走<b>高三开发者 CX 共享的智谱 AI 池（glm-4.7）</b>——朋友拿到 HTML，复制到浏览器直接开玩；网络不通 / Key 过期时自动降级为离线推演，绝不卡你进度。<br><span style="font-size:12px;color:#9aa6b8">💡 提示：抖音内置浏览器偶尔会拦截外域请求，如果一直卡「推理中」，右上角 ⋯ → 「在浏览器打开」就能秒解。</span></div>
+        <span class="badge">默认 / 朋友分享首选</span>
+      </div>
+      <div class="eng-tab adv" id="etab_adv" onclick="switchEngineTab('adv')">
+        <div class="t"><span class="emoji">🧠</span>自定义 API（懂的人自己换模型）</div>
+        <div class="d">填自己的 Base URL / API Key / 模型名。支持智谱 / DeepSeek / 豆包 / 通义 / Kimi / OpenAI 等<b>所有 OpenAI 兼容接口</b>。填完自动覆盖推荐档。</div>
+        <span class="badge">进阶用户</span>
+      </div>
+      <div class="eng-tab off" id="etab_off" onclick="switchEngineTab('off')">
+        <div class="t"><span class="emoji">🎲</span>纯离线（断网兜底·开发者模式）</div>
+        <div class="d">强制不联网，由内置漫威正典规则引擎驱动。仅用于：完全断网环境、或想验证"没有 AI 时底线在哪"，<b>日常不推荐使用</b>。</div>
+        <span class="badge">极端兜底</span>
+      </div>
+    </div>
+
+    <!-- 推荐档面板 -->
+    <div class="eng-pan" id="epan_rec">
+      <div class="noteline">
+        <b>🚀 推荐档 = 作者共享 AI 池优先 · 零配置开玩</b><br>
+        · 当前共享池：<b id="pool_name_show">加载中…</b> &nbsp; 默认模型：<code id="pool_model_show">—</code><br>
+        · 优先级链路：<b>作者部署代理 → 作者内置智谱 Key → 你自填的 Key → 离线兜底</b>（4 层透明降级，绝不卡进度）<br>
+        · 作者已把 Key 硬编码在 HTML 中了，<b>朋友拿到这份 HTML 直接就可以点「▶ 推进」开始 AI 文笔</b>，无需注册任何平台。<br>
+        <span style="color:#8fe0a0">💡 本 HTML 只分享给 2-3 个朋友使用；对外公开发布时，请务必把 【CX_SHARED_KEY】 清空后再传，避免泄露 API Key！</span>
+      </div>
+      <div class="dim" style="font-size:12.5px;line-height:1.7;margin-top:4px">
+        👇 <b>想自己换模型 / 用自己的额度？</b>切换到上面的「🧠 自定义 API」卡片填自己的 Base+Key+Model 即可（推荐档会自动复用你的 Key，不用重复填）。
+      </div>
+      <div class="reg-grid" id="regGrid"></div>
+      <div class="tutbox" id="cfg_tut_rec" style="display:none;margin-top:8px"></div>
+      <div style="margin-top:10px;color:#93a6bb;font-size:12px;line-height:1.7">
+        📌 <b>推荐档无需保存</b>，关窗即生效。如果当前显示"作者共享 AI 池已就绪"，直接关掉本窗口开始玩即可。
+      </div>
+    </div>
+
+    <!-- 自定义面板 -->
+    <div class="eng-pan" id="epan_adv">
+      <!-- v1.2：自定义档二级面板 = 平台选择卡（傻瓜式引导）+ 表单 + chips -->
+      <div class="dim" style="font-size:13px;line-height:1.7;margin-bottom:6px">
+        📌 先在下面 <b>点一张平台卡片</b>（自动填好地址和模型默认值）→ 粘你的 API Key → 点「保存自定义配置」即生效，推荐档也会自动复用。
+      </div>
+      <div class="reg-grid" id="advRegGrid"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin:4px 0 10px">
+        <button class="primary" onclick="autoConfig()">🔍 自动探测作者通道</button>
+      </div>
+      <label class="subh">API Base URL</label>
+      <input id="cfg_base" placeholder="https://open.bigmodel.cn/api/paas/v4" spellcheck="false" autocapitalize="off" autocorrect="off">
+      <div class="chips" id="chips"></div>
+      <div class="tutbox" id="cfg_tut"></div>
+      <label class="subh">API Key</label>
+      <input id="cfg_key" type="password" placeholder="留空 = 推荐档或离线；智谱为 xxxxx.yyyyy 两段式" spellcheck="false" autocapitalize="off" autocorrect="off">
+      <label class="subh">模型名称</label>
+      <input id="cfg_model" placeholder="glm-4.7(走4.7专属池) / glm-4.7-flashx(高速) / deepseek-chat / qwen-plus / ..." spellcheck="false" autocapitalize="off" autocorrect="off">
+      <div class="fgrid" style="margin-top:8px">
+        <div><label>温度</label><input id="cfg_temp" type="number" step="0.05" value="0.7"></div>
+        <div><label>最大输出 tokens</label><input id="cfg_max" type="number" step="256" value="1200"></div>
+      </div>
+      <div class="warnline">⚠ 浏览器直连会把 API Key 暴露给接口服务商，部分接口还会因 CORS 拒绝网页直连。本地 / 自建服务最安全。若报错 Failed to fetch，多为 CORS，起一个本地服务打开即可。</div>
+    </div>
+
+    <!-- 离线档面板 -->
+    <div class="eng-pan" id="epan_off">
+      <div class="noteline" style="border-color:#6b5a2b;background:#1a150a;color:#e2cf95">
+        <b>🎲 纯离线骰子引擎</b><br>
+        · 不发任何网络请求，剧情由内置漫威正典时间线 × 血统出身 × 日历天气 组合生成<br>
+        · 120 种情境 × 18 套叙事语气 × 7 条正典锚点事件，单角色 200 回合不重样<br>
+        · 适合地铁/飞机/没网环境。推荐档在网络不可用时也会自动落到这套引擎。
+      </div>
+      <div id="offDemo" style="margin-top:10px;color:#8fa3b8;font-size:12.5px;line-height:1.7"></div>
+    </div>
+
+    <div style="display:flex;gap:7px;margin-top:14px;flex-wrap:wrap">
+      <button class="primary" onclick="saveSettings()">💾 保存自定义配置</button>
+      <button onclick="resetDefault()">恢复智谱默认</button>
+      <button onclick="clearSettings()">清空</button>
+      <button onclick="testApi()">🔌 测试连接</button>
+      <button onclick="closeSettings()">关闭</button>
+    </div>
+    <div id="cfg_msg" style="margin-top:10px;font-size:12.5px;line-height:1.6"></div>
+    </div><!-- /engineConfigSection (hidden) -->
+
+    <!-- Beta v2.3 · 收款码硬编码（只读展示·防篡改·高三学生开发者 CX 硬编码进源码·所有玩家直接可见）-->
+    <div style="margin-top:22px;padding:14px;border-radius:12px;border:1px dashed rgba(109,62,240,.45);background:linear-gradient(180deg,rgba(109,62,240,.08),rgba(109,62,240,.02))">
+      <div class="subh" style="font-size:13px;color:#9d7cff">🧋 请喝奶茶收款码（源码硬编码·只读展示）</div>
+      <div style="font-size:12px;color:#9fb3c7;line-height:1.8;margin-top:6px">
+        收款码图片已由<b style="color:#9d7cff">高三学生开发者 CX</b> 以 base64 形式直接写进源码——<b>所有玩家打开 HTML 即可直接看到，无需额外配置，也无法被浏览器/平台插件篡改。</b><br>
+        更新收款码：打开 HTML 搜索 <code style="background:var(--bg-2);padding:1px 5px;border-radius:4px">CX_DONATE_WX</code>，替换两张 base64 图片并重新发布 HTML 即可。
+      </div>
+      <div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">
+        <button class="primary" onclick="openDonate()">👀 预览「请喝奶茶」弹窗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 人生回顾（v2.6 手动入口） ================= -->
+<div class="modal about-modal" id="lifeReviewModal" onclick="if(event.target===this)closeLifeReview()" style="z-index:120">
+  <div class="box" style="max-width:620px">
+    <h3>📜 人生回顾</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button onclick="copyLifeReview(event)">📋 复制全文</button>
+      <button onclick="exportLifeReview()">⬇ 导出 TXT</button>
+    </div>
+    <div id="lifeReviewBody" style="margin-top:10px;max-height:65vh;overflow-y:auto"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="primary" onclick="closeLifeReview()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 关于作者 & 版权声明 ================= -->
+<div class="modal about-modal" id="aboutModal" onclick="if(event.target===this)closeAbout()">
+  <div class="box">
+    <h3>ℹ 关于作者 · 版权声明</h3>
+    <div class="author-hero">
+      <div class="cx-name">CX</div>
+      <div class="role">漫威电影宇宙 · 英雄纪元人生模拟器 ｜ <span style="color:#f2c54d">高三学生开发者</span> · 课余独立作品</div>
+    </div>
+    <div style="font-size:14px;line-height:1.9;color:#dbe3ee">
+      本作品《漫威模拟器》（又名《漫威电影宇宙 · 英雄纪元人生模拟器》）由 <b style="color:#9d7cff">一名普通高三学生 CX</b> 在课余时间独立设计、敲代码、调 AI 参数完成。<br>
+      我没有商业团队、没有大厂资源，只有热爱漫威 + 喜欢写代码的一颗心 🔥 如果你玩得开心，我最想要的回报就是——<b>发一条抖音 @我 / 留一句评论 / 分享给朋友</b>。
+    </div>
+    <div class="line">
+      <b>🛡 版权所有：</b>© CX，保留一切权利。<br>
+      <b>🎯 署名要求：</b>转载 / 直播 / 二创 / 改编时需在显著位置标注<b>「原作者 CX」</b>或保留页面内的作者水印与"关于"入口。<br>
+      <b>🚫 禁止：</b>禁止去除水印 / 改作者署名后分发、禁止用于付费 NFT/数字藏品打包发行、禁止包装成"某平台原创作品"进行商业化售卖。<br>
+      <b>✅ 允许：</b>抖音 / B 站 / 快手 / 小红书 / 视频号等平台免费游玩 / 录屏 / 直播（请保留本页水印或注明"原作者 CX"）。<br>
+      <b>💼 商业化合作：</b>付费墙 / 广告分成 / 内嵌支付 / 合作发行等，请联系作者本人协商授权。
+    </div>
+    <div class="line" style="margin-top:14px;padding:12px 14px;border-radius:10px;background:linear-gradient(180deg,rgba(232,198,106,.10),rgba(232,198,106,.03));border:1px dashed rgba(232,198,106,.4)">
+      <b style="color:#e8c66a">🛟 免责声明 & 年龄建议（重要，请阅读）</b><br>
+      1. <b>IP 归属声明</b>：本作是<b>非官方同人作品</b>，与漫威 / 迪士尼官方无关；钢铁侠、美国队长、雷神、复仇者联盟、神盾局等相关<b>IP、角色、名称、商标、视觉元素均归属华特迪士尼公司 / 漫威娱乐（Marvel Entertainment, LLC）</b>，原作一切解释权归官方所有。<b>本作不作任何商业用途，不代表官方立场。</b><br>
+      2. <b>AI 内容免责</b>：本作剧情由大语言模型实时生成，可能出现<b>与漫威正典不一致、设定冲突、违反科学常识、或违背现实法律法规</b>的情节，<b>仅用于娱乐与同人二创参考，请勿当真</b>；游戏中涉及的军事、医疗、法律、金融、职业发展等描述，<b>一律不能作为现实决策依据</b>。<br>
+      3. <b>风险与责任</b>：作者对因违反本声明、滥用本作品（包括但不限于违反平台使用规范、违反当地法律法规、未成年人未在监护人指导下使用、或沉迷导致的身心影响）所造成的<b>任何直接/间接损失，不承担法律责任</b>。<br>
+      4. <b style="color:#e8c66a">🎂 年龄建议：本作建议 16 周岁以上用户游玩</b>；16 周岁以下未成年人请<b>务必在家长 / 监护人知情并指导</b>下使用，并<b>合理控制每日游玩时长（建议 ≤ 1 小时 / 天）</b>，避免沉迷游戏、影响学业与身心健康。<br>
+      5. <b>内容合规</b>：云端 AI 引擎会对每一条输入与输出进行合规审核，如遇"拦截"类提示请换委婉措辞或一键切"离线推演"继续游戏；<b>请文明游玩，勿发布或生成任何违反《网络安全法》《未成年人保护法》及平台社区公约的内容。</b>
+    </div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="primary" onclick="closeAbout()">知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 赞助打赏（Beta v2.3 · 高三学生·课余独立开发·AI算力全自费） ================= -->
+<div class="modal about-modal" id="donateModal" onclick="if(event.target===this)closeDonate()" style="z-index:122">
+  <div class="box" style="max-width:540px">
+    <h3>☕ 支持一下作者</h3>
+    <div class="author-hero" style="padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(242,197,77,.10),rgba(157,124,255,.08));border:1px dashed rgba(242,197,77,.45)">
+      <div class="cx-name" style="color:#f2c54d">独立开发者 · 课余作品</div>
+      <div class="role" style="line-height:1.85;margin-top:6px">
+        本作永久免费。如果你玩得开心，想鼓励我继续更新剧情和正典大事件，<b>一杯咖啡、一瓶汽水都是心意</b>。<br>
+        不支持也完全没关系——<b>你愿意点开玩，就是最大的支持</b>。🛡
+      </div>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('wechat')}catch(_){}" title="扫码支持作者">
+        <div class="qr-title">💚 微信</div>
+        <div class="qr-box" id="qrWX"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
+        <div class="qr-foot">长按 / 点击 → 识别二维码</div>
+      </div>
+      <div class="qr-card" onclick="try{_dlQrPlaceholder('alipay')}catch(_){}" title="扫码支持作者">
+        <div class="qr-title">💙 支付宝</div>
+        <div class="qr-box" id="qrAli"><span class="qr-empty">作者还没上传收款码～<br>稍后再来看 🙏</span></div>
+        <div class="qr-foot">长按 / 点击 → 识别二维码</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="primary" onclick="closeDonate()">谢谢你 ♥</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 主题设置（v1.4：深色 / 浅色 / 跟随系统 / 自定义背景图） ================= -->
+<div class="modal" id="themeModal" onclick="if(event.target===this)closeThemePanel()" style="z-index:118">
+  <div class="box" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <h3 style="margin:0">🎨 外观主题（四端通用）</h3>
+      <button onclick="closeThemePanel()" style="font-size:22px;background:none;border:none;color:var(--fg-2,#888);cursor:pointer;padding:4px 10px;border-radius:8px;line-height:1;flex-shrink:0" aria-label="关闭">✕</button>
+    </div>
+    <div class="subh" style="font-size:12.5px">选择你喜欢的外观风格。所有设置会自动保存在本机，下次打开自动生效。</div>
+    <div id="themeGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+      <!-- 选项由 JS 动态生成 → 见 renderThemeOptions() -->
+    </div>
+    <div style="margin-top:18px;padding:14px;border:1px dashed var(--line-2);border-radius:10px;background:var(--bg-1)">
+      <div class="subh" style="font-size:12.5px;margin-bottom:8px">🖼 自定义背景图（本地图片不上传服务器）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="file" id="themeBgFile" accept="image/*" onchange="onThemeBgFile(event)" style="flex:1 1 220px;min-height:40px;color:var(--fg-1)">
+        <button onclick="applyThemeBg(null)">🗑 清除</button>
+      </div>
+      <div class="dim" style="font-size:12px;margin-top:8px;line-height:1.65">
+        提示：图片会保存在浏览器本地（localStorage · data:URL），尺寸过大可能影响存档体积，建议 1920×1080 或更小。
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:14px;border:1px dashed var(--line-2);border-radius:10px;background:var(--bg-1);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="flex:1 1 200px">
+        <div class="subh" style="font-size:12.5px;margin-bottom:4px">🔊 音效与震动</div>
+        <div class="dim" style="font-size:12px;line-height:1.6">点亮选项、推进剧情、撞上大事件、解锁成就时播放轻音效；手机端附带轻微震动。</div>
+      </div>
+      <button id="sfxToggleBtn" onclick="toggleSfx()" style="min-width:96px"></button>
+    </div>
+    <div style="margin-top:18px;text-align:center;position:sticky;bottom:0;background:var(--bg-1,#0f1620);padding:10px 0 4px;margin:18px -18px -18px;border-top:1px solid var(--line-2,#2f3d4e);border-radius:0 0 12px 12px">
+      <button class="primary" onclick="closeThemePanel()">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= v2.6 首次进入 3 步引导（只出现一次） ================= -->
+<div class="modal" id="onboardModal" onclick="if(event.target===this)finishOnboard()" style="z-index:130;display:none">
+  <div class="box ob-box">
+    <div class="ob-dots" id="obDots"></div>
+    <div class="ob-emoji" id="obEmoji">📜</div>
+    <h3 id="obTitle" style="text-align:center;margin:6px 0 10px">这里是「世界日志」</h3>
+    <p id="obText" style="font-size:14px;line-height:1.85;color:var(--fg-1);margin:0 0 18px"></p>
+    <div class="ob-actions">
+      <button id="obSkip" onclick="finishOnboard()">跳过</button>
+      <button class="primary" id="obNext" onclick="nextOnboard()">下一步</button>
+    </div>
+  </div>
+</div>
+
+<div id="busy">
+  <div class="spin-wrap"><div class="spin"></div><div class="spin2"></div><div class="spin3"></div></div>
+  <div id="busyTxt">引擎推演中…</div>
+  <div class="busy-prog"><i id="busyProg"></i></div>
+  <div id="busyQuote">
+    <div class="q-en" id="bq_en">"I am Iron Man."</div>
+    <div class="q-zh" id="bq_zh">我是钢铁侠。</div>
+    <div class="a"><span class="en" id="bq_auth_en">Tony Stark</span><span class="zh" id="bq_auth_zh">· 托尼·斯塔克</span></div>
+  </div>
+</div>
+<!-- ===== v2.6.4 编年史覆盖层（时间轴 / 月份跳转 / 类型筛选） ===== -->
+<div id="chrOverlay" class="chr-ov" style="display:none">
+  <div class="chr-panel">
+    <div class="chr-topbar">
+      <button class="chr-back" onclick="closeChronicle()">✕</button>
+      <div class="chr-title">📖 我的编年史</div>
+    </div>
+    <div class="chr-months" id="chrMonths"></div>
+    <div class="chr-filters" id="chrFilters"></div>
+    <div class="chr-list" id="chrList"></div>
+  </div>
+</div>
+<script src="app.js?v=2.7.1"></script>
+<script src="js2/core/store.js?v=2.7.1"></script>
+<script src="js2/core/savekit.js?v=2.7.1"></script>
+<script src="js/chronicle.js?v=2.7.1"></script>
+</body>
+</html>
+
+
+
