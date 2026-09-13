@@ -2623,10 +2623,8 @@ html,body,div,span,p,button,input,textarea{
 })();
 </script>
 <!-- ================= v2.6 融合：引入 v2.4 Liquid Glass 设计令牌与 AI 服务 ================= -->
-<!-- v2.6：引入 Noto Sans SC 中文字体，Windows 端不再 fallback 到微软雅黑 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Noto Sans SC 仅作增强：非阻塞加载（print→all swap），国内被墙/弱网超时直接放弃，用系统苹方/雅黑兜底，绝不拖白屏 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" media="print" onload="this.media='all'" onerror="try{this.remove()}catch(_){}">
 <link rel="stylesheet" href="css/design-tokens.css?v=2.6.2">
 <link rel="stylesheet" href="css/glass.css?v=2.6.2">
 <link rel="stylesheet" href="css/components.css?v=2.6.2">
@@ -2649,6 +2647,17 @@ html,body,div,span,p,button,input,textarea{
   <div style="font-size:15px;font-weight:600;color:#cfd9e3;letter-spacing:1px">漫威模拟器</div>
   <div style="font-size:11.5px;color:#5a6b7d;margin-top:6px">正在加载世界线…</div>
 </div>
+<script>
+/* iOS Safari 弱网专项兜底：本内联脚本不依赖任何外部 js/css，解析到这里立即执行。
+   即使 10 个 defer 引擎脚本因弱网长时间 pending（会推迟 DOMContentLoaded/load/pageshow，
+   导致 _boot 不运行、splash 永不消失=「打不开」），1.5 秒后也强制撤掉启动遮罩，露出可点的首页。*/
+(function(){
+  function kill(){try{var sp=document.getElementById('bootSplash');if(sp){sp.style.opacity='0';setTimeout(function(){try{sp.remove()}catch(_){}},420);}}catch(_){}}
+  setTimeout(kill,1500);
+  /* 双保险：页面若从 bfcache 恢复，也立刻撤掉 */
+  window.addEventListener('pageshow',kill);
+})();
+</script>
 <style>@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}</style>
 
 <!-- ================= 作者水印（CX）· 全屏可见层 ================= -->
@@ -10540,59 +10549,62 @@ if(document.readyState==='loading'){
 }else{
   try{_boot()}catch(_){}
 }
-/* PWA: 注册 Service Worker，支持离线 + 发版自动刷新 */
+/* PWA: 注册 Service Worker，支持离线 + 发版自动刷新
+   铁律：任何情况下都不允许自动刷新整页超过一次，且必须带持久化冷却锁——
+   否则手机弱网下外部 js 偶尔加载失败会触发「刷新→再失败→再刷新」死循环，表现为页面永远打不开。*/
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
+    var hadController=!!navigator.serviceWorker.controller;  /* 打开时是否已被 SW 控制：首次安装为 false */
     navigator.serviceWorker.register('../sw.js').then(function(reg){
-      /* 主动检查 SW 更新，绕过浏览器默认 24 小时检查周期 */
       try{reg.update();}catch(_){}
-      /* 发现新 SW 安装中：安装完自动进入激活，无需用户确认 */
       reg.addEventListener('updatefound',function(){
         var nw=reg.installing;
         if(!nw)return;
         nw.addEventListener('statechange',function(){
           if(nw.state==='installed'&&navigator.serviceWorker.controller){
-            /* 新 SW 已就绪且有旧版在运行：请求立即激活 */
             try{nw.postMessage({type:'SKIP_WAITING'});}catch(_){}
           }
         });
       });
     }).catch(function(){});
-    /* 控制器变更：新 SW 已接管，刷新页面应用新版（_refreshed 防止重复刷新） */
-    var _refreshed=false;
+    /* 只有「已有旧 SW 控制 → 换成新 SW」（即真·发版更新）才刷新；首次安装接管不刷。
+       sessionStorage 冷却锁兜底：2 秒内的重复 controllerchange 一律忽略。*/
     navigator.serviceWorker.addEventListener('controllerchange',function(){
-      if(_refreshed)return;_refreshed=true;
+      if(!hadController){hadController=true;return;}
+      var v=0;try{v=+sessionStorage.getItem('__sw_cc')||0}catch(_){}
+      if(Date.now()-v<2000)return;
+      try{sessionStorage.setItem('__sw_cc',String(Date.now()))}catch(_){}
       location.reload();
     });
-    /* 收到自愈完成通知：SW 已清缓存注销，强制无缓存重载 */
+    /* SW 自愈完成回调：清缓存后重载一次，带 30 秒冷却锁，防消息重入循环 */
     navigator.serviceWorker.addEventListener('message',function(e){
       if(e.data&&e.data.type==='HEAL_DONE'){
-        location.replace(location.pathname+'?_heal='+Date.now());
+        var now=Date.now(),last=0;
+        try{last=+localStorage.getItem('__heal_cd')||0}catch(_){}
+        if(now-last<30000)return;
+        try{localStorage.setItem('__heal_cd',String(now))}catch(_){}
+        location.replace(location.pathname+'?_heal='+now);
       }
     });
   });
 }
-/* 自愈：清掉所有 SW 缓存并注销，让页面完全走网络重新加载。
-   不清缓存也能玩的关键——当缓存损坏/资源 404 时自动或手动触发。 */
+/* 手动自愈：点「🔧 修复」时调用。清掉所有 SW 缓存并注销，再无缓存重载。
+   30 秒冷却锁：连点、消息重入、刷新后立刻再失败都不会造成循环；冷却中只做普通 reload。*/
 function selfHeal(){
+  var now=Date.now(),last=0;
+  try{last=+localStorage.getItem('__heal_cd')||0}catch(_){}
+  if(now-last<30000){try{location.reload()}catch(_){}return}
+  try{localStorage.setItem('__heal_cd',String(now))}catch(_){}
   try{
     if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}
   }catch(_){}
   if('serviceWorker' in navigator && navigator.serviceWorker.controller){
     try{navigator.serviceWorker.controller.postMessage({type:'SELF_HEAL'});return}catch(_){}
   }
-  location.replace(location.pathname+'?_heal='+Date.now());
+  location.replace(location.pathname+'?_heal='+now);
 }
-/* 关键资源加载失败（css/js）时自动自愈一次，避免坏缓存导致白屏 */
-var _healTried=false;
-window.addEventListener('error',function(e){
-  if(_healTried)return;
-  var t=e.target;
-  if(t&&(t.tagName==='SCRIPT'||t.tagName==='LINK')&&t.src){
-    _healTried=true;
-    setTimeout(selfHeal,400);
-  }
-},true);
+/* 注意：外部 js/css 单个加载失败【不再】触发整站刷新——手机弱网下这是常态，
+   引擎模块缺失有离线降级，主界面照常可用；只有白屏时由用户手动点「🔧 修复」。*/
 </script>
 </body>
 </html>
