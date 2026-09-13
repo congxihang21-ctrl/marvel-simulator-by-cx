@@ -4997,6 +4997,14 @@ function renderOpts(){
    updInputPH();
    return;
  }
+ /* v2.6.3_fix: 种子节点已激活（S.currentNode 有值）但 #opts 里还没有 seed-choice，
+    说明 renderNode 因时序/异常没成功渲染三选项。强制重跑一次，确保开局三方向出现。 */
+ try{
+   if(S && S.currentNode && typeof GameSeed !== 'undefined' && GameSeed.renderNode){
+     GameSeed.renderNode();
+     if(optsEl && optsEl.querySelector('.seed-choice')){ updInputPH(); return; }
+   }
+ }catch(_e){ console.warn('[renderOpts] seed re-render failed', _e); }
  var h=[],T=['A','B','C','D','E'];
  /* 建议内容变了（进入新一轮）→ 清空点亮状态 */
  var hk='';try{hk=JSON.stringify(CUR_HINTS)}catch(_){}
@@ -6350,7 +6358,11 @@ function enterGame(){
  var setupScreen=$('setupScreen'),gameScreen=$('gameScreen');
  if(setupScreen)setupScreen.style.display='none';
  if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
- try{var _bdge=$('cxBadge');if(_bdge)_bdge.style.display='none'}catch(_){}  /* 游戏内隐藏右下角签名徽章，避免遮挡底部 Tab 栏（版权由全屏平铺水印承担） */
+ /* 游戏内隐藏右下角签名徽章：给 <html> 加 _immersive class，触发 CSS 规则 ._immersive .cx-badge{display:none}。
+    比 inline display:none 更可靠——ensureWatermark 重建 badge 时新元素没有内联样式，但 CSS 规则对新旧元素都生效。
+    版权由全屏平铺水印承担。*/
+ try{document.documentElement.classList.add('_immersive')}catch(_){}
+ try{var _bdge=$('cxBadge');if(_bdge)_bdge.style.display='none'}catch(_){}
  var _ab=$('wzActionBar');if(_ab)_ab.style.display='none';
  var bar=$('gameBottomBar');if(bar)bar.style.display='none'; /* v2.6.2：功能已迁入设置 Tab，不再显示 */
  /* v2.6.2_fix：iOS Safari 同步重渲染会卡死主线程。
@@ -6385,6 +6397,7 @@ function backToHome(){
  closeIO();
  $('gameScreen').style.display='none';
  $('setupScreen').style.display='block';
+ try{document.documentElement.classList.remove('_immersive')}catch(_){}  /* 移除游戏沉浸态，恢复签名徽章显示 */
  try{var _bdge2=$('cxBadge');if(_bdge2)_bdge2.style.display=''}catch(_){}  /* 返回首页恢复签名徽章 */
  var wv=$('wizardView');if(wv)wv.style.display='none';
  var hv=$('homeView');if(hv)hv.style.display='block';
