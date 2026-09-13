@@ -139,4 +139,37 @@
       '.mcu-diag-tip{padding:10px 15px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #23263a;color:#8b90a8;font-size:12px;line-height:1.7}';
     (document.head || document.documentElement).appendChild(st);
   } catch (_) {}
+
+  /* ============================================================================
+   * v2.7.1 · 主线程心跳看门狗
+   * 每秒一拍：两拍间隔 ≥3s 说明主线程被长任务/渲染冻结卡住（iPhone 滑动卡死类问题
+   * 不会产生任何 onerror，只能靠心跳发现）→ 记入诊断；触摸设备累计 2 次 → 自动开启
+   * 低功耗模式（持久）+ 当场自救（隐藏水印大图层等，仅本会话），防止小白玩家彻底卡死。
+   * 页面切后台时 iOS 会把定时器压到极低频率 → 后台/恢复瞬间不计入，避免误触发。
+   * ==========================================================================*/
+  (function () {
+    var coarse = false;
+    try { coarse = !!(w.matchMedia && w.matchMedia('(hover:none) and (pointer:coarse)').matches); } catch (_) {}
+    var last = Date.now(), longCount = 0, rescued = false;
+    setInterval(function () {
+      try {
+        if (document.hidden || document.webkitHidden) { last = Date.now(); return; }
+        var now = Date.now(), gap = now - last; last = now;
+        if (gap < 3000) return;
+        rec('WARN', 'longtask', '主线程卡顿 ' + gap + 'ms' + (coarse ? '（触摸设备）' : ''));
+        longCount++;
+        if (coarse && !rescued && longCount >= 2) {
+          rescued = true;
+          var root = document.documentElement;
+          root.classList.add('lowfx');
+          root.classList.add('auto-safe');
+          try { localStorage.setItem('mcu_lowfx', '1'); } catch (_) {}
+          rec('LOG', 'self-rescue', '多次长卡顿 → 已自动开启低功耗模式并临时关闭重特效图层');
+          setTimeout(function () {
+            try { if (typeof w.toast === 'function') w.toast('检测到画面卡顿，已自动开启低功耗模式（设置里可手动关闭）'); } catch (_) {}
+          }, 300);
+        }
+      } catch (_) {}
+    }, 1000);
+  })();
 })(window);
