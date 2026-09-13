@@ -356,9 +356,9 @@
    3. 存档注入：save() / openSave() / normalizeSave() 自动给存档注入 _author/_copyright
    ============================================================ */
 /* Beta v2.3 · 作者身份：高三在读学生，课余独立开发；署名保留 CX，介绍页补充"学生开发者"背景，更贴合抖音年轻观众 */
-var APP_VERSION = '漫威模拟器 2.7.0';
+var APP_VERSION = '漫威模拟器 2.7.1';
 /* v2.6.3：版本号唯一真相源。页脚/关于页/存档/资源 URL 一律读这里，禁止再手写版本号。 */
-var CX_BETA_TAG = 'Beta v2.7.0';
+var CX_BETA_TAG = 'Beta v2.7.1';
 var CX_AUTHOR = 'CX（高三学生开发者）';
 var CX_COPYRIGHT = '© ' + CX_AUTHOR + ' · 漫威电影宇宙人生模拟器 · 课余独立开发，保留一切权利。转载 / 二创 / 直播请标注原作者 CX。';
 var CX_WM_BADGE = 'CX · 漫威模拟器 · 学生原创';
@@ -1823,8 +1823,10 @@ function toast(msg, ms){
     }, ms||2000);
   }catch(_){}
 }
+var _busySince=0;
 function busy(on,txt){var b=$('busy');if(!b)return;
   if(!on){
+    _busySince=0;
     /* 先让进度条补到 100% 再关，视觉更顺滑 */
     try{finishBusyProg(function(){try{b.style.display='none'}catch(_){}})}catch(_){b.style.display='none'}
     /* Beta v2.2 · S6：请求完成 → 恢复选项卡可点击（去掉 .busy 灰态禁点） */
@@ -1836,6 +1838,7 @@ function busy(on,txt){var b=$('busy');if(!b)return;
       }
     }catch(_){}
   }else{
+    if(!_busySince)_busySince=Date.now();
     b.style.display='block';
     if(txt)$('busyTxt').textContent=txt;
     /* Beta v2.2 · S6：请求开始 → 选项卡灰态禁点，防小白重复点击导致剧情错位/重复请求扣额度 */
@@ -1873,6 +1876,25 @@ function busy(on,txt){var b=$('busy');if(!b)return;
     startBusyQuote();
   }
 }
+
+/* v2.7.1：busy 遮罩终极兜底 —— 任何漏网的永不返回等待（老旧 iOS 内核/第三方代理/
+   WebView 异常），遮罩连续超过阈值就强制撕掉，保证玩家不会"点一下就永久卡死"。
+   正常超时链（45s 请求 + 25s 断流）会先于本兜底走完并自动切离线回合。*/
+setInterval(function(){
+  try{
+    if(!_busySince)return;
+    var isMob=false;try{isMob=!!(ENV&&(ENV.isMobile||ENV.isWechat||ENV.isDouyin))}catch(_){}
+    var limit=isMob?80000:110000;
+    var held=Date.now()-_busySince;
+    if(held<limit)return;
+    _busySince=0;
+    var b=$('busy');if(b)b.style.display='none';
+    try{var o=$('opts');if(o)o.classList.remove('busy');}catch(_){}
+    try{stopBusyQuote();}catch(_){}
+    try{ if(window.MCU&&MCU.diag)MCU.diag.log('busy-watchdog','busy 遮罩持续 '+Math.round(held/1000)+'s，已强制释放'); }catch(_){}
+    try{ toast('网络等待太久，已自动停止（本轮可以再点一次推进，或切离线模式）'); }catch(_){}
+  }catch(_){}
+},2000);
 
 /* =====================================================================
    v1.4：世界新闻板块接口（数据结构已铺好；UI 面板以后版本再加）
@@ -2794,8 +2816,49 @@ async function callApi(messages,maxTok){
           storyEl.appendChild(streamDiv);
           try{ var bs=$('body_story'); if(bs) bs.scrollTop = bs.scrollHeight; }catch(_){}
         }
+        /* v2.7.1：流读取看门狗 —— iPhone 弱网下响应头已到、数据流中途挂死时，
+           abort 不一定能打断 pending 的 reader.read()，会导致 busy 遮罩永久盖屏。
+           每收到任意字节就续命；连续 N ms 一个字节都没有 → 主动 cancel+abort 并抛错（不重试），
+           上层 catch 会立刻切离线回合，游戏永远能继续。*/
+        var READ_GAP = isShort ? 25000 : 40000;
+        var streamStalled = false;
+        var readTimer = null, stallRej = null;
+        /* 看门狗到期时主动 reject 一个竞速 Promise —— 即使老 iOS 内核里 abort
+           唤不醒挂死的 reader.read()，race 也能强制跳出等待 */
+        var stallSide = function(){
+          return new Promise(function(_, rej){ stallRej = rej; });
+        };
+        var armReadTimer = function(){
+          if(readTimer)clearTimeout(readTimer);
+          /* 上一拍的 side promise 输掉 race 后无人持有，直接丢弃（不 reject，避免误报 unhandled）*/
+          stallRej = null;
+          readTimer = setTimeout(function(){
+            streamStalled = true;
+            try{ if(reader&&reader.cancel) reader.cancel(); }catch(_){}
+            try{ ctrl.abort(); }catch(_){}
+            if(stallRej){ try{ stallRej(new Error('STREAM_STALL')); }catch(_){} stallRej = null; }
+          }, READ_GAP);
+        };
+        /* v2.7.1：逐字写 DOM/读 scrollHeight 会强制同步布局，长日志+弱网机上本身就是冻结源 → 节流 */
+        var lastUiTs = 0, lastScrollTs = 0, pendingNarrative = '';
+        var flushStreamUi = function(force){
+          var nowTs = Date.now();
+          if(!force && nowTs - lastUiTs < 200) return;
+          lastUiTs = nowTs;
+          if(streamDiv){
+            var sb = streamDiv.querySelector('.stream-b');
+            if(sb){ sb.textContent = pendingNarrative || '世界正在推进，请稍候…'; }
+          }
+          if(force || nowTs - lastScrollTs > 400){
+            lastScrollTs = nowTs;
+            try{ var bsf=$('body_story'); if(bsf) bsf.scrollTop = bsf.scrollHeight; }catch(_){}
+          }
+        };
+        armReadTimer();
         while(true){
-          var chunk = await reader.read();
+          var chunk = await Promise.race([reader.read(), stallSide()]);
+          if(streamStalled || !chunk) throw new Error('STREAM_STALL');
+          armReadTimer();   /* 收到数据（含心跳字节）→ 重新计时 */
           if(chunk.done)break;
           buf += dec.decode(chunk.value||new Uint8Array(), {stream:true});
           /* 按行切：SSE 用 \n\n 分隔事件 */
@@ -2827,12 +2890,9 @@ async function callApi(messages,maxTok){
                 if(delta){
                   fullText += delta;
                   if(firstByte){firstByte=false;try{_bumpBusySSE(0)}catch(_){}}
-                  /* v2.6：只把半截 JSON 里的 narrative 抠出来显示，避免玩家看到 JSON 花括号乱码 */
-                  if(streamDiv){
-                    var sb = streamDiv.querySelector('.stream-b');
-                    if(sb){ var peek=_ssePeekNarrative(fullText); sb.textContent = peek || '世界正在推进，请稍候…'; }
-                    try{ var bs2=$('body_story'); if(bs2) bs2.scrollTop = bs2.scrollHeight; }catch(_){}
-                  }
+                  /* v2.7.1：narrative 预览写入/自动滚动全部节流（200ms/400ms），不再逐字强制布局 */
+                  pendingNarrative = _ssePeekNarrative(fullText);
+                  flushStreamUi(false);
                   if(bt){
                     var len=fullText.length;
                     bt.textContent = len>0 ? '✍ 已撰写 '+len+' 字…' : '引擎推演中…';
@@ -2844,6 +2904,9 @@ async function callApi(messages,maxTok){
             }
           }
         }
+        /* v2.7.1：正常读完 → 停看门狗、冲刷最后一帧预览 */
+        if(readTimer){clearTimeout(readTimer);readTimer=null;}
+        flushStreamUi(true);
         /* 流式结束：清理临时流式条目（最终 renderStory 会重建） */
         if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
         /* 读完：返回与 r.json() 同结构，让 applyReply / parseReply 无改动兼容 */
@@ -2858,6 +2921,12 @@ async function callApi(messages,maxTok){
           if(jj.choices)return jj;
         }catch(_){}
       }catch(sseErr){
+        /* v2.7.1：看门狗判定的"流中途断流"不重发（重发只会再卡 45s），直接抛出 → doTurn 立刻跑离线回合 */
+        if(readTimer){try{clearTimeout(readTimer)}catch(_){}readTimer=null;}
+        if(streamStalled){
+          if(streamDiv && streamDiv.parentNode){ try{streamDiv.parentNode.removeChild(streamDiv);}catch(_){} }
+          throw new Error('STREAM_STALL · 网络中断，剧情流连续 '+Math.round(READ_GAP/1000)+' 秒没有响应');
+        }
         console.warn('[callApi] SSE 解析失败，退化请求 JSON 模式：', sseErr);
         /* v2.6：清理流式临时条目 */
         if(streamDiv && streamDiv.parentNode){ streamDiv.parentNode.removeChild(streamDiv); }
