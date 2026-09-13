@@ -1,4 +1,4 @@
-﻿
+
 /* ============================================================
    漫威模拟器 · 四端适配优化层 (iOS / 鸿蒙 / 安卓 / Windows)
    ------------------------------------------------------------
@@ -6350,6 +6350,7 @@ function enterGame(){
  var setupScreen=$('setupScreen'),gameScreen=$('gameScreen');
  if(setupScreen)setupScreen.style.display='none';
  if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
+ try{var _bdge=$('cxBadge');if(_bdge)_bdge.style.display='none'}catch(_){}  /* 游戏内隐藏右下角签名徽章，避免遮挡底部 Tab 栏（版权由全屏平铺水印承担） */
  var _ab=$('wzActionBar');if(_ab)_ab.style.display='none';
  var bar=$('gameBottomBar');if(bar)bar.style.display='none'; /* v2.6.2：功能已迁入设置 Tab，不再显示 */
  /* v2.6.2_fix：iOS Safari 同步重渲染会卡死主线程。
@@ -6384,6 +6385,7 @@ function backToHome(){
  closeIO();
  $('gameScreen').style.display='none';
  $('setupScreen').style.display='block';
+ try{var _bdge2=$('cxBadge');if(_bdge2)_bdge2.style.display=''}catch(_){}  /* 返回首页恢复签名徽章 */
  var wv=$('wizardView');if(wv)wv.style.display='none';
  var hv=$('homeView');if(hv)hv.style.display='block';
  var ab=$('wzActionBar');if(ab)ab.style.display='none';
