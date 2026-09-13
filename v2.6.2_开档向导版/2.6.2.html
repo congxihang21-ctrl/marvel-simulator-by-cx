@@ -2730,6 +2730,44 @@ html,body,div,span,p,button,input,textarea{
 #gameScreen .timecard{margin-bottom:6px;}
 /* 旧 main-stage/sub-grid 隐藏（已被 Tab 取代，保留类以防旧 CSS 引用） */
 .main-stage,.sub-grid{display:none;}
+
+/* ===== v2.6.2 紧凑顶栏（替代旧大时间卡） ===== */
+.game-head{flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:8px 10px 6px;font-size:13px;color:var(--fg-1,#eee);}
+.game-head .gh-time{flex:1;min-width:0;font-weight:700;font-size:14px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--gold,#e8c66a);}
+.game-head .gh-turn{font-size:12px;color:var(--fg-2,#8b97a8);flex:0 0 auto;}
+.game-head #ovrBadge{display:inline-flex!important;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);font-size:12px;cursor:pointer;}
+.game-head .ovr-num{font-weight:800;color:var(--gold,#e8c66a);}
+.game-head .ovr-tier{color:var(--fg-2,#8b97a8);font-size:11px;}
+/* 旧 timecard 隐藏 */
+.timecard{display:none;}
+/* 目标条紧凑化 */
+#goalBarWrap{flex:0 0 auto;padding:0 10px 6px;}
+.goal-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+.goal-bar .gb-ic{font-size:18px;flex:0 0 auto;}
+.goal-bar .gb-info{flex:1;min-width:0;}
+.goal-bar .gb-title{font-size:11px;color:var(--fg-2,#8b97a8);margin-bottom:2px;}
+.goal-bar .gb-desc{font-size:13.5px;color:var(--fg-1,#eee);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.goal-bar .gb-bar{height:3px;margin-top:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;}
+.goal-bar .gb-bar span{display:block;height:100%;background:linear-gradient(90deg,#e8c66a,#9b6dff);border-radius:2px;transition:width .4s;}
+
+/* ===== 设置 Tab：卡片网格 ===== */
+.set-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.set-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+  padding:18px 8px;border-radius:14px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:var(--fg-1,#eee);cursor:pointer;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.set-card:active{transform:scale(.95);background:rgba(232,198,106,.12);border-color:rgba(232,198,106,.4);}
+.set-card .set-ic{font-size:26px;line-height:1;}
+.set-card .set-tx{font-size:13px;font-weight:600;}
+.set-tip{font-size:12px;color:var(--fg-2,#8b97a8);line-height:1.7;padding:10px;
+  border:1px dashed rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.02);}
+@media(max-width:380px){.set-grid{grid-template-columns:repeat(2,1fr);}}
 </style></head>
 <body>
 
@@ -2836,43 +2874,25 @@ html,body,div,span,p,button,input,textarea{
 <!-- ================= 游戏界面 ================= -->
 <div class="screen" id="gameScreen" style="display:none">
 
-  <div class="topbar">
-    <div class="topbtns">
-      <button onclick="openThemePanel()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>外观</button>
-      <button onclick="openSave()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>存档</button>
-      <button onclick="openLoad()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>读档</button>
-      <button onclick="openLifeReview()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>人生回顾</button>
-      <button onclick="openAbout()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>关于</button>
-      <button onclick="openDonate()" style="background:linear-gradient(135deg,rgba(242,197,77,.16),rgba(255,98,98,.12));border-color:color-mix(in srgb,var(--gold,#e8c66a) 45%,var(--line-2));color:var(--gold,#f2c54d)" title="支持作者"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ic-svg"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>支持</button>
-      <button onclick="selfHeal()" title="修复显示（清缓存重载）" style="color:#f2c54d">🔧</button>
-    </div>
+  <!-- 紧凑顶栏：OVR 徽章 + 世界时间 + 轮次（一行，不再是大卡片） -->
+  <div class="game-head">
+    <span id="heroBadge" data-keep-color style="display:none;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--magic) 60%,transparent),color-mix(in srgb,var(--accent) 40%,transparent));color:#fff;font-weight:700;font-size:11.5px;line-height:1.5">🎭 <span id="heroName">无名者</span></span>
+    <span id="ovrBadge" class="ovr-badge ovr-t0" style="display:none" onclick="try{switchTab('me')}catch(_){}" title="点「我」看能力详情">
+      <span class="ovr-num" id="ovrNum">0</span><span class="ovr-tier" id="ovrTier">凡人</span>
+    </span>
+    <span class="gh-time" id="bigTime">—</span>
+    <span class="gh-turn" id="turnNo">第 0 轮</span>
   </div>
 
-  <div class="timecard">
-    <div class="lab">
-      <span id="heroBadge" data-keep-color style="display:none;margin-right:8px;padding:2px 9px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--magic) 60%,transparent),color-mix(in srgb,var(--accent) 40%,transparent));color:#fff;font-weight:700;letter-spacing:0;font-size:11.5px;line-height:1.5;box-shadow:0 1px 6px rgba(126,100,255,.25)">🎭 <span id="heroName">无名者</span></span>
-      <!-- Beta v2.0：OVR 能力综评徽章（简易/专家模式都显示，点击看 8 维能力详情）-->
-      <span id="ovrBadge" class="ovr-badge ovr-t0" style="display:none" onclick="try{openDetail('ability')}catch(_){}" title="点击查看 8 维能力详情">
-        <span class="ovr-num" id="ovrNum">0</span>
-        <span class="ovr-meta"><span class="ovr-tier" id="ovrTier">凡人</span><span class="ovr-lab">OVR 综评</span></span>
-      </span>
-      🕐 世界时间 · 地球-616
-    </div>
-    <div class="big" id="bigTime">—</div>
-    <div class="sub" id="subTime">—</div>
-    <div class="turn" id="turnNo">第 0 轮</div>
-  </div>
-
-  <!-- v1.8：🎯 人生目标条（时间卡下方）—— 给自由玩法一个明确的方向 -->
+  <!-- 🎯 人生目标条 -->
   <div id="goalBarWrap" style="display:none">
-    <div class="goal-bar" id="goalBar" onclick="try{openDetail('goals')}catch(_){}">
+    <div class="goal-bar" id="goalBar" onclick="try{switchTab('goal')}catch(_){}">
       <div class="gb-ic">🎯</div>
       <div class="gb-info">
-        <div class="gb-title">当前人生目标（点击查看所有目标/成就/里程碑）</div>
+        <div class="gb-title">当前目标</div>
         <div class="gb-desc" id="goalBarDesc">—</div>
         <div class="gb-bar"><span id="goalBarPct" style="width:0%"></span></div>
       </div>
-      <span class="gb-cta">查看详情 →</span>
     </div>
   </div>
 
@@ -2898,12 +2918,13 @@ html,body,div,span,p,button,input,textarea{
         <div class="actrow-more"><button onclick="openSkipMenu()" title="快进一周 / 一月 / 一季 / 一年，附带世界总结">🗓 长时间快进（周 / 月 / 季 / 年）</button></div>
       </div>
     </div>
-    <!-- ② 我：出身 + 人生状态 + 能力 -->
+    <!-- ② 我：出身 + 人生状态 + 能力 + 人生回顾 -->
     <div class="tab-pane" id="tab-me">
       <div class="tab-scroll">
         <div class="tab-section"><div class="tab-hd">🎴 出身设定</div><div id="body_setup" class="tab-body"></div></div>
         <div class="tab-section"><div class="tab-hd">🧍 人生状态</div><div id="body_player" class="tab-body"></div></div>
         <div class="tab-section"><div class="tab-hd">⚡ 能力与装备</div><div id="body_ability" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd" onclick="try{openLifeReview()}catch(_){}" style="cursor:pointer">📜 人生回顾 <span style="font-size:12px;color:var(--fg-2);font-weight:400">（点这里查看完整人生时间线）</span></div></div>
       </div>
     </div>
     <!-- ③ 关系 -->
@@ -2926,6 +2947,20 @@ html,body,div,span,p,button,input,textarea{
         <div class="tab-section"><div class="tab-hd">🎯 人生目标 · 成就 · 里程碑</div><div id="body_goals" class="tab-body"></div></div>
       </div>
     </div>
+    <!-- ⑥ 设置：外观 / 存档 / 读档 / 修复 / 关于 / 支持 -->
+    <div class="tab-pane" id="tab-set">
+      <div class="tab-scroll">
+        <div class="set-grid">
+          <button class="set-card" onclick="openThemePanel()"><span class="set-ic">🎨</span><span class="set-tx">外观主题</span></button>
+          <button class="set-card" onclick="openSave()"><span class="set-ic">💾</span><span class="set-tx">存档</span></button>
+          <button class="set-card" onclick="openLoad()"><span class="set-ic">📂</span><span class="set-tx">读档</span></button>
+          <button class="set-card" onclick="selfHeal()"><span class="set-ic">🔧</span><span class="set-tx">修复显示</span></button>
+          <button class="set-card" onclick="openAbout()"><span class="set-ic">ℹ️</span><span class="set-tx">关于版权</span></button>
+          <button class="set-card" onclick="openDonate()"><span class="set-ic">☕</span><span class="set-tx">支持作者</span></button>
+        </div>
+        <div class="set-tip">所有外观设置自动保存在本机。遇到显示异常点「🔧 修复显示」可清缓存重载。</div>
+      </div>
+    </div>
   </div>
 
   <!-- 底部 Tab 导航（iOS 安全区适配，无 backdrop-filter） -->
@@ -2935,6 +2970,7 @@ html,body,div,span,p,button,input,textarea{
     <button class="tab-btn" data-tab="rel" onclick="switchTab('rel')"><span class="tb-ic">👥</span><span class="tb-tx">关系</span></button>
     <button class="tab-btn" data-tab="world" onclick="switchTab('world')"><span class="tb-ic">🌍</span><span class="tb-tx">世界</span></button>
     <button class="tab-btn" data-tab="goal" onclick="switchTab('goal')"><span class="tb-ic">🎯</span><span class="tb-tx">目标</span></button>
+    <button class="tab-btn" data-tab="set" onclick="switchTab('set')"><span class="tb-ic">⚙️</span><span class="tb-tx">设置</span></button>
   </div>
 
   <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed var(--line-2);border-radius:9px;background:var(--bg-1);text-align:center">
@@ -7677,9 +7713,16 @@ function renderGoalBar(){
     var sum=getGoalSummary(), cur=sum.cur;
     if(!cur){wrap.style.display='none';return}
     wrap.style.display='block';
-    try{$('goalBarDesc').textContent = (cur.type==='short'?'🌱 短期':cur.type==='mid'?'🌿 中期':'🌳 长期') + ' · ' + cur.title + 
-      (cur.status==='done'?'（✅ 已达成！目标系统会自动推荐下一条～）':
-       cur.status==='doing'?'（进行中，进度 '+Math.round(cur.progress||0)+'%）':'（即将开始）')}catch(_){}
+    try{
+      var tt=String(cur.title||'');
+      /* 去掉冗长括号注释，只留核心目标名 */
+      tt=tt.replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();
+      if(tt.length>24)tt=tt.slice(0,24)+'…';
+      var stTxt='';
+      if(cur.status==='done')stTxt=' ✅';
+      else if(cur.status==='doing')stTxt=' · '+Math.round(cur.progress||0)+'%';
+      $('goalBarDesc').textContent=(cur.type==='short'?'🌱':cur.type==='mid'?'🌿':'🌳')+' '+tt+stTxt;
+    }catch(_){}
     try{$('goalBarPct').style.width=String(Math.max(3,Math.min(100,sum.overall||0)))+'%'}catch(_){}
   }catch(e){console.warn('renderGoalBar',e)}
 }
@@ -7736,11 +7779,11 @@ function kv(k,v){return '<div class="kv"><div class="k">'+esc(k)+'</div><div cla
 var PLAYER_KEYS=['年龄','所在地','身份','职业','财富','家庭','社会地位','身体与能力','战斗能力','科技与工程','技能','声望','重要关系','所属势力','当前目标','身体状态','情绪','当前任务'];
 
 function renderTime(){
- if(!S||!S.date){$('bigTime').textContent='—';$('subTime').textContent='—';$('turnNo').textContent='第 0 轮';return}
+ if(!S||!S.date){$('bigTime').textContent='—';var st0=$('subTime');if(st0)st0.textContent='—';$('turnNo').textContent='第 0 轮';return}
  var d=curDate(),hol=holidays(d),wk=isWeekend(d)?'周末':'工作日';
  var sub=season(d)+' · '+term(d)+' · '+wk+(hol.length?' · '+hol.join('、'):'');
- $('bigTime').textContent=fmt(d);
- $('subTime').textContent=sub;
+ $('bigTime').textContent=fmt(d)+' · '+sub;
+ var st=$('subTime');if(st)st.textContent=sub;
  $('turnNo').textContent='第 '+S.turn+' 轮';
  var t1=$('time_story'),t2=$('time_action');
  if(t1)t1.textContent=fmt(d);
@@ -9826,7 +9869,7 @@ function enterGame(){
  if(setupScreen)setupScreen.style.display='none';
  if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
  var _ab=$('wzActionBar');if(_ab)_ab.style.display='none';
- var bar=$('gameBottomBar');if(bar)bar.style.display='block';
+ var bar=$('gameBottomBar');if(bar)bar.style.display='none'; /* v2.6.2：功能已迁入设置 Tab，不再显示 */
  buildPanels(); /* v1.9：buildPanels 内部已经幂等（先清空 colL/colR 再重建），
                     直接调用不会重复。不要用 body_player 这种已废弃的 guard。*/
  /* v2.6: 加载存档后确保所有引擎字段完整（老存档兼容） */
@@ -10731,8 +10774,10 @@ if(document.readyState==='loading'){
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     var hadController=!!navigator.serviceWorker.controller;  /* 打开时是否已被 SW 控制：首次安装为 false */
-    navigator.serviceWorker.register('../sw.js').then(function(reg){
+    navigator.serviceWorker.register('../sw.js',{updateViaCache:'none'}).then(function(reg){
       try{reg.update();}catch(_){}
+      /* 每 10 分钟主动检查一次 SW 更新，发版后最多 10 分钟用户就能收到新版 */
+      try{setInterval(function(){try{reg.update()}catch(_){}},600000)}catch(_){}
       reg.addEventListener('updatefound',function(){
         var nw=reg.installing;
         if(!nw)return;
@@ -10769,14 +10814,23 @@ if('serviceWorker' in navigator){
 function selfHeal(){
   var now=Date.now(),last=0;
   try{last=+localStorage.getItem('__heal_cd')||0}catch(_){}
-  if(now-last<30000){try{location.reload()}catch(_){}return}
+  if(now-last<15000){try{location.reload()}catch(_){}return}
   try{localStorage.setItem('__heal_cd',String(now))}catch(_){}
+  /* 1) 清掉所有缓存 */
+  try{if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}catch(_){}
+  /* 2) 注销所有 SW（直接从页面注销，不依赖 SW 是否认 SELF_HEAL 消息）*/
+  var healed=false;
   try{
-    if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        return Promise.all(regs.map(function(r){return r.unregister()}));
+      }).then(function(){ healed=true; location.replace(location.pathname+'?_heal='+now); })
+        .catch(function(){ healed=true; location.replace(location.pathname+'?_heal='+now); });
+      /* 兜底：3 秒后强制重载，防止注销 Promise 不 resolve */
+      setTimeout(function(){ if(!healed) location.replace(location.pathname+'?_heal='+now); },3000);
+      return;
+    }
   }catch(_){}
-  if('serviceWorker' in navigator && navigator.serviceWorker.controller){
-    try{navigator.serviceWorker.controller.postMessage({type:'SELF_HEAL'});return}catch(_){}
-  }
   location.replace(location.pathname+'?_heal='+now);
 }
 /* 注意：外部 js/css 单个加载失败【不再】触发整站刷新——手机弱网下这是常态，

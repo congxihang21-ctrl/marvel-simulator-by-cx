@@ -3,7 +3,7 @@
    - 导航请求（HTML 页面，含根 index.html 跳转脚本）→ 网络优先，失败才回退缓存（保证发版立即可见）
    - 静态资源（css/js/json/img）→ 缓存优先 + 后台更新（stale-while-revalidate，秒开）
    - 新 SW 激活后强制 claim 所有页面 + 广播更新通知 */
-const CACHE = 'marvel-hero-v2.6.3';
+const CACHE = 'marvel-hero-v2.6.4';
 const CORE = [
   './',
   './index.html',
@@ -74,6 +74,16 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   /* API 请求不缓存 */
   if (url.hostname.includes('open.bigmodel.cn') || url.hostname.includes('zhipu')) return;
+
+  /* ⚠️ sw.js 自身【永不缓存，永远走网络】。
+     这是避免"每次发版用户都要手动清缓存"的关键：
+     如果 sw.js 被缓存，浏览器更新检查会拿到旧 sw.js，永远检测不到新版。 */
+  if (url.pathname.endsWith('/sw.js')) {
+    e.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(() => caches.match(req))
+    );
+    return;
+  }
 
   if (isNavigation(req)) {
     /* HTML 页面：网络优先，失败回退缓存 */
