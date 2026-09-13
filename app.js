@@ -356,7 +356,9 @@
    3. 存档注入：save() / openSave() / normalizeSave() 自动给存档注入 _author/_copyright
    ============================================================ */
 /* Beta v2.3 · 作者身份：高三在读学生，课余独立开发；署名保留 CX，介绍页补充"学生开发者"背景，更贴合抖音年轻观众 */
-var APP_VERSION = '漫威模拟器 2.6.2';
+var APP_VERSION = '漫威模拟器 2.7.0';
+/* v2.6.3：版本号唯一真相源。页脚/关于页/存档/资源 URL 一律读这里，禁止再手写版本号。 */
+var CX_BETA_TAG = 'Beta v2.7.0';
 var CX_AUTHOR = 'CX（高三学生开发者）';
 var CX_COPYRIGHT = '© ' + CX_AUTHOR + ' · 漫威电影宇宙人生模拟器 · 课余独立开发，保留一切权利。转载 / 二创 / 直播请标注原作者 CX。';
 var CX_WM_BADGE = 'CX · 漫威模拟器 · 学生原创';
@@ -718,7 +720,7 @@ function ensureWatermark(){
       if(f && f.innerHTML && f.innerHTML.indexOf(CX_AUTHOR)===-1){
         f.innerHTML='作者：<span class="cx-sign" title="'+CX_COPYRIGHT+'">© '+CX_AUTHOR+'</span> ｜ 凡人之躯，亦可比肩神明 · 地球-616，你的英雄史诗由此开启 ｜ <span class="cx-sign" style="cursor:pointer" onclick="openAbout()">© 版权 · 非官方同人 · 漫威IP归属迪士尼/漫威</span>'+
           '<div class="foot-beta" style="margin-top:8px;font-size:12px;line-height:1.9;color:var(--fg-2);padding:0 6px">'+
-          '🔬 本作 <b>仍在 Beta 内测阶段</b>（当前版本 Beta v2.2），剧情/系统/离线文笔会持续打磨升级。<br>'+
+          '🔬 本作 <b>仍在 Beta 内测阶段</b>（当前版本 '+CX_BETA_TAG+'），剧情/系统/离线文笔会持续打磨升级。<br>'+
           '🐞 游玩中遇到 Bug、白屏、剧情不合逻辑，或想提出角色设定建议？<b>欢迎反馈给作者</b>：<br>'+
           '🎵 <b>抖音同名</b>：<span class="cx-sign" title="搜索抖音号 cxh20080910 关注发私信即可">'+CX_AUTHOR+'</span>（<b>抖音号：cxh20080910</b> · 发私信/评论区留言都可以）<br>'+
           '💖 感谢每一位耐心游玩、愿意陪这个模拟器慢慢长大的朋友——你们的反馈就是我继续写下去的最大动力。<br>'+
@@ -3714,6 +3716,29 @@ function switchTab(t){
       }catch(e){console.warn('render tab '+k,e)}
     });
   }
+  try{refreshLowfxCard()}catch(_){}
+}
+/* ===== v2.6.3 低功耗模式开关（iPhone/低端机滑动卡死自救） ===== */
+function _lowfxOn(){
+  try{return localStorage.getItem('mcu_lowfx')==='1';}catch(_){return false;}
+}
+function toggleLowfx(){
+  var on=!_lowfxOn();
+  try{localStorage.setItem('mcu_lowfx',on?'1':'0');}catch(_){}
+  document.documentElement.classList.toggle('lowfx',on);
+  refreshLowfxCard();
+  try{toast(on?'🔋 低功耗模式已开启：滑动更流畅，特效已关闭':'✨ 已恢复完整特效');}catch(_){
+    alert(on?'低功耗模式已开启':'已恢复完整特效');
+  }
+}
+function refreshLowfxCard(){
+  var card=$('lowfxCard');
+  if(!card)return;
+  var on=_lowfxOn();
+  card.style.outline=on?'2px solid var(--acc-2,#9d7cff)':'';
+  card.style.outlineOffset='-2px';
+  var tx=card.querySelector('.set-tx');
+  if(tx)tx.textContent=on?'低功耗模式 · 开':'低功耗模式';
 }
 /* openDetail 不再弹窗 —— 直接跳到对应 Tab 页（详情已铺在 Tab 里） */
 function openDetail(k){
@@ -4849,6 +4874,8 @@ function selectStoryDay(k){
 function renderStory(keepScroll){
   var el=$('story');
   if(!el)return;
+  /* v2.6.4 编年史：每次渲染增量摄取新日志/里程碑到 S.chronicle（独立模块，失败不影响游戏）*/
+  try{if(window.Chronicle)Chronicle.track();}catch(_){}
   var log=(S&&S.log)||[];
   if(!log.length){
     /* v2.6.2_fix: seed 事件直接 appendChild 到 #story，不在 S.log 里。
@@ -5080,19 +5107,34 @@ function renderCheckBanner(){
    1. 外部调用都进入 _renderAllRaf()，1 帧内合并一次
    2. 每个子 render 函数各自 try-catch，单块挂了不影响全局
    3. 长日志 #story 渲染单独走 rAF 块内，避免抖动 */
+/* v2.6.3 性能：body_* → 所属 Tab 面映射。隐藏面每回合不重渲染，
+   switchTab 切过去时已有补渲染逻辑，内容不会缺失。 */
+var _BODY_PANE={setup:'tab-me',player:'tab-me',ability:'tab-me',
+                rel:'tab-rel',world:'tab-world',events:'tab-world',org:'tab-world'};
+function _paneVisible(id){
+  var p=document.getElementById(id);
+  return !!p && p.classList.contains('active');
+}
+function _renderBodyIfVisible(k){
+  var el=$('body_'+k);
+  if(!el)return;
+  var pane=_BODY_PANE[k];
+  if(pane && !_paneVisible(pane))return;   /* 隐藏 Tab：跳过，切换时再渲染 */
+  try{el.innerHTML=_renderDetailBody(k)}catch(e){console.warn('render'+k,e)}
+}
 function _renderAllRaw(){
   try{ensureWatermark()}catch(_){}
   if(!S)return;
   try{
     var s=$('bigTime');if(s)renderTime();
   try{renderOVRBadge()}catch(e){console.warn('renderOVRBadge',e)}   /* Beta v2.0：时间卡 OVR 徽章（双模式）*/
-  if($('body_setup'))try{$('body_setup').innerHTML=_renderDetailBody('setup')}catch(e){console.warn('renderSetup',e)}
-  if($('body_player'))try{$('body_player').innerHTML=_renderDetailBody('player')}catch(e){console.warn('renderPlayer',e)}
-  if($('body_ability'))try{$('body_ability').innerHTML=_renderDetailBody('ability')}catch(e){console.warn('renderAbility',e)}
-  if($('body_rel'))try{$('body_rel').innerHTML=_renderDetailBody('rel')}catch(e){console.warn('renderRel',e)}
-  if($('body_world'))try{$('body_world').innerHTML=_renderDetailBody('world')}catch(e){console.warn('renderWorld',e)}
-  if($('body_events'))try{$('body_events').innerHTML=_renderDetailBody('events')}catch(e){console.warn('renderEvents',e)}
-  if($('body_org'))try{$('body_org').innerHTML=_renderDetailBody('org')}catch(e){console.warn('renderOrg',e)}
+  _renderBodyIfVisible('setup');
+  _renderBodyIfVisible('player');
+  _renderBodyIfVisible('ability');
+  _renderBodyIfVisible('rel');
+  _renderBodyIfVisible('world');
+  _renderBodyIfVisible('events');
+  _renderBodyIfVisible('org');
   if($('opts'))try{renderOpts()}catch(e){console.warn('renderOpts',e)}
   /* ========== v1.9 · 概览迷你卡渲染（8 张卡，去重后）========== */
   try{if($('mini_setup'))miniSetup()}catch(e){console.warn('miniSetup',e)}
@@ -6014,8 +6056,10 @@ function _prepareSave(){
     if(S.log&&S.log.length>220){S.log=S.log.slice(-150)}
     if(S.events&&S.events['已发生']&&S.events['已发生'].length>40){S.events['已发生']=S.events['已发生'].slice(-20)}
     if(S.rumors&&S.rumors.length>50){S.rumors=S.rumors.slice(-30)}
+    /* v2.7：章节存档点数量硬保险（精细预算在 Chronicle.captureCheckpoint 内）*/
+    if(Array.isArray(S._chkpoints)&&S._chkpoints.length>4)S._chkpoints=S._chkpoints.slice(-4);
   }catch(_){}
-  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app=APP_VERSION;if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
+  try{S._author=CX_AUTHOR;S._copyright=CX_COPYRIGHT;S._app=APP_VERSION;if(window.MCU&&MCU.SaveKit)MCU.SaveKit.stamp(S);if(!S._createdAt)S._createdAt=Date.now();S._lastSavedAt=Date.now()}catch(_){}
   try{return JSON.stringify(S)}catch(e){console.warn('save stringify fail',e);return null}
 }
 function _doWrite(s){
@@ -7013,6 +7057,8 @@ function tryDismissOib(){
    6. enterGame 后用 renderAllNow 同步渲染（首帧不 rAF，用户不看到白屏） */
 function _boot(){
   if(!document.body){setTimeout(_boot,30);return}
+  /* v2.6.3：同步低功耗开关显示状态（类已由 head 内联脚本提前打上） */
+  try{refreshLowfxCard()}catch(_){}
   /* v2.6：移除首屏骨架屏 */
   try{var sp=document.getElementById('bootSplash');if(sp){sp.style.opacity='0';setTimeout(function(){try{sp.remove()}catch(_){}},420)}}catch(_){}
   /* v2.6：空闲时预加载收款码图片，点击"支持"时秒开 */
