@@ -261,6 +261,18 @@ ultron_004:{title:"尘埃落定",level:"人生",text:"索科维亚安全落地�
   {label:"支持托尼的立场",next:"ending_ultron_stark",effects:{}},
   {label:"支持史蒂夫的立场",next:"ending_ultron_cap",effects:{}},
   {label:"离开复仇者，独自行走",next:"ending_ultron_solo",effects:{}}]},
+/* ===== v2.6.2 普通人开局铺垫（先过日子，再决定要不要卷入大事件）=====
+   现代各时代的首节点原本直接把玩家扔进正典大事件（内战一上来就要选边），
+   但玩家身份往往是普通人。pro_start 由 startFromSeed 按玩家设定动态生成，
+   让玩家自己决定「主动入局 / 旁观 / 先顾生活」，再分流到时代主线或日常导演事件。*/
+pro_observe:{title:"风暴之外",level:"日常",text:"你选择留在普通人的生活里。大事件在远方发生——新闻滚动推送、街头议论纷纷，但你的世界依旧是上班下班、人情冷暖、一日三餐。只是偶尔某个瞬间，你会隐约感觉到：那道隔开平凡与非凡的界线，似乎没有想象中那么远。",choices:[
+  {label:"过好自己的小日子",next:"_director",effects:{stress:-3}},
+  {label:"多留意新闻，和邻居聊聊",next:"_director",effects:{int:+1}},
+  {label:"攒钱、健身，为变化做准备",next:"_director",effects:{wil:+2}}]},
+pro_daily:{title:"寻常一日",level:"日常",text:"日子在柴米油盐里不紧不慢地往前过。处理好手边的工作、关照好身边的人，本身就是一种了不起。这个时代的惊天动地，暂时与你无关。",choices:[
+  {label:"认真工作 / 学习",next:"_director",effects:{stress:+1,int:+1}},
+  {label:"陪陪家人朋友",next:"_director",effects:{stress:-3}},
+  {label:"给自己放个假",next:"_director",effects:{stress:-5}}]},
 /* ===== 内战时代（2016-2017）· 协议路线 ===== */
 civil_001:{title:"索科维亚协议",level:"世界",text:"2016年，联合国通过了索科维亚协议——复仇者必须接受政府监管。117个国家签署。钢铁侠支持，美国队长反对。你必须选边。",choices:[
   {label:"支持协议，站在钢铁侠这边",next:"civil_002",effects:{flag_teamIron:true}},

@@ -2636,8 +2636,8 @@ html,body,div,span,p,button,input,textarea{
 <script src="js/eventDirector.js?v=2.6.2" defer></script>
 <script src="js/endingEngine.js?v=2.6.2" defer></script>
 <script src="js/ai.js?v=2.6.2" defer></script>
-<script src="js/seed_data.js?v=2.6.2" defer></script>
-<script src="js/game_seed.js?v=2.6.2" defer></script>
+<script src="js/seed_data.js?v=2.6.3" defer></script>
+<script src="js/game_seed.js?v=2.6.3" defer></script>
 </head>
 <body>
 
@@ -10362,9 +10362,9 @@ function _boot(){
       if(raw&&main){
         var o=normalizeSave(main);
         var label=usedBackup?('（本地主存档损坏，已从 '+backLabel+' 备份恢复）'):'';
-        /* v2.6.2：不再弹全屏 confirm 挡路（手机上容易被当成卡死）。
-           直接把存档载入内存但不进游戏，留在首页：
-           想继续 → 点首页「↩ 继续当前人生」；想开新 → 点「开始新人生」，startGame 里会再确认覆盖。 */
+        /* v2.6.2：不弹全屏 confirm（手机上易被当成卡死）。
+           有存档 → 载入后【自动回到游戏中】（符合手机游戏习惯，关掉浏览器再开能直接续玩）；
+           想重开可点游戏内 🏠 回首页 → 开始新人生（startGame 会再确认覆盖）。__autoResumed 防 _boot 重复执行。*/
         S=o;CUR_HINTS=[];isOpening=false;
         try{updInputPH&&updInputPH()}catch(_){}
         try{updHomeBtns&&updHomeBtns()}catch(_){}
@@ -10374,6 +10374,19 @@ function _boot(){
             setTimeout(function(){toast('🛡 已从 '+backLabel+' 备份恢复你的人生 · 建议现在点「💾 存档 → ⬇ 导出 TXT 文件」存一份自己的')},600);
           }catch(_){}
         }
+        try{
+          if(!window.__autoResumed && location.hash!=='#load' && S&&S.setup){
+            window.__autoResumed=true;
+            setTimeout(function(){
+              try{
+                if(S&&S.setup){
+                  enterGame();
+                  setTimeout(function(){try{toast('↩ 已回到你的人生 · 点 🏠 可回首页')}catch(_){}},500);
+                }
+              }catch(e){console.warn('auto resume',e)}
+            },400);
+          }
+        }catch(_){}
       }
     }catch(e){console.warn('restore',e)}
     /* 全局错误兜底：任何未捕获异常都收起加载遮罩，避免永久转圈圈 */

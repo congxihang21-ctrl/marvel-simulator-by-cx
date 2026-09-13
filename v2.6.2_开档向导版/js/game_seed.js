@@ -200,8 +200,18 @@ var GameSeed = (function(){
     if(!S || !S.currentNode) return;
     /* v2.6: 支持 EventDirector 生成的动态事件 */
     var node;
-    if(S.currentNode === '_director' && S._directorNode){
+    if(S.currentNode === '_director'){
       node = S._directorNode;
+      /* 兜底：种子节点直接 next:'_director' 但没预置事件时，当场挑一个导演事件 */
+      if(!node && typeof EventDirector !== 'undefined'){
+        try{
+          var picked = EventDirector.selectNextEvent(S);
+          if(picked && picked.evt){
+            node = directorEventToNode(picked.evt);
+            S._directorNode = node;
+          }
+        }catch(e){ console.warn('director fallback', e); }
+      }
     } else {
       node = NODES[S.currentNode];
     }
@@ -281,7 +291,8 @@ var GameSeed = (function(){
                  '<span class="risk-tag risk-' + risk + '">' + riskLabel + '</span></div>';
         }
         var letter = String.fromCharCode(65 + i);
-        div.innerHTML = '<div class="choice-label"><span class="choice-letter">' + letter + '</span>' + c.label + '</div>' + meta;
+        var choiceText = c.label || c.text || ('行动 ' + letter);  /* 种子节点用 label，导演节点用 text，缺一个都会显示 undefined */
+        div.innerHTML = '<div class="choice-label"><span class="choice-letter">' + letter + '</span>' + choiceText + '</div>' + meta;
         div.onclick = function(){ makeChoice(c); };
         optsEl.appendChild(div);
       });
@@ -301,6 +312,12 @@ var GameSeed = (function(){
     try{ if(typeof checkAchievements === 'function') checkAchievements(); }catch(e){}
   }
 
+  /* v2.6.2：解析下一节点 id——'__era__' 表示玩家主动入局，跳到该时代的正典首节点 */
+  function resolveNodeId(n){
+    if(n === '__era__') return (S && S._eraAnchor) ? S._eraAnchor : 'pro_daily';
+    return n;
+  }
+
   function makeChoice(choice){
     if(!S) return;
     if(choice.check && choice.base !== undefined){
@@ -309,9 +326,10 @@ var GameSeed = (function(){
     } else {
       if(choice.effects) applyEffects(choice.effects);
       if(choice.next){
-        S.currentNode = choice.next;
-        if(choice.next.indexOf('ending_') === 0){
-          showEnding(choice.next.replace('ending_', ''));
+        var nx = resolveNodeId(choice.next);
+        S.currentNode = nx;
+        if(nx.indexOf('ending_') === 0){
+          showEnding(nx.replace('ending_', ''));
           return;
         }
       }
@@ -376,9 +394,10 @@ var GameSeed = (function(){
     if(result){
       if(result.effects) applyEffects(result.effects);
       if(result.next){
-        S.currentNode = result.next;
-        if(result.next.indexOf('ending_') === 0){
-          showEnding(result.next.replace('ending_', ''));
+        var rnx = resolveNodeId(result.next);
+        S.currentNode = rnx;
+        if(rnx.indexOf('ending_') === 0){
+          showEnding(rnx.replace('ending_', ''));
           return;
         }
       }
@@ -627,7 +646,7 @@ var GameSeed = (function(){
     var nextSeed = null;
     if(S.currentNode !== '_director' && NODES[S.currentNode] && NODES[S.currentNode].choices && NODES[S.currentNode].choices[0]){
       var next = NODES[S.currentNode].choices[0].next;
-      if(next && next.indexOf('ending_') !== 0) nextSeed = next;
+      if(next && next.indexOf('ending_') !== 0) nextSeed = resolveNodeId(next);  /* 解析 __era__，_director 交给 renderNode 兜底 */
     }
     /* v2.6: 第3回合后，70%概率走 EventDirector 动态事件（AI 驱动人生） */
     if(typeof EventDirector !== 'undefined' && (S.turn||0) > 2 && Math.random() < 0.7){
@@ -666,6 +685,47 @@ var GameSeed = (function(){
     }
   }
 
+  /* v2.6.2：按玩家设定动态生成「普通人开局」节点。
+     修复反馈：内战时代开档第一段直接就是索科维亚协议选边，普通人毫无铺垫。
+     现在先落回玩家自己的生活，让玩家自己决定要不要主动靠近大事件。*/
+  var ERA_BG = {
+    cold_001:'冷战的阴云笼罩着世界，神盾局在暗处活动，超级士兵的故事早已成了传说',
+    hero_001:'托尼·斯塔克刚刚公开承认自己是钢铁侠，“超级英雄”重新成为街头巷尾的话题',
+    nyc_001:'纽约上空的外星人入侵刚过去不久，整个世界还没从那场震动里缓过神',
+    ultron_001:'复仇者们四处出击，索科维亚的局势在电视新闻里反复出现',
+    civil_001:'索科维亚协议引发全球争论，钢铁侠与美国队长公开站到了对立面',
+    infinity_001:'宇宙的威胁若隐若现，一种说不清的不安笼罩在每个人心头',
+    multi_001:'多元宇宙的传闻开始流传，世界似乎远比人们以为的更离奇'
+  };
+  function buildPrologue(anchor){
+    var setup = (S && S.setup) || {};
+    var yr = parseInt(String(setup.sdate||'').slice(0,4)) || new Date().getFullYear();
+    var nm = (setup.name && String(setup.name).trim()) || '你';
+    var loc = (setup.loc && String(setup.loc).trim()) || '这座城市';
+    var birth = (setup.birth && String(setup.birth).trim()) || '';
+    var family = (setup.family && String(setup.family).trim()) || '';
+    var bg = ERA_BG[anchor] || '超级英雄的世界暗流涌动';
+    var life = [];
+    if(birth) life.push(birth.replace(/家庭$/,'')+'出身');
+    if(family) life.push(family);
+    var lifeTxt = life.length ? ('作为'+life.join('、')+'，你每天操心的是工作、账单和身边的人')
+                              : '你每天操心的是工作、账单和身边的人';
+    var text = yr+'年，'+nm+'在'+loc+'过着再普通不过的生活。'+lifeTxt+'。\n'+
+      '新闻里，'+bg+'——但这些暂时还只是滚动字幕里遥远的标题，像是另一个世界的事。\n'+
+      '没有人一出生就站在历史的中央。你要以什么姿态，迎接这个非凡的时代？';
+    return {
+      id:'pro_start',
+      title:'平凡的开局',
+      level:'日常',
+      text:text,
+      choices:[
+        {label:'我想靠近这个非凡的世界（主动入局）', next:'__era__', effects:{flag_seekHero:true}},
+        {label:'先做个旁观者，把自己的日子过好', next:'pro_observe', effects:{}},
+        {label:'眼下还有更要紧的事（工作 / 家人 / 学业）', next:'pro_daily', effects:{}}
+      ]
+    };
+  }
+
   function startFromSeed(originKey){
     // v2.6: 确保 eraName 存在（AI 上下文需要）
     if(S && S.setup && S.setup.era && !S.eraName) S.eraName = String(S.setup.era);
@@ -686,7 +746,11 @@ var GameSeed = (function(){
     for(var i=0; i<nodeMap.length; i++){
       var item = nodeMap[i];
       if(item.p.test(eraName) || (year >= item.y[0] && year <= item.y[1])){
-        S.currentNode = item.node;
+        /* v2.6.2：现代时代先走「普通人开局」，时代正典首节点存为 _eraAnchor，
+           玩家在 pro_start 选择「主动入局」才会进入；旁观/顾生活则走日常导演事件。*/
+        S._eraAnchor = item.node;
+        NODES.pro_start = buildPrologue(item.node);
+        S.currentNode = 'pro_start';
         matched = true;
         break;
       }
