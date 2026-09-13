@@ -9865,6 +9865,7 @@ function finishOnboard(){
  try{_lockBodyScroll(false)}catch(_){}
 }
 function enterGame(){
+ try{busy(true,'正在载入你的人生…')}catch(_){}
  var setupScreen=$('setupScreen'),gameScreen=$('gameScreen');
  if(setupScreen)setupScreen.style.display='none';
  if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
@@ -9884,6 +9885,7 @@ function enterGame(){
  try{restoreModeFromSaved()}catch(_){}
  applyFold();try{ensureWatermark()}catch(_){}renderAll();save();
  window.scrollTo(0,0);
+ try{busy(false)}catch(_){}
  /* v2.6：首次进入游戏弹 3 步引导（本机只弹一次）*/
  try{setTimeout(maybeStartOnboard,500)}catch(_){}
 }
@@ -9898,6 +9900,52 @@ function backToHome(){
  var bar=$('gameBottomBar');if(bar)bar.style.display='none';
  updHomeBtns();
  window.scrollTo(0,0);
+}
+/* v2.6.2 第三轮：恢复存档时弹选择，不再自动 enterGame（重型渲染在手机上易被误判卡死）*/
+function showResumeChoice(o){
+  try{
+    try{busy(false)}catch(_){}  /* 收起启动加载遮罩，露出选择弹窗 */
+    var s=o||S;if(!s||!s.setup)return;
+    var nm=(s.setup&&s.setup.name)||'你的英雄';
+    var era=(s.setup&&s.setup.era)||'';
+    var dt=(s.date)||'—';
+    var turn=(s.turn||0)+' 轮';
+    var mid='';
+    try{mid='rc_modal_'+Date.now()}catch(_){mid='rc_modal'}
+    var html='<div id="'+mid+'" class="rc-overlay" style="position:fixed;inset:0;z-index:99999;background:rgba(8,10,18,.82);'
+      +'display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:none">'
+      +'<div class="rc-card" style="max-width:420px;width:100%;background:var(--bg-1,#111622);'
+      +'border:1px solid var(--line-2,rgba(255,255,255,.12));border-radius:16px;padding:24px 20px;box-shadow:0 20px 60px rgba(0,0,0,.6)">'
+      +'<div style="text-align:center;font-size:22px;margin-bottom:6px">👋</div>'
+      +'<div style="text-align:center;font-size:18px;font-weight:700;color:var(--gold,#d4af37);margin-bottom:4px">欢迎回来，'+esc(nm)+'</div>'
+      +'<div style="text-align:center;font-size:13px;color:var(--fg-2,#aab);margin-bottom:18px;line-height:1.6">'
+      + (era?esc(era)+' · ':'') + esc(dt) + ' · 第 ' + esc(turn) + '</div>'
+      +'<button class="rc-btn rc-continue" style="width:100%;padding:14px;border-radius:12px;border:none;'
+      +'background:linear-gradient(135deg,#d4af37,#b8860b);color:#1a1208;font-size:16px;font-weight:700;'
+      +'cursor:pointer;margin-bottom:10px">▶ 继续上次的人生</button>'
+      +'<button class="rc-btn rc-new" style="width:100%;padding:12px;border-radius:12px;'
+      +'border:1px solid var(--line-2,rgba(255,255,255,.15));background:transparent;color:var(--fg-1,#e8e8f0);'
+      +'font-size:14px;cursor:pointer">🏠 回到主页，开新存档</button>'
+      +'<div style="text-align:center;font-size:11px;color:var(--fg-3,#778);margin-top:14px">'
+      +'旧存档不会丢失，随时可在「设置 → 读档」恢复</div>'
+      +'</div></div>';
+    var wrap=document.createElement('div');wrap.innerHTML=html;
+    var node=wrap.firstChild;document.body.appendChild(node);
+    var cBtn=node.querySelector('.rc-continue'), nBtn=node.querySelector('.rc-new');
+    function close(){try{node.remove()}catch(_){}}
+    function doContinue(){close();try{enterGame()}catch(e){console.warn('enterGame',e)}}
+    function doNew(){
+      close();
+      /* 不进游戏，留在主页。清空内存里的 S 以免误渲染；存档还在 localStorage。*/
+      S=null;
+      try{updHomeBtns&&updHomeBtns()}catch(_){}
+      try{busy(false)}catch(_){}
+    }
+    $on(cBtn,'click',doContinue);
+    $on(nBtn,'click',doNew);
+    /* 默认焦点在继续按钮（回车可直接续玩）*/
+    try{cBtn.focus()}catch(_){}
+  }catch(e){console.warn('showResumeChoice',e);try{enterGame()}catch(_){}}
 }
 /* v2.6.2：首页数据条（时代/正典事件/成就数量，运行时取值不写死）*/
 function fillHomeStats(){
@@ -10581,16 +10629,11 @@ function _boot(){
           }catch(_){}
         }
         try{
+          /* v2.6.2 第三轮：不再自动 enterGame（手机上重型渲染会被误判为卡死）。
+             弹出选择：继续上次游玩 / 回到主页开新档。S 已加载到内存，选继续才进游戏。*/
           if(!window.__autoResumed && location.hash!=='#load' && S&&S.setup){
             window.__autoResumed=true;
-            setTimeout(function(){
-              try{
-                if(S&&S.setup){
-                  enterGame();
-                  setTimeout(function(){try{toast('↩ 已回到你的人生 · 点 🏠 可回首页')}catch(_){}},500);
-                }
-              }catch(e){console.warn('auto resume',e)}
-            },400);
+            try{showResumeChoice(o)}catch(e){console.warn('resume choice',e);setTimeout(enterGame,400)}
           }
         }catch(_){}
       }
