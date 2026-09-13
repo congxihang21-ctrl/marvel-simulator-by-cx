@@ -1,4 +1,4 @@
-﻿
+
 /* ===================== v1.4：主题设计系统（深色 / 浅色 / 跟随系统 / 自定义图）
    用 CSS 变量统一颜色，切主题只改 :root 的 class，所有元素联动。
    自定义背景图通过 body.style.setProperty('--bg-user:url(...)') 注入，不走 <img> 防泄露。
@@ -2739,6 +2739,21 @@ html.lowfx .fullscreen-watermark{
 html.lowfx .mc,html.lowfx .panel{background:rgba(20,22,34,.94) !important;}
 html.lowfx .opt{background:rgba(157,124,255,.10) !important;}
 html.lowfx *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+/* v2.7.1：content-visibility 在部分 iOS Safari 版本上与滚动容器叠加会诱发跳变/冻结，
+   触摸端与低功耗模式一律关闭（桌面端保留长历史渲染优化） */
+@media (hover:none) and (pointer:coarse){
+  #story .entry,#story .seed-event,#story .wc-card,.story-day-hd{
+    content-visibility:visible !important;contain:none !important;
+  }
+}
+html.lowfx #story .entry,html.lowfx #story .seed-event,html.lowfx #story .wc-card,html.lowfx .story-day-hd{
+  content-visibility:visible !important;contain:none !important;
+}
+/* v2.7.1：心跳检测到真实卡死后的当场自救（仅本会话自动加，设置手动低功耗不加这么猛）：
+   拆掉两个最容易把 iPhone WebKit 拖死的全屏 fixed 大图层 —— 平铺水印 + 固定背景伪层 */
+html.auto-safe .fullscreen-watermark{display:none !important;}
+html.auto-safe body:before{display:none !important;}
+html.auto-safe,html.auto-safe body{background-image:none !important;}
 
 /* ============================================================================
    Beta v2.6.4 · 编年史（无 backdrop-filter，移动端滑动零额外负担）
