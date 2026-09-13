@@ -2673,6 +2673,63 @@ html,body,div,span,p,button,input,textarea{
 .wc-empty{padding:22px 8px;text-align:center;}
 /* 故事区头条卡与旧条目间距统一 */
 #storyList .wc-card{margin-left:0;margin-right:0;}
+
+/* ===== v2.6.2 UI 大修 · 底部 Tab 导航游戏主界面（无 backdrop-filter，iOS 安全） ===== */
+#gameScreen{flex-direction:column;height:100vh;height:100dvh;
+  padding-bottom:0!important;overflow:hidden;}
+#gameScreen > .timecard,
+#gameScreen > #goalBarWrap,
+#gameScreen > #checkBanner{flex:0 0 auto;}
+.tab-content{flex:1 1 auto;min-height:0;overflow:hidden;position:relative;}
+.tab-pane{display:none;height:100%;flex-direction:column;min-height:0;}
+.tab-pane.active{display:flex;}
+.tab-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;touch-action:pan-y;padding:10px 10px 14px;}
+/* 主页：日志滚动 + 行动条贴底 */
+#tab-home{display:none;}
+#tab-home.active{display:flex;flex-direction:column;}
+#tab-home .tab-scroll{padding-bottom:6px;}
+.home-action{flex:0 0 auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(15,16,28,.92),rgba(10,11,20,.98));}
+.home-action .opthead{margin-bottom:6px;}
+.home-action #opts{margin-bottom:6px;}
+.home-action textarea{width:100%;min-height:64px;resize:vertical;
+  border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:var(--fg-1,#eee);padding:10px;font-size:14px;line-height:1.5;}
+.home-action .actrow-v2{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.home-action .actrow-v2 button{flex:1;min-width:90px;}
+.home-action .actrow-more{margin-top:7px;}
+/* 其他 Tab 内的分区 */
+.tab-section{margin-bottom:16px;}
+.tab-hd{font-size:15px;font-weight:800;color:var(--fg-1,#f3f5f8);margin-bottom:9px;
+  padding-left:9px;border-left:3px solid var(--gold,#e8c66a);}
+.tab-body{font-size:13.5px;line-height:1.75;color:var(--fg-1,#e8e8ee);}
+.tab-body .dim{color:var(--fg-2,#8b97a8);}
+.tab-body h4{font-size:13.5px;margin:14px 0 7px;color:var(--gold,#e8c66a);}
+.tab-body .card{padding:9px 11px;margin:6px 0;border-radius:10px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+.tab-body .rel-row{padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.08);}
+/* 底部 Tab 导航栏 */
+.tab-nav{flex:0 0 auto;display:flex;align-items:stretch;
+  padding:5px 4px calc(5px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,rgba(18,19,32,.96),rgba(10,11,20,.99));
+  border-top:1px solid rgba(255,255,255,.1);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:6px 2px;border:none;background:transparent;color:var(--fg-2,#7a8494);
+  font-size:10.5px;font-weight:600;cursor:pointer;transition:color .18s,transform .12s;
+  -webkit-tap-highlight-color:transparent;}
+.tab-btn .tb-ic{font-size:20px;line-height:1;opacity:.85;}
+.tab-btn:active{transform:scale(.92);}
+.tab-btn.active{color:var(--gold,#e8c66a);}
+.tab-btn.active .tb-ic{filter:drop-shadow(0 0 6px rgba(232,198,106,.45));}
+.tab-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:2px;
+  background:var(--gold,#e8c66a);border-radius:0 0 3px 3px;}
+.tab-btn{position:relative;}
+/* 顶栏时间卡在 Tab 界面的紧凑化 */
+#gameScreen .timecard{margin-bottom:6px;}
+/* 旧 main-stage/sub-grid 隐藏（已被 Tab 取代，保留类以防旧 CSS 引用） */
+.main-stage,.sub-grid{display:none;}
 </style></head>
 <body>
 
@@ -2821,30 +2878,63 @@ html,body,div,span,p,button,input,textarea{
 
   <div id="checkBanner"></div>
 
-  <!-- ⭐ 主体区：世界日志（最核心交互）+ 我的行动 -->
-  <div class="main-stage">
-    <div class="panel panel-story"><h3 onclick="togglePanel('story')"><span class="tri" id="tri_story">▼</span>📜 世界日志<span class="ptime" id="time_story">—</span></h3>
-      <div class="body" id="body_story"><div id="story"></div></div></div>
-
-    <div class="panel panel-action"><h3 onclick="togglePanel('action')"><span class="tri" id="tri_action">▼</span>⚡ 我的行动<span class="ptime" id="time_action">—</span></h3>
-      <div class="body" id="body_action" style="max-height:none">
-      <div class="opthead"><span class="lbl">【系统建议】可多选</span><span class="tip">点亮你想做的方向（可同时选几个），再点「按选择推进」</span></div>
-      <div id="opts"></div>
-      <div class="subh" style="margin-top:10px">✍ 自己补充（可留空，也会和上面点亮的方向一起生效）</div>
-      <textarea id="playerInput" placeholder="例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班……（Ctrl+Enter 快速推进）"></textarea>
-      <div class="actrow-v2">
-        <button class="primary act-main" id="btnDo" onclick="doSelectedAction()" title="把点亮的方向和你写的行动一起执行">✅ 按选择推进</button>
-        <button class="act-world" onclick="locked('doTurn',function(){doTurn('world')},700)" title="不做选择，让时间自己往前走几天，世界和身边人会自己动起来">🌙 自行推进</button>
-        <button class="act-next" onclick="locked('doTurn',function(){doTurn('nextevent')},700)" title="跳过日常，直接快进到下一件有故事的事那天">⚡ 到有事件发生</button>
+  <!-- ⭐ 主体区：底部 Tab 导航，五个分类页（v2.6.2 大修 · 不再堆砌单页滚动） -->
+  <div class="tab-content">
+    <!-- ① 主页：世界日志 + 行动条（行动条永远在主页底部，不随日志滚动） -->
+    <div class="tab-pane active" id="tab-home">
+      <div class="tab-scroll">
+        <div id="story"></div>
       </div>
-      <div class="actrow-more"><button onclick="openSkipMenu()" title="快进一周 / 一月 / 一季 / 一年，附带世界总结">🗓 长时间快进（周 / 月 / 季 / 年）</button></div>
-    </div></div>
+      <div class="home-action">
+        <div class="opthead"><span class="lbl">【系统建议】可多选</span><span class="tip">点亮你想做的方向（可同时选几个），再点「按选择推进」</span></div>
+        <div id="opts"></div>
+        <div class="subh" style="margin:8px 0 4px">✍ 自己补充（可留空，也会和上面点亮的方向一起生效）</div>
+        <textarea id="playerInput" placeholder="例：去厨房跟母亲谈汤米的入伍通知 / 照常去上早班……（Ctrl+Enter 快速推进）"></textarea>
+        <div class="actrow-v2">
+          <button class="primary act-main" id="btnDo" onclick="doSelectedAction()" title="把点亮的方向和你写的行动一起执行">✅ 按选择推进</button>
+          <button class="act-world" onclick="locked('doTurn',function(){doTurn('world')},700)" title="不做选择，让时间自己往前走几天，世界和身边人会自己动起来">🌙 自行推进</button>
+          <button class="act-next" onclick="locked('doTurn',function(){doTurn('nextevent')},700)" title="跳过日常，直接快进到下一件有故事的事那天">⚡ 到有事件发生</button>
+        </div>
+        <div class="actrow-more"><button onclick="openSkipMenu()" title="快进一周 / 一月 / 一季 / 一年，附带世界总结">🗓 长时间快进（周 / 月 / 季 / 年）</button></div>
+      </div>
+    </div>
+    <!-- ② 我：出身 + 人生状态 + 能力 -->
+    <div class="tab-pane" id="tab-me">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🎴 出身设定</div><div id="body_setup" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">🧍 人生状态</div><div id="body_player" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">⚡ 能力与装备</div><div id="body_ability" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ③ 关系 -->
+    <div class="tab-pane" id="tab-rel">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">👥 人际关系</div><div id="body_rel" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ④ 世界：世界动态 + 大事件/传闻 + 组织 -->
+    <div class="tab-pane" id="tab-world">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🌍 世界动态</div><div id="body_world" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">📰 大事件与街头传闻</div><div id="body_events" class="tab-body"></div></div>
+        <div class="tab-section"><div class="tab-hd">🏛 所属组织</div><div id="body_org" class="tab-body"></div></div>
+      </div>
+    </div>
+    <!-- ⑤ 目标 -->
+    <div class="tab-pane" id="tab-goal">
+      <div class="tab-scroll">
+        <div class="tab-section"><div class="tab-hd">🎯 人生目标 · 成就 · 里程碑</div><div id="body_goals" class="tab-body"></div></div>
+      </div>
+    </div>
   </div>
 
-  <!-- 次体区：属性/关系/世界等概览卡（次要信息，放下方）-->
-  <div class="grid sub-grid">
-    <div id="colL"></div>
-    <div id="colR"></div>
+  <!-- 底部 Tab 导航（iOS 安全区适配，无 backdrop-filter） -->
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="home" onclick="switchTab('home')"><span class="tb-ic">📜</span><span class="tb-tx">主页</span></button>
+    <button class="tab-btn" data-tab="me" onclick="switchTab('me')"><span class="tb-ic">👤</span><span class="tb-tx">我</span></button>
+    <button class="tab-btn" data-tab="rel" onclick="switchTab('rel')"><span class="tb-ic">👥</span><span class="tb-tx">关系</span></button>
+    <button class="tab-btn" data-tab="world" onclick="switchTab('world')"><span class="tb-ic">🌍</span><span class="tb-tx">世界</span></button>
+    <button class="tab-btn" data-tab="goal" onclick="switchTab('goal')"><span class="tb-ic">🎯</span><span class="tb-tx">目标</span></button>
   </div>
 
   <div id="gameBottomBar" style="display:none;margin:16px 0 6px;padding:12px;border:1px dashed var(--line-2);border-radius:9px;background:var(--bg-1);text-align:center">
@@ -7079,26 +7169,9 @@ function openingOfflineEngine(){
      → enterGame/startGame/import/backToGame/restore 等 5 条入口路径每次都无条件 appendChild，导致 2~3 遍重复渲染
    - 新方案：① 以 `mc_setup`（第一张卡）作为幂等标记；② 构建前先 clear colL/colR；③ 所有入口统一改 guard。*/
 function buildPanels(){
-  /* 先幂等：如果之前建过，就先清空两栏再重建（避免进入游戏后改 PANEL_DEF 出 bug）*/
-  var colL=$('colL'),colR=$('colR');
-  var already=!!$('mc_setup');
-  if(!colL||!colR)return;
-  /* v1.9：无论之前建没建过，都先清空再重建 —— 永远保证 8 张卡，不留脏 DOM */
-  colL.innerHTML='';colR.innerHTML='';
-  var cols=[colL,colR];
-  PANEL_DEF.forEach(function(p){
-    var col=cols[p.col===0?0:1];if(!col)return;
-    var wrap=document.createElement('div');
-    wrap.className='mc';wrap.setAttribute('data-k',p.k);wrap.id='mc_'+p.k;
-    wrap.innerHTML=
-      '<div class="hd" onclick="try{openDetail(\''+p.k+'\')}catch(_){}">'+
-        '<div class="ic">'+(p.ic||'📋')+'</div>'+
-        '<div class="tl">'+esc(p.st||p.t)+'</div>'+
-        '<span class="more">详情 →</span>'+
-      '</div>'+
-      '<div class="body" id="mini_'+p.k+'"></div>';
-    col.appendChild(wrap);
-  });
+  /* v2.6.2 UI 大修：colL/colR 已被底部 Tab 导航取代，详情直接铺在各 Tab 页内。
+     此函数保留仅为兼容旧调用（enterGame 等），实际不再建概览卡。 */
+  return;
 }
 /* v1.9：推荐入口层直接调这个 guard —— 与 buildPanels 内部语义一致（mc_setup 已在就不重建）*/
 function needBuildPanels(){ return !$('mc_setup'); }
@@ -7120,34 +7193,31 @@ function applyFold(){
 }
 
 /* ================= v1.8 · 详情子界面 open/close（复用_fixModalAnchors，iOS17/18 永不越界）================= */
+/* ===== v2.6.2 UI 大修 · 底部 Tab 切换 ===== */
+var _TAB_MAP={setup:'me',player:'me',ability:'me',rel:'rel',world:'world',events:'world',rumors:'world',org:'world',goals:'goal'};
+function switchTab(t){
+  var panes=document.querySelectorAll('.tab-pane');
+  panes.forEach(function(p){p.classList.toggle('active',p.id==='tab-'+t)});
+  var btns=document.querySelectorAll('.tab-btn');
+  btns.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===t)});
+  var pane=document.getElementById('tab-'+t);
+  if(pane){var sc=pane.querySelector('.tab-scroll');if(sc)sc.scrollTop=0;}
+  try{if(S&&S.uiTab!==t){S.uiTab=t;save&&save();}}catch(_){}
+  /* 目标页没有 body_goals 的 renderAll 钩子，切到时手动渲染 */
+  if(t==='goal'){
+    try{
+      var gb=$('body_goals');
+      if(gb){gb.innerHTML=_renderDetailBody('goals');}
+    }catch(e){console.warn('render goals',e)}
+  }
+}
+/* openDetail 不再弹窗 —— 直接跳到对应 Tab 页（详情已铺在 Tab 里） */
 function openDetail(k){
-  var m=$('detailModal');if(!m)return;
-  var meta=DETAIL_META[k];if(!meta){try{toast('没有对应详情')}catch(_){}return}
-  var tEl=$('detailTitle'),bEl=$('detailBody');
-  if(tEl){
-    tEl.innerHTML='<span class="ic">'+esc(meta.ic)+'</span><span class="tx">'+esc(meta.tit)+'</span>';
-  }
-  if(bEl){
-    try{bEl.innerHTML=_renderDetailBody(k)}catch(e){console.warn('_renderDetailBody',k,e);bEl.innerHTML='<div style="color:#ff9aa2">加载详情失败：'+esc(e.message||e)+'</div>'}
-  }
-  try{m.removeAttribute('style')}catch(_){}
-  try{m.style.zIndex='175'}catch(_){}
-  m.style.display='flex';
-  _lockBodyScroll(true);
-  setTimeout(function(){_fixModalAnchors(m,{skipAbsolute:true})},16);
-  setTimeout(function(){_fixModalAnchors(m,{skipAbsolute:true})},120);
-  setTimeout(function(){_fixModalAnchors(m,{skipAbsolute:true})},360);
+  var t=_TAB_MAP[k]||'home';
+  try{switchTab(t)}catch(e){console.warn('switchTab',e)}
 }
 function closeDetail(){
-  try{
-    var m=$('detailModal');if(!m)return;
-    try{m.classList.remove&&m.classList.remove('show')}catch(_){}
-    try{m.style.setProperty('display','none','important')}catch(_){}
-    try{m.style.display='none'}catch(_){}
-    setTimeout(function(){try{m.style.display='none'}catch(_){}},0);
-  }catch(_){}
-  try{_lockBodyScroll(false)}catch(_){}
-  setTimeout(function(){try{_unlockAllScroll()}catch(_){}},60);
+  /* 兼容旧调用：什么都不做 */
 }
 
 /* ================= Beta v1.9 · 英雄纪元目标系统（改走超级英雄路线，不再像人生模拟器）============
@@ -9754,7 +9824,7 @@ function finishOnboard(){
 function enterGame(){
  var setupScreen=$('setupScreen'),gameScreen=$('gameScreen');
  if(setupScreen)setupScreen.style.display='none';
- if(gameScreen){gameScreen.style.display='block';gameScreen.scrollTop=0}
+ if(gameScreen){gameScreen.style.display='flex';gameScreen.scrollTop=0}
  var _ab=$('wzActionBar');if(_ab)_ab.style.display='none';
  var bar=$('gameBottomBar');if(bar)bar.style.display='block';
  buildPanels(); /* v1.9：buildPanels 内部已经幂等（先清空 colL/colR 再重建），
