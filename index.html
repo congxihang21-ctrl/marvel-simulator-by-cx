@@ -93,7 +93,16 @@
    所以我们在 window 上埋一个全局标记，pageshow.persisted=true 时强制重跑。后续 _boot 里会读它。*/
 window._MCU_FIXED_VH = true;
 </script>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2.6.3">
+<style>
+/* ===== v2.6.3 缓存修复保险层（内联，随 index.html 即时生效，不依赖外部 CSS/JS 缓存） ===== */
+/* 1) 游戏画面内永不显示首页式长 footer（它在 #gameScreen 里，靠 _immersive 隐藏，旧缓存会漏掉） */
+#gameScreen .foot{display:none !important}
+/* 2) #gameScreen 可见（display:flex）时，隐藏右下角固定签名徽章，避免遮挡底部 Tab 栏。
+      :has() 支持 iOS Safari 15.4+；同时保留 ._immersive 旧规则做双保险。 */
+body:has(#gameScreen[style*="flex"]) .cx-badge{display:none !important}
+html._immersive .cx-badge{display:none !important}
+</style>
 <!-- ================= v1.8 · 华为/旧版浏览器兼容 polyfill（在 body 前、主脚本前执行） ================= -->
 <script>
 /* 防御：华为默认浏览器（华为浏览器/Quark 内核）可能缺少部分 ES2017+ API，
@@ -896,7 +905,7 @@ document.addEventListener('keydown',function(e){
     <div class="a"><span class="en" id="bq_auth_en">Tony Stark</span><span class="zh" id="bq_auth_zh">· 托尼·斯塔克</span></div>
   </div>
 </div>
-<script src="app.js"></script>
+<script src="app.js?v=2.6.3"></script>
 </body>
 </html>
 
