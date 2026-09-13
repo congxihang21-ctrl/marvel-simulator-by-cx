@@ -18,6 +18,19 @@
   }catch(e){}
 })();
 </script>
+<!-- v2.6.3 低功耗模式：必须在 CSS 渲染前给 <html> 打上 lowfx 类。
+     ?lowfx=1 开启（并记住）｜ ?lowfx=0 关闭；设置页也有开关。 -->
+<script>
+(function(){
+  try{
+    var m=location.search.match(/[?&]lowfx=(1|0)/);
+    if(m){ localStorage.setItem('mcu_lowfx', m[1]==='1'?'1':'0'); }
+    if(localStorage.getItem('mcu_lowfx')==='1'){
+      document.documentElement.classList.add('lowfx');
+    }
+  }catch(e){}
+})();
+</script>
 <meta charset="UTF-8">
 <!-- ============================================================
      四端适配优化版 · viewport 组合拳
@@ -47,7 +60,7 @@
 <meta name="browsermode" content="application">
 <!-- 禁止 IE 兼容模式 -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.6.2（开档向导版）</title>
+<title>漫威电影宇宙 · 英雄纪元 · 人生模拟器 Beta v2.7.0（编年史·章节回溯版）</title>
 <script>
 /* 面板去重精简 + 人际关系数值化（好感/信任/敌意 0-100）+ 电脑端滚轮修复 + 四端适配：iOS / 鸿蒙 / 安卓 X5 / Win Edge
    在 CSS 之前跑一丢丢 JS：给 :root 注入 --vh / --sat / --sab 三个"真·视口尺寸"变量。
@@ -93,7 +106,7 @@
    所以我们在 window 上埋一个全局标记，pageshow.persisted=true 时强制重跑。后续 _boot 里会读它。*/
 window._MCU_FIXED_VH = true;
 </script>
-<link rel="stylesheet" href="style.css?v=2.6.3">
+<link rel="stylesheet" href="style.css?v=2.7.0">
 <style>
 /* ===== v2.6.3 缓存修复保险层（内联，随 index.html 即时生效，不依赖外部 CSS/JS 缓存） ===== */
 /* 1) 游戏画面内永不显示首页式长 footer（它在 #gameScreen 里，靠 _immersive 隐藏，旧缓存会漏掉） */
@@ -207,16 +220,17 @@ html._immersive .cx-badge{display:none !important}
 <link rel="stylesheet" href="css/glass.css?v=2.6.2">
 <link rel="stylesheet" href="css/components.css?v=2.6.2">
 <link rel="stylesheet" href="css/responsive.css?v=2.6.2">
-<script src="js/rng.js?v=2.6.2" defer></script>
-<script src="js/worldlineEngine.js?v=2.6.2" defer></script>
-<script src="js/worldClock.js?v=2.6.3" defer></script>
-<script src="js/characterEngine.js?v=2.6.2" defer></script>
-<script src="js/relationshipEngine.js?v=2.6.2" defer></script>
-<script src="js/eventDirector.js?v=2.6.2" defer></script>
-<script src="js/endingEngine.js?v=2.6.2" defer></script>
-<script src="js/ai.js?v=2.6.2" defer></script>
-<script src="js/seed_data.js?v=2.6.3" defer></script>
-<script src="js/game_seed.js?v=2.6.3" defer></script>
+<script src="js2/core/diag.js?v=2.7.0" defer></script>
+<script src="js/rng.js?v=2.7.0" defer></script>
+<script src="js/worldlineEngine.js?v=2.7.0" defer></script>
+<script src="js/worldClock.js?v=2.7.0" defer></script>
+<script src="js/characterEngine.js?v=2.7.0" defer></script>
+<script src="js/relationshipEngine.js?v=2.7.0" defer></script>
+<script src="js/eventDirector.js?v=2.7.0" defer></script>
+<script src="js/endingEngine.js?v=2.7.0" defer></script>
+<script src="js/ai.js?v=2.7.0" defer></script>
+<script src="js/seed_data.js?v=2.7.0" defer></script>
+<script src="js/game_seed.js?v=2.7.0" defer></script>
 </head>
 <body>
 
@@ -352,6 +366,7 @@ html._immersive .cx-badge{display:none !important}
     <!-- ① 主页：世界日志 + 行动条（行动条永远在主页底部，不随日志滚动） -->
     <div class="tab-pane active" id="tab-home">
       <div class="tab-scroll">
+        <button class="chr-open-btn" onclick="openChronicle()"><span>📖</span> 打开完整编年史<span class="chr-open-sub">按章回看 · 点击跳转</span></button>
         <div id="story"></div>
       </div>
       <div class="home-action">
@@ -404,7 +419,9 @@ html._immersive .cx-badge{display:none !important}
           <button class="set-card" onclick="openSave()"><span class="set-ic">💾</span><span class="set-tx">存档</span></button>
           <button class="set-card" onclick="openLoad()"><span class="set-ic">📂</span><span class="set-tx">读档</span></button>
           <button class="set-card" onclick="selfHeal()"><span class="set-ic">🔧</span><span class="set-tx">修复显示</span></button>
+          <button class="set-card" id="lowfxCard" onclick="toggleLowfx()"><span class="set-ic">🔋</span><span class="set-tx">低功耗模式</span></button>
           <button class="set-card" onclick="openAbout()"><span class="set-ic">ℹ️</span><span class="set-tx">关于版权</span></button>
+          <button class="set-card" onclick="openDiag()"><span class="set-ic">🩺</span><span class="set-tx">诊断日志</span></button>
           <button class="set-card" onclick="openDonate()"><span class="set-ic">☕</span><span class="set-tx">支持作者</span></button>
         </div>
         <div class="set-tip">所有外观设置自动保存在本机。遇到显示异常点「🔧 修复显示」可清缓存重载。</div>
@@ -905,7 +922,22 @@ document.addEventListener('keydown',function(e){
     <div class="a"><span class="en" id="bq_auth_en">Tony Stark</span><span class="zh" id="bq_auth_zh">· 托尼·斯塔克</span></div>
   </div>
 </div>
-<script src="app.js?v=2.6.3"></script>
+<!-- ===== v2.6.4 编年史覆盖层（时间轴 / 月份跳转 / 类型筛选） ===== -->
+<div id="chrOverlay" class="chr-ov" style="display:none">
+  <div class="chr-panel">
+    <div class="chr-topbar">
+      <button class="chr-back" onclick="closeChronicle()">✕</button>
+      <div class="chr-title">📖 我的编年史</div>
+    </div>
+    <div class="chr-months" id="chrMonths"></div>
+    <div class="chr-filters" id="chrFilters"></div>
+    <div class="chr-list" id="chrList"></div>
+  </div>
+</div>
+<script src="app.js?v=2.7.0"></script>
+<script src="js2/core/store.js?v=2.7.0"></script>
+<script src="js2/core/savekit.js?v=2.7.0"></script>
+<script src="js/chronicle.js?v=2.7.0"></script>
 </body>
 </html>
 
