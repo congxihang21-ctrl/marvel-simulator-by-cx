@@ -4997,14 +4997,15 @@ function renderOpts(){
    updInputPH();
    return;
  }
- /* v2.6.3_fix: 种子节点已激活（S.currentNode 有值）但 #opts 里还没有 seed-choice，
-    说明 renderNode 因时序/异常没成功渲染三选项。强制重跑一次，确保开局三方向出现。 */
+ /* v2.6.3_fix: 仅补救「开局节点 pro_start」三选项丢失的情况。
+    条件收窄到 currentNode==='pro_start'（玩家点选任一开局选项后立即离开此节点），
+    绝不影响后续 AI hints / EventDirector / 普通种子节点回合。 */
  try{
-   if(S && S.currentNode && typeof GameSeed !== 'undefined' && GameSeed.renderNode){
+   if(S && S.currentNode === 'pro_start' && typeof GameSeed !== 'undefined' && GameSeed.renderNode){
      GameSeed.renderNode();
      if(optsEl && optsEl.querySelector('.seed-choice')){ updInputPH(); return; }
    }
- }catch(_e){ console.warn('[renderOpts] seed re-render failed', _e); }
+ }catch(_e){ console.warn('[renderOpts] prologue re-render failed', _e); }
  var h=[],T=['A','B','C','D','E'];
  /* 建议内容变了（进入新一轮）→ 清空点亮状态 */
  var hk='';try{hk=JSON.stringify(CUR_HINTS)}catch(_){}
