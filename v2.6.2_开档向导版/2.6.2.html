@@ -2631,6 +2631,7 @@ html,body,div,span,p,button,input,textarea{
 <link rel="stylesheet" href="css/responsive.css?v=2.6.2">
 <script src="js/rng.js?v=2.6.2" defer></script>
 <script src="js/worldlineEngine.js?v=2.6.2" defer></script>
+<script src="js/worldClock.js?v=2.6.3" defer></script>
 <script src="js/characterEngine.js?v=2.6.2" defer></script>
 <script src="js/relationshipEngine.js?v=2.6.2" defer></script>
 <script src="js/eventDirector.js?v=2.6.2" defer></script>
@@ -2638,7 +2639,41 @@ html,body,div,span,p,button,input,textarea{
 <script src="js/ai.js?v=2.6.2" defer></script>
 <script src="js/seed_data.js?v=2.6.3" defer></script>
 <script src="js/game_seed.js?v=2.6.3" defer></script>
-</head>
+<style>
+/* ===== v2.6.2 世界时钟：头条卡片 + 频道筛选（无 backdrop-filter，iOS 安全） ===== */
+.wc-fbar{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:8px 10px;margin:-4px 0 8px;
+  background:linear-gradient(180deg,rgba(14,18,28,.96) 70%,rgba(14,18,28,0));}
+.wc-fb{flex:1;padding:7px 0;border-radius:999px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:#aeb8c6;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;}
+.wc-fb.on{background:linear-gradient(135deg,#e8c66a,#d8a93f);color:#231a05;border-color:transparent;
+  box-shadow:0 4px 14px rgba(232,198,106,.28);}
+.wc-card{position:relative;margin:9px 2px;padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);
+  border-left:3px solid #5b8bb5;box-shadow:0 6px 18px rgba(0,0,0,.18);}
+.wc-head{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.wc-ic{font-size:20px;line-height:1;flex:0 0 auto;}
+.wc-tt{flex:1;min-width:0;}
+.wc-t1 b{font-size:14.5px;color:#f3f5f8;font-weight:700;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.wc-t2{font-size:11.5px;color:#8b97a8;margin-top:3px;line-height:1.4;}
+.wc-date{color:#d8b45a;font-weight:600;}
+.wc-chev{flex:0 0 auto;color:#6b7686;font-size:13px;transition:transform .2s;}
+.wc-card.open .wc-chev{transform:rotate(180deg);}
+.wc-card.open .wc-t1 b{-webkit-line-clamp:unset;}
+.wc-body{display:none;font-size:13px;line-height:1.75;color:#c6cfdc;margin-top:9px;padding-top:9px;
+  border-top:1px dashed rgba(255,255,255,.1);}
+.wc-body p{margin:0 0 6px;}
+.wc-card.open .wc-body{display:block;}
+.wc-crisis{border-left-color:#ff5a5a;background:linear-gradient(180deg,rgba(255,90,90,.11),rgba(255,90,90,.03));
+  border-color:rgba(255,90,90,.28);}
+.wc-crisis .wc-t1 b{color:#ffd9d9;}
+.wc-altered{border-left-color:#f2cf6a;background:linear-gradient(180deg,rgba(242,207,106,.13),rgba(150,110,255,.06));
+  border-color:rgba(242,207,106,.38);box-shadow:0 0 0 1px rgba(242,207,106,.12),0 6px 20px rgba(0,0,0,.22);}
+.wc-altered .wc-t1 b{color:#f2cf6a;}
+.wc-empty{padding:22px 8px;text-align:center;}
+/* 故事区头条卡与旧条目间距统一 */
+#storyList .wc-card{margin-left:0;margin-right:0;}
+</style></head>
 <body>
 
 <!-- ================= v2.6 首屏骨架屏（JS 加载前显示，减少白屏感） ================= -->
@@ -8171,12 +8206,13 @@ function _dayKeyFromTime(t){
   if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
   return '更早';
 }
-/* v2.6：判断某天是不是"关键日"——当天日志有🔴/人生大事件标记，或撞上已发生大事 / 里程碑 */
+/* v2.6：判断某天是不是"关键日"——当天日志有🔴/人生大事件标记，或撞上世界头条大事件 / 里程碑 */
 function _isKeyDay(dk,entries){
   try{
     var i;
     for(i=0;i<entries.length;i++){
-      var tx=String(entries[i].text||'');
+      var en=entries[i],tx=String(en.text||'');
+      if(en.channel==='crisis'||en.channel==='altered')return true;
       if(tx.indexOf('\ud83d\udd34')>=0||tx.indexOf('人生大事件')>=0||tx.indexOf('【大事件】')>=0||tx.indexOf('大事件]')>=0)return true;
     }
     var evs=(S&&S.events&&S.events['已发生'])||[];
@@ -8186,7 +8222,39 @@ function _isKeyDay(dk,entries){
   }catch(_){}
   return false;
 }
+/* ===== v2.6.2 世界头条卡片（世界时钟产出），供 AI 日志与种子流程共用 ===== */
+window.WorldClockUI={
+  cardHtml:function(e,inDay){
+    var k=e.channel||'world';
+    var openCls=(k==='altered')?' open':'';
+    var ic=k==='crisis'?'🔴':(k==='altered'?'🌟':'🌍');
+    var lab=k==='crisis'?'世界大事件':(k==='altered'?'你改写了历史':'世界头条');
+    return '<div class="wc-card wc-'+k+openCls+'">'
+      +'<div class="wc-head"><span class="wc-ic">'+ic+'</span>'
+      +'<div class="wc-tt"><div class="wc-t1"><b>'+esc(e.title||'')+'</b></div>'
+      +'<div class="wc-t2">'+(inDay?'':'<span class="wc-date">'+esc(e.time||'')+'</span> · ')
+      +'<span>'+esc(e.ripple||lab)+'</span></div></div>'
+      +'<span class="wc-chev">▾</span></div>'
+      +'<div class="wc-body">'+md(String(e.text==null?'':e.text))+'</div></div>';
+  },
+  /* 种子（离线）流程下，直接把头条卡追加到故事区 */
+  append:function(arr){
+    var st=$('story');if(!st||!arr||!arr.length)return;
+    var html=arr.map(function(en){return window.WorldClockUI.cardHtml(en,false);}).join('');
+    st.insertAdjacentHTML('beforeend',html);
+    try{st.scrollTop=st.scrollHeight;}catch(_){}
+  }
+};
+/* 卡片展开/收起：全局事件委托，点一次即可（触摸友好） */
+document.addEventListener('click',function(ev){
+  var c=ev.target&&ev.target.closest?ev.target.closest('.wc-card'):null;
+  if(c){c.classList.toggle('open');}
+});
+/* 世界日志频道筛选 */
+var _storyChan='all';
+function setWCChan(c){ _storyChan=c; renderStory(true); }
 function _storyEntryHtml(e){
+  if(e.canon||e.channel){ return window.WorldClockUI.cardHtml(e,true); }
   var div='<div class="entry'+(e.self?' self':'')+'"><div class="t">'+esc(e.time||'')+'</div><div class="b">'+md(String(e.text==null?'':e.text))+'</div>';
   if(e.hints&&e.hints.length){
     div+='<div class="hints">当时的方向：'+e.hints.slice(0,3).map(function(x){return esc(String(x))}).join(' ／ ')+'</div>';
@@ -8216,7 +8284,7 @@ function renderStory(keepScroll){
   _storyPrevLatest=latest;
   /* 签名守卫：日志与所选日期都没变就不重建（避免切主题等无关渲染导致闪烁/滚动跳动）*/
   var lastT=(log[log.length-1]&&log[log.length-1].time)||'';
-  var sig=log.length+'|'+lastT+'|'+_storyDay;
+  var sig=log.length+'|'+lastT+'|'+_storyDay+'|'+(_storyChan||'all');
   if(!keepScroll && sig===_storyLastSig && el.getAttribute('data-built')==='1')return;
   _storyLastSig=sig;
   el.setAttribute('data-built','1');
@@ -8233,6 +8301,15 @@ function renderStory(keepScroll){
       (n>1?'<span class="st-n">'+n+'</span>':'')+'</button>';
   }).join('');
   var dayEntries=groups[_storyDay]||[];
+  /* v2.6.2 频道筛选：全部 / 🌍世界头条 / 🙂我的人生 */
+  var chan=_storyChan||'all';
+  var shown=chan==='all'?dayEntries:dayEntries.filter(function(e){
+    return chan==='world' ? !!(e.canon||e.channel) : !(e.canon||e.channel);
+  });
+  var fbar='<div class="wc-fbar">'
+    +[['all','全部'],['world','🌍 世界'],['me','🙂 我的']].map(function(o){
+        return '<button class="wc-fb'+(chan===o[0]?' on':'')+'" onclick="setWCChan(\''+o[0]+'\')">'+o[1]+'</button>';
+      }).join('')+'</div>';
   var wm=String((dayEntries[0]&&dayEntries[0].time)||'').match(/周./);
   var dp=_storyDay.split('-');
   var dayTitle=(dp.length===3)?(dp[0]+'年'+parseInt(dp[1],10)+'月'+parseInt(dp[2],10)+'日'):_storyDay;
@@ -8241,7 +8318,9 @@ function renderStory(keepScroll){
     (wm?'<span class="dw">'+wm[0]+'</span>':'')+
     (viewKey?'<span class="dw" style="color:#ff7b7b;font-weight:700">🔴 关键事件日</span>':'')+
     '<span class="dc">这一天 '+dayEntries.length+' 条记录</span></div>';
-  el.innerHTML='<div class="story-tabs">'+tabs+'</div><div id="storyList">'+head+dayEntries.map(_storyEntryHtml).join('')+'</div>';
+  var bodyHtml=shown.length?shown.map(_storyEntryHtml).join('')
+    :'<div class="dim wc-empty">这个频道在这一天没有记录。</div>';
+  el.innerHTML=fbar+'<div class="story-tabs">'+tabs+'</div><div id="storyList">'+head+bodyHtml+'</div>';
   try{
     var onTab=el.querySelector('.story-tab.on');
     if(onTab&&onTab.scrollIntoView)onTab.scrollIntoView({inline:'center',block:'nearest'});
@@ -8540,12 +8619,21 @@ function buildRequest(mode,inp){
    var tNow=S.turn||0;
    var todayMs=(new Date(todayStr.replace(/-/g,'/'))).getTime();
    var hot=[],pre=[],hit=[];
+   /* v2.6.2 世界时钟：已被时钟处理的正典不再让 AI 重复触发；被玩家改写的事件视为「从未发生」 */
+   var _wcFired=(S.worldClock&&S.worldClock.fired)||{};
+   var _wcState=function(a){return _wcFired[a.range[0]+'@'+a.name];};
+   var _wcPast=[],_wcAverted=[];
    for(var _ci=0;_ci<CANON_ANCHORS.length;_ci++){
      var a=CANON_ANCHORS[_ci];if(!a||!a.range)continue;
+     var _st=_wcState(a);
+     if(_st==='averted'){ _wcAverted.push(a.name); continue; }
+     if(_st==='fired'){ _wcPast.push(a.range[0].slice(0,7)+' '+a.name); }
      var sMs=(new Date(String(a.range[0]).replace(/-/g,'/'))).getTime();
      var eMs=(new Date(String(a.range[1]).replace(/-/g,'/'))).getTime();
      var hitT=false;for(var _tj=0;_tj<a.triggerTurn.length;_tj++){if(tNow===a.triggerTurn[_tj]){hitT=true;break}}
      var line='· ['+a.era_tag+'|impact:'+a.impact+'] '+a.name+'（'+a.range[0]+'~'+a.range[1]+'）seed示例：'+String(a.seeds&&a.seeds[0]||'').slice(0,48);
+     /* 已发生的事件不再要求 AI 本回合强插/预热，避免与世界头条重复；只作为既成事实在下方统一告知 */
+     if(_st==='fired'){ continue; }
      if(todayMs>=sMs&&todayMs<=eMs){
        if(hitT)hit.push(line+'【⚡强锚回合='+tNow+'】');
        else hot.push(line);
@@ -8560,11 +8648,14 @@ function buildRequest(mode,inp){
    if(hit.length){lines.push('【⚡ 本回合强锚·正典大事件（必写进 narrative 当日本身或视野目击）】');lines.push(hit.slice(0,6).join('\n'));lines.push('');}
    if(hot.length){lines.push('【🔴 进行中正典事件（必须同步写进 world.你所在地区 / 新闻 / 社会传闻 / 目击者视角）】');lines.push(hot.slice(0,6).join('\n'));lines.push('');}
    if(pre.length){lines.push('【📰 正典预热传闻（提前 30 天周期出现报纸/广播/街谈巷议铺垫）】');lines.push(pre.slice(0,5).join('\n'));lines.push('');}
+   /* v2.6.2 世界时钟既成事实 / 被改写事件——统一告知 AI，保证世界自洽 */
+   if(_wcPast.length){lines.push('【📚 已发生的世界大事（既成事实，不要再当突发新闻重复；只能作为背景、余波、人们的谈资被提及）】');lines.push(_wcPast.slice(-8).join('\n'));lines.push('');}
+   if(_wcAverted.length){lines.push('【🌟 以下正典事件已被玩家的选择改写/取消，它们在这个世界里【没有发生】：不得出现其新闻、后果或相关后续；普通人甚至不知道自己躲过了什么】');lines.push('· '+_wcAverted.join('\n· '));lines.push('');}
    if(!hit.length&&!hot.length&&!pre.length){
      // 无匹配时按玩家选的 era 挑命中 era_tag 的下一事件，做"远景式"预热（避免小年代玩家完全摸不到正典）
      var eraPick=String(S&&S.setup&&S.setup.era||'2010S').replace(/[^0-9S]/g,'').toUpperCase();
      if(eraPick.length===3)eraPick=eraPick.slice(0,2)+'S';
-     var fall=CANON_ANCHORS.filter(function(v){return v.era_tag===eraPick&&(new Date(String(v.range[0]).replace(/-/g,'/'))).getTime()>todayMs}).sort(function(a,b){return (new Date(String(a.range[0]).replace(/-/g,'/')))-(new Date(String(b.range[0]).replace(/-/g,'/')))}).slice(0,4);
+     var fall=CANON_ANCHORS.filter(function(v){return !_wcState(v)&&(new Date(String(v.range[0]).replace(/-/g,'/'))).getTime()>todayMs}).sort(function(a,b){return (new Date(String(a.range[0]).replace(/-/g,'/')))-(new Date(String(b.range[0]).replace(/-/g,'/')))}).slice(0,4);
      if(fall.length){
        lines.push('【🔮 年代远景锚点（当前年代 '+eraPick+' 后续将发生，先在 NPC 闲聊 / 新闻边角料里埋暗示，不要提前剧透）】');
        for(var _fi=0;_fi<fall.length;_fi++){var b=fall[_fi];lines.push('· ['+b.era_tag+'|impact:'+b.impact+'] '+b.name+'（发生于 '+b.range[0]+' 前后）· 暗示示例：'+String(b.seeds&&b.seeds[0]||'').slice(0,50))}
@@ -8679,6 +8770,8 @@ var mode_last='normal';
 function applyReply(o){
  if(o.advance&&typeof o.advance.minutes==='number'&&o.advance.minutes>0){
   var d=curDate();d.setMinutes(d.getMinutes()+o.advance.minutes);setDate(d);
+  /* v2.6.2 世界时钟：时间一旦跨月，到期正典大事件必然发生，写入世界头条 */
+  try{ if(typeof WorldClock!=='undefined') WorldClock.tick(S); }catch(_){}
  }
  if(o.player)S.player=Object.assign(S.player||{},o.player);
  if(o.ability!==undefined)S.ability=o.ability;

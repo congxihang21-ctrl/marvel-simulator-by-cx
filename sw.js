@@ -3,7 +3,7 @@
    - 导航请求（HTML 页面，含根 index.html 跳转脚本）→ 网络优先，失败才回退缓存（保证发版立即可见）
    - 静态资源（css/js/json/img）→ 缓存优先 + 后台更新（stale-while-revalidate，秒开）
    - 新 SW 激活后强制 claim 所有页面 + 广播更新通知 */
-const CACHE = 'marvel-hero-v2.6.2';
+const CACHE = 'marvel-hero-v2.6.3';
 const CORE = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const CORE = [
   './v2.6.2_开档向导版/js/game_seed.js',
   './v2.6.2_开档向导版/js/relationshipEngine.js',
   './v2.6.2_开档向导版/js/worldlineEngine.js',
+  './v2.6.2_开档向导版/js/worldClock.js',
   './v2.6.2_开档向导版/js/characterEngine.js',
   './v2.6.2_开档向导版/js/seed_data.js',
   './v2.6.2_开档向导版/js/rng.js'

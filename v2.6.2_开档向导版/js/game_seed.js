@@ -91,6 +91,15 @@ var GameSeed = (function(){
     var d = S.date ? new Date(S.date) : new Date();
     d.setMonth(d.getMonth() + 1);
     S.date = d.toISOString();
+    /* 世界时钟：跨过的每个月，到期的正典大事件【必然发生】，以世界头条形式进入你的时间线 */
+    try{
+      if(typeof WorldClock !== 'undefined'){
+        var _wcOut = WorldClock.tick(S);
+        if(_wcOut.headlines.length && window.WorldClockUI && WorldClockUI.append){
+          WorldClockUI.append(_wcOut.headlines);
+        }
+      }
+    }catch(e){ console.warn('worldclock tick', e); }
     // 年龄增长
     if(S.player && S.player['年龄']){
       var age = parseInt(S.player['年龄']) || 20;
@@ -173,9 +182,20 @@ var GameSeed = (function(){
         }
       }
     }catch(_){}
-  }
 
-  /* v2.6: 把 EventDirector 事件转成节点格式，供 renderNode 统一渲染 */
+    /* 世界时钟：若未来 18 个月内有可被改写的大事件、且玩家已入局，插入一次「风雨欲来」干预机会 */
+    try{
+      if(typeof WorldClock !== 'undefined' && S.currentNode !== '_director'){
+        var _opp = WorldClock.opportunity(S);
+        if(_opp){
+          S._wcReturn = S.currentNode;
+          S._wcOppFlag = _opp.__wcFlag;
+          S._directorNode = _opp;
+          S.currentNode = '_director';
+        }
+      }
+    }catch(e){ console.warn('worldclock opp', e); }
+  }
   function directorEventToNode(evt){
     var flagKey = 'flag_' + evt.id + '_done';
     var choices = [
@@ -312,9 +332,26 @@ var GameSeed = (function(){
     try{ if(typeof checkAchievements === 'function') checkAchievements(); }catch(e){}
   }
 
-  /* v2.6.2：解析下一节点 id——'__era__' 表示玩家主动入局，跳到该时代的正典首节点 */
+  /* v2.6.2：解析下一节点 id——
+     '__era__'   玩家主动入局 → 时代正典首节点
+     '__resume__' 干预机会结束 → 回到被打断的节点
+     '__wcThwart__' 干预判定成功：写入改写历史的因果 flag，再回到原节点 */
   function resolveNodeId(n){
     if(n === '__era__') return (S && S._eraAnchor) ? S._eraAnchor : 'pro_daily';
+    if(n === '__resume__') return (S && S._wcReturn) ? S._wcReturn : '_director';
+    if(n === '__wcThwart__'){
+      try{
+        if(typeof WorldClock !== 'undefined') WorldClock.applyThwart(S, S._wcOppFlag || 'thanos_thwarted');
+        var stEl = document.getElementById('story');
+        if(stEl){
+          stEl.insertAdjacentHTML('beforeend',
+            '<div class="wc-card wc-altered open"><div class="wc-head"><span class="wc-ic">🌟</span><b>历史被你改写</b></div>'+
+            '<div class="wc-body">你提前阻止了那场本该席卷世界的灾难。此刻还没有人知道你做了什么——但未来，已经不一样了。</div></div>');
+          stEl.scrollTop = stEl.scrollHeight;
+        }
+      }catch(e){ console.warn('wc thwart', e); }
+      return (S && S._wcReturn) ? S._wcReturn : '_director';
+    }
     return n;
   }
 
@@ -708,18 +745,32 @@ var GameSeed = (function(){
     var life = [];
     if(birth) life.push(birth.replace(/家庭$/,'')+'出身');
     if(family) life.push(family);
-    var lifeTxt = life.length ? ('作为'+life.join('、')+'，你每天操心的是工作、账单和身边的人')
-                              : '你每天操心的是工作、账单和身边的人';
-    var text = yr+'年，'+nm+'在'+loc+'过着再普通不过的生活。'+lifeTxt+'。\n'+
-      '新闻里，'+bg+'——但这些暂时还只是滚动字幕里遥远的标题，像是另一个世界的事。\n'+
-      '没有人一出生就站在历史的中央。你要以什么姿态，迎接这个非凡的时代？';
+    var lifeTxt = life.length ? ('作为'+life.join('、')+'，你每天操心的是工作、账单和身边的人') : '';
+    /* v2.6.2 双开局轨：按能力资质/血统/技能判定是「能力者/特殊职业」还是纯普通人 */
+    var powerTxt = [setup.apt, setup.blood, setup.skills, setup.gear].map(function(x){return String(x||'')}).join(' ');
+    var powered = /变种|异人|魔法|血清|超能|超能力|强化|异能|神盾|特工|英雄|蜘蛛|装甲|钢铁|阿斯加德|瓦坎达|塔罗|外星|血统|装备|格斗|射击|黑客|科研/.test(powerTxt);
+    var text, opt1, title;
+    if(powered){
+      title='能力者的开局';
+      text = yr+'年，'+nm+'在'+loc+'过着表面平静的生活。'+(life.length?'作为'+life.join('、')+'，':'')+
+        '你心里清楚——你和别人不一样。无论是超凡的能力、严苛的训练，还是特殊的身份，你手里握着改变局势的可能。\n'+
+        '新闻里，'+bg+'。这一次，那些"遥远的标题"，或许很快就会和你产生真实的交集。\n'+
+        '是藏好锋芒独善其身，还是走到聚光灯下，由你决定。';
+      opt1='以我的能力，主动入局（英雄/职业路线）';
+    }else{
+      title='平凡的开局';
+      text = yr+'年，'+nm+'在'+loc+'过着再普通不过的生活。'+(lifeTxt?' '+lifeTxt+'。':'')+'\n'+
+        '新闻里，'+bg+'——但这些暂时还只是滚动字幕里遥远的标题，像是另一个世界的事。\n'+
+        '没有人一出生就站在历史的中央。你要以什么姿态，迎接这个非凡的时代？';
+      opt1='我想靠近这个非凡的世界（主动入局）';
+    }
     return {
       id:'pro_start',
-      title:'平凡的开局',
+      title:title,
       level:'日常',
       text:text,
       choices:[
-        {label:'我想靠近这个非凡的世界（主动入局）', next:'__era__', effects:{flag_seekHero:true}},
+        {label:opt1, next:'__era__', effects:{flag_seekHero:true}},
         {label:'先做个旁观者，把自己的日子过好', next:'pro_observe', effects:{}},
         {label:'眼下还有更要紧的事（工作 / 家人 / 学业）', next:'pro_daily', effects:{}}
       ]
@@ -770,6 +821,8 @@ var GameSeed = (function(){
     try{
       if(typeof RNG !== 'undefined') RNG.setSeed(hashCode(String(S.seedKey||'') + (S.setup.name||'') + S.date));
       if(typeof WorldlineEngine !== 'undefined') WorldlineEngine.init(S);
+      /* v2.6.2 世界时钟：以开档年月为基准，之后按月硬触发正典事件 */
+      if(typeof WorldClock !== 'undefined'){ WorldClock.ensure(S); S.worldClock.ym = (function(){var dd=new Date(S.date);return dd.getFullYear()*12+dd.getMonth();})(); }
       if(typeof CharacterEngine !== 'undefined'){
         CharacterEngine.initCharacter(S);
         /* 根据出身设置初始经济 */
